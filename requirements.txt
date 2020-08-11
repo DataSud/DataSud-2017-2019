@@ -1,0 +1,21 @@
+psycopg2
+django>=1.11,<1.12
+djangorestframework
+django-extensions
+django-mama-cas
+django-taggit
+django-bootstrap3
+django-queryset-csv
+django-admin-list-filter-dropdown
+django_celery_beat
+ckanapi
+requests
+timeout-decorator
+pillow
+lxml
+redis
+celery
+-e git+https://github.com/neogeo-technologies/OWSLib.git@idgo#egg=OWSLib
+markdown
+rdflib
+geomet
