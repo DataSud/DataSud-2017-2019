@@ -1,0 +1,25 @@
+[{
+	"model": "idgo_admin.datatype",
+	"pk": 1,
+	"fields": {
+		"name": "Donn\u00e9es ouvertes",
+		"description": "Donn\u00e9es ouvertes",
+		"slug": "donnees-ouvertes"
+	}
+}, {
+	"model": "idgo_admin.datatype",
+	"pk": 2,
+	"fields": {
+		"name": "Donn\u00e9es intelligentes",
+		"description": "Donn\u00e9es intelligentes",
+		"slug": "donnees-intelligentes"
+	}
+}, {
+	"model": "idgo_admin.datatype",
+	"pk": 3,
+	"fields": {
+		"name": "Donn\u00e9es g\u00e9ographiques",
+		"description": "Donn\u00e9es g\u00e9ographiques",
+		"slug": "donnees-geographiques"
+	}
+}]
