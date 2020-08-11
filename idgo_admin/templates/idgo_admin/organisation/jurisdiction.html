@@ -1,0 +1,70 @@
+{% load static %}
+<script src="{% static 'libs/turf/turf.min.js' %}"></script>
+<script src="{% static 'libs/leaflet/leaflet.js' %}"></script>
+<link rel="stylesheet" href="{% static 'libs/leaflet/leaflet.css' %}"/>
+<div id="map" style="width: 100%; height: 400px; margin: 5px 0 20px 0;"></div>
+<script>
+$(function() {
+
+	var layers = [];
+	var baseMaps = {};
+	{% if basemaps %}
+		{% if basemaps|length > 1 %}
+			{% for basemap in basemaps %}
+	baseMaps['{{ basemap.name }}'] = L.tileLayer('{{ basemap.url }}', {{ basemap.options|safe }});
+			{% endfor %}
+		{% else %}
+	baseMaps['{{ basemaps.0.name}}'] = L.tileLayer('{{ basemaps.0.url }}', {{ basemaps.0.options|safe }});
+		{% endif %}
+	{% else %}
+	baseMaps['CartoDB'] = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {});
+	{% endif %}
+
+	for (var defaultBaseMap in baseMaps) {
+		layers.push(baseMaps[defaultBaseMap]);
+		break;
+	};
+
+	const getPointOnSurface = function(feature) {
+		const ft = turf.pointOnSurface(feature);
+		return L.point(ft.geometry.coordinates[1], ft.geometry.coordinates[0]);
+	};
+
+	const communesLayers = L.geoJSON({{ organisation.jurisdiction.get_communes_as_feature_collection_geojson|safe }}, {
+		style: {
+			className: 'geojsonFeature',
+			color: '#2e97ef',
+			fillColor: '#2e97ef',
+			stroke: true,
+			opacity: 1,
+			fillOpacity: 0.123,
+			weight: 1.5,
+			lineCap: 'butt',
+			lineJoin: 'round'
+		},
+		onEachFeature: function(feature, layer) {
+			layer.on({
+				mouseover : function(e) {
+					const layer = e.target;
+					const ft = turf.pointOnSurface(layer.feature);
+					const point = L.point(ft.geometry.coordinates[1], ft.geometry.coordinates[0]);
+					const content = layer.feature.properties.name + ' (' + layer.feature.properties.code + ')';
+					L.popup().setLatLng(L.latLng(point.x, point.y)).setContent(content).openOn(map);
+				},
+				mouseout : function(e) {
+					const layer = e.target;
+					map.closePopup();
+				}
+			});
+		}
+	});
+	layers.push(communesLayers);
+
+	const map = L
+		.map('map', {
+			'layers': layers
+		})
+		.fitBounds({% if bounds %}{{ bounds|safe }}{% else %}communesLayers.getBounds(){% endif %})
+
+});
+</script>

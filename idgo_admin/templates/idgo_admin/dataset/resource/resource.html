@@ -1,0 +1,29 @@
+{% extends "idgo_admin/base.html" %}
+
+{% block breadcrumb_content %}
+<ol class="breadcrumb">
+	<li>
+		<span class="glyphicon glyphicon-home"></span>
+	</li>
+	<li>{% if target == 'mine' %}
+		<a href="{% url 'idgo_admin:list_my_datasets' %}">Mes jeux de données</a>{% elif target == 'all' %}
+		<a href="{% url 'idgo_admin:list_all_datasets' %}">Tous jeux de données</a>{% elif target == 'ckan_harvested' %}
+		<a href="{% url 'idgo_admin:list_all_ckan_harvested_datasets' %}">Jeux de données moissonnés CKAN</a>{% elif target == 'csw_harvested' %}
+		<a href="{% url 'idgo_admin:list_all_csw_harvested_datasets' %}">Jeux de données moissonnés CSW</a>{% elif target == 'dcat_harvested' %}
+		<a href="{% url 'idgo_admin:list_all_dcat_harvested_datasets' %}">Jeux de données moissonnés DCAT</a>{% endif %}
+	</li>
+	<li>
+		<a href="{% url 'idgo_admin:dataset' %}?id={{ dataset.id }}#dataset">{{ dataset.title_overflow }}</a>
+	</li>
+	<li>
+		<a href="{% url 'idgo_admin:dataset' %}?id={{ dataset.id }}#resources">Ressources</a>
+	</li>
+	<li class="active">{% if resource %}
+		<a href="{% url 'idgo_admin:resource' dataset_id=dataset.id %}?id={{ resource.id }}">{{ resource.title_overflow }}</a>{% else %}
+		Nouvelle ressource{% endif %}
+	</li>
+</ol>
+{% endblock breadcrumb_content %}
+{% block main_content %}
+{% include "idgo_admin/dataset/resource/edit.html" %}
+{% endblock main_content %}

@@ -1,0 +1,56 @@
+{% extends "idgo_admin/dataset/resource/layer/base.html" %}
+
+{% load bootstrap3 %}
+
+{% block layer_tab_content %}
+<div role="tabpanel" class="tab-pane active" id="configuration">
+	<div class="tab-pane-content">
+		<div class="row">
+			<div class="col-xs-4">
+				<div class="form-group">
+					<label class="control-label" for="id_resource_name">Ressource de données géographiques</label>
+					<input type="text" name="title" id="id_resource_name" class="form-control" value="{{ layer.resource.title }}" disabled>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-xs-12">
+				<label class="control-label" for="id_layername">Identifiant de la couche de données disponible sur le service cartographique OGC</label>
+			</div>
+			<div class="col-xs-4">
+				<div class="form-group">
+					<input type="text" name="title" id="id_layername" class="form-control" value="{{ layer.layername }}" disabled>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-xs-4">
+				<div class="form-group">
+					<label class="control-label" for="id_geometry_type">Type de géométrie</label>
+					<input type="text" name="title" id="id_title" class="form-control" value="{{ layer.geometry_type }}" disabled>
+				</div>
+			</div>
+		</div>
+		<form method="post">
+			<div class="row">
+				<div class="col-xs-12">
+					{% bootstrap_field form.title %}
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-xs-12">
+					{% bootstrap_field form.abstract %}
+				</div>
+			</div>
+			<div class="buttons-on-the-right-side">
+				<button type="submit" name="save" class="btn btn-primary">Enregistrer</button>
+			</div>
+		</form>
+	</div>
+</div>
+<script>
+$(function() {
+	$('#layer_menu a[href="{% url "idgo_admin:layer_editor" dataset_id=layer.resource.dataset.id resource_id=layer.resource.id layer_id=layer.id %}"]').parent().addClass('active');
+});
+</script>
+{% endblock layer_tab_content %}

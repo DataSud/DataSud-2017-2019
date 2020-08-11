@@ -1,0 +1,7 @@
+<a type="button"{% if name %} id="id_{{ name }}" name="{{ name }}"{% endif %}{% if class %} class="{{ class }}"{% endif %}{% if role %} role="{{ role }}"{% endif %} data-toggle="modal" data-target="#{{ target }}">{{ text }}</a>
+<script>
+$('#{{ target }}').on('show.bs.modal', function(e) {
+	var modal = $(this);
+	modal.find('.modal-body').empty().append("{{ body }}");
+});
+</script>

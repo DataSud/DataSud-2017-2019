@@ -1,0 +1,365 @@
+{% extends "idgo_admin/base.html" %}
+
+{% load bootstrap3 %}
+{% load static %}
+
+{% block head_extras %}
+<script src="{% static 'libs/leaflet/leaflet.js' %}"></script>
+<script src="{% static 'libs/leaflet/leaflet-nontiledlayer.js' %}"></script>
+<script src="{% static 'libs/leaflet/leaflet-nontiledlayer-wms.js' %}"></script>
+<script src="{% static 'libs/leaflet.draw/leaflet.draw.js' %}"></script>
+<script src="{% static 'libs/bootstrap-slider/bootstrap-slider.js' %}"></script>
+<script src="{% static 'libs/turf/turf.min.js' %}"></script>
+<link rel="stylesheet" href="{% static 'libs/leaflet/leaflet.css' %}"/>
+<link rel="stylesheet" href="{% static 'libs/leaflet.draw/leaflet.draw.css' %}"/>
+{% endblock head_extras %}
+
+{% block breadcrumb_content %}
+<ol class="breadcrumb">
+	<li>
+		<span class="glyphicon glyphicon-home"></span>
+	</li>
+	{% if fake %}
+	<li class="active">{% if instance %}{{ instance.name }}{% else %}Demande de création d'un territoire de compétence{% endif %}</li>
+	{% else %}
+	<li>
+		<a href="{% url 'idgo_admin:jurisdictions' %}">Territoires de compétence</a>
+	</li>
+	<li class="active">{% if instance %}{{ instance.name }}{% else %}Nouveau{% endif %}</li>
+	{% endif %}
+</ol>
+{% endblock breadcrumb_content %}
+
+{% block main_content %}
+{% include "idgo_admin/alert_messages.html" %}
+<div id="jurisdiction" class="well">
+	<form type="submit" method="post">
+	{% if not new and not instance %}
+		<div class="row">
+			<p>
+				<center>
+					<strong>{{ form.jurisdiction.label }}</strong>
+				</center>
+			</p>
+			<div class="col-xs-offset-3 col-xs-6">
+				{{ form.jurisdiction }}
+				{{ form.prefill }}
+			</div>
+		</div>
+		{% if form.prefill.value %}
+		<div class="row">
+			<div class="col-xs-offset-4 col-xs-4">
+				<button type="submit" name="reuse" class="btn btn-block btn-primary">Utiliser ce même territoire</button>
+			</div>
+		</div>
+		<br/ >
+		<center>
+			<strong>Ou utiliser ce territoire comme modèle</strong>
+		</center>
+		<br/ >
+		{% endif %}
+	{% endif %}
+		<div class="row">
+			<div class="col-sm-8">
+				<div id="map" style="margin-bottom: 15px;"></div>
+			</div>
+			<div class="col-sm-4" id="right">
+				<div class="row">
+					<div class="col-sm-12">
+						{% bootstrap_field form.name %}
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-sm-12">
+						{% bootstrap_field form.code %}
+					</div>
+				</div>
+				<hr />
+				<div class="row">
+					<div class="col-sm-12">
+						<h4>{{ form.communes.label }}</h4>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-sm-12">
+						<div class="form-group">
+							<p>Liste de codes INSEE séparés par la virgule</p>
+							<input type="text" name="insee_list" class="form-control" id="id_insee_list" placeholder="Par exemple : 05061, 05013, 05037...">
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-sm-12">
+						<div class="checkbox">
+							<label>
+								<input type="checkbox" name="check-all"> Sélectionner/Désélectionner tout
+							</label>
+						</div>
+						{{ form.communes }}
+					</div>
+				</div>
+			</div>
+		</div>
+		<br />
+		<div class="buttons-on-the-right-side">
+			<a class="btn btn-default" href="{% url "idgo_admin:jurisdictions" %}">Annuler</a>
+		{% if fake %}
+			<button type="submit" name="save" class="btn btn-primary">Valider la demande</button>
+		{% else %}
+			<button type="submit" name="continue" class="btn btn-default">Enregistrer et continuer les modifications</button>
+			<button type="submit" name="save" class="btn btn-primary">Enregistrer</button>
+		{% endif %}
+		</div>
+		<hr />
+		<div class="row">
+			<div class="col-xs-12">
+				<small>* Les champs marqués d'un astérisque sont obligatoires.</small>
+			</div>
+		</div>
+	</form>
+</div>
+<script>
+$(function() {
+
+	var layers = [];
+
+	const style = {
+		className: 'geojsonFeature',
+		color: '#54a8b9',
+		fillColor: '#54a8b9',
+		stroke: true,
+		opacity: 1,
+		fillOpacity: 0.123,
+		weight: 1,
+		lineCap: 'butt',
+		lineJoin: 'round'
+	};
+
+	const highlightStyle = {
+		className: 'geojsonFeature',
+		color: '#54a8b9',
+		fillColor: '#54a8b9',
+		stroke: true,
+		opacity: 1,
+		fillOpacity: 0.123,
+		weight: 2.5,
+		lineCap: 'butt',
+		lineJoin: 'round'
+	};
+
+	const selectStyle = {
+		className: 'geojsonFeature',
+		color: '#b96554',
+		fillColor: '#b96554',
+		stroke: true,
+		opacity: 1,
+		fillOpacity: 0.123,
+		weight: 1.2,
+		lineCap: 'butt',
+		lineJoin: 'round'
+	};
+
+	const highlightSelectStyle = {
+		className: 'geojsonFeature',
+		color: '#b96554',
+		fillColor: '#b96554',
+		stroke: true,
+		opacity: 1,
+		fillOpacity: 0.123,
+		weight: 3,
+		lineCap: 'butt',
+		lineJoin: 'round'
+	};
+
+	var baseMaps = {};
+	{% if basemaps %}
+		{% if basemaps|length > 1 %}
+			{% for basemap in basemaps %}
+	baseMaps['{{ basemap.name }}'] = L.tileLayer('{{ basemap.url }}', {{ basemap.options|safe }});
+			{% endfor %}
+		{% else %}
+	baseMaps['{{ basemaps.0.name}}'] = L.tileLayer('{{ basemaps.0.url }}', {{ basemaps.0.options|safe }});
+		{% endif %}
+	{% else %}
+	baseMaps['CartoDB'] = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {});
+	{% endif %}
+
+	for (var defaultBaseMap in baseMaps) {
+		layers.push(baseMaps[defaultBaseMap]);
+		break;
+	};
+
+	const getPointOnSurface = function(feature) {
+		const ft = turf.pointOnSurface(feature);
+		return L.point(ft.geometry.coordinates[1], ft.geometry.coordinates[0]);
+	};
+
+	const communesLayers = L.geoJSON({{ communes|safe }}, {
+		style: style,
+		onEachFeature: function(feature, layer) {
+			layer.on({
+				click: function(e) {
+					const layer = e.target;
+					const $checkbox = $('input[name="{{ form.communes.name }}"][value="' + layer.feature.properties.pk + '"]');
+					if ($checkbox.is(':checked')) {
+						$checkbox.prop('checked', false);
+						communesLayers.resetStyle(layer);
+					} else {
+						$checkbox.prop('checked', true);
+						layer.setStyle(selectStyle).bringToFront();
+					};
+					const $frame = $('#id_{{ form.communes.name }}').parent();
+					$frame.animate({
+						scrollTop: $checkbox.parent().offset().top - $frame.offset().top + $frame.scrollTop() - 7
+					}, 303);
+				},
+				mouseover : function(e) {
+					const layer = e.target;
+					const $checkbox = $('input[name="{{ form.communes.name }}"][value="' + layer.feature.properties.pk + '"]');
+					layer.setStyle($checkbox.is(':checked') ? highlightSelectStyle : highlightStyle).bringToFront();
+					const point = getPointOnSurface(layer.feature);
+					L.popup().setLatLng(L.latLng(point.x, point.y)).setContent(layer.feature.properties.name).openOn(map);
+				},
+				mouseout : function(e) {
+					const layer = e.target;
+					const $checkbox = $('input[name="{{ form.communes.name }}"][value="' + layer.feature.properties.pk + '"]');
+					if ($checkbox.is(':checked')) {
+						layer.setStyle(selectStyle);
+					} else {
+						communesLayers.resetStyle(layer);
+					};
+					map.closePopup();
+				}
+			});
+		}
+	});
+	layers.push(communesLayers);
+
+	$('#map').height($('#right').height() - 15);
+	const map = L
+		.map('map', {
+			'layers': layers
+		})
+		.fitBounds({% if bounds %}{{ bounds|safe }}{% else %}communesLayers.getBounds(){% endif %})
+		.addControl(new L.control.layers(baseMaps, {
+			'Communes': communesLayers
+		}, {
+			collapsed: false
+		}));
+
+	const getCommuneLayerByCode = function(code, callback) {
+		communesLayers.eachLayer(function(layer) {
+			if (layer.feature.properties.pk == code) {
+				return callback(layer);
+			};
+		});
+	};
+
+	$('#id_{{ form.communes.name }} .list-group-item')
+		.mouseenter(function(e) {
+			$input = $(this).find('input[name="{{ form.communes.name }}"]')
+			getCommuneLayerByCode($input.val(), function(layer) {
+				layer.setStyle($input.is(':checked') ? highlightSelectStyle : highlightStyle).bringToFront();
+				const point = getPointOnSurface(layer.feature);
+				L.popup().setLatLng(L.latLng(point.x, point.y)).setContent(layer.feature.properties.name).openOn(map);
+			});
+		})
+		.mouseleave(function(e) {
+			map.closePopup();
+			$input = $(this).find('input[name="{{ form.communes.name }}"]')
+			getCommuneLayerByCode($input.val(), function(layer) {
+				if ($input.is(':checked')) {
+					layer.setStyle(selectStyle).bringToFront();
+				} else {
+					communesLayers.resetStyle(layer);
+				};
+			});
+		});
+
+	$inseeList = $('input[name="insee_list"]')
+		.change(function(e) {
+			const values = $(this).val().split(',');
+			$('input[name="check-all"]').prop('checked', false).trigger('change');
+			for (var i = 0; i < values.length; i ++) {
+				const $checkbox = $('input[name="{{ form.communes.name }}"][value="' + values[i].trim() + '"]');
+				$checkbox.prop('checked', true).trigger('change');
+			};
+		})
+		.keyup(function(e) {
+			var code = e.keyCode ? e.keyCode : e.which;
+			if ((e.keyCode || e.which) == 13) {
+				$(this).trigger('change');
+				return;
+			}
+		});
+
+	$('input[name="check-all"]')
+		.change(function() {
+			const checked = $(this).is(':checked');
+			$('#id_{{ form.communes.name }}').find('input[name="{{ form.communes.name }}"]').map(function() {
+				$(this).prop('checked', checked);
+			});
+			communesLayers.setStyle(checked ? selectStyle : style);
+		});
+
+	$('input[name="{{ form.communes.name }}"]')
+		.change(function(e) {
+			const checked = $(this).is(':checked');
+			const value = $(this).val();
+			getCommuneLayerByCode(value, function(layer) {
+				if (checked) {
+					layer.setStyle(selectStyle).bringToFront();
+					map.fitBounds(communesLayers.getBounds()).panTo(layer.getBounds().getCenter());
+				} else {
+					communesLayers.resetStyle(layer);
+				};
+			});
+		});
+
+	$('input[name="{{ form.communes.name }}"]:checked')
+		.map(function() {
+			getCommuneLayerByCode($(this).val(), function(layer) {
+				layer.setStyle(selectStyle).bringToFront();
+			});
+		})
+		.get();
+
+	function handleCheckAllInput() {
+		if ($('input[name="{{ form.communes.name }}"]:checked').length == $('input[name="{{ form.communes.name }}"]').length) {
+			$('input[name="check-all"]').prop('checked', true);
+		} else {
+			$('input[name="check-all"]').prop('checked', false);
+		};
+	};
+
+	$('input[name="{{ form.communes.name }}"]')
+		.change(function(e) {
+			e.preventDefault;
+			handleCheckAllInput();
+		})
+		.ready(function(e) {
+			e.preventDefault;
+			handleCheckAllInput();
+		});
+
+	$('form button[type="submit"]').click(function(e) {
+		const $form = $('form[name="' + this.name + '"]');
+		$form.submit();
+	});
+
+	{% if not instance %}
+	$('#id_{{ form.jurisdiction.name }}').change(function(e) {
+			const value = this.value;
+			const $form = $('form').attr('method', "POST");
+			$modalHourglass.one('show.bs.modal', function(e) {
+				$('<input/>').attr('type', 'hidden').attr('name', "prefill").appendTo($form);
+				$('<input/>').attr('type', 'hidden').attr('name', '{{ form.jurisdiction.name }}').val(value).appendTo($form);
+				$form.submit();
+			}).modal('show');
+			e.stopPropagation();
+		});
+	{% endif %}
+
+});
+</script>
+{% endblock main_content %}

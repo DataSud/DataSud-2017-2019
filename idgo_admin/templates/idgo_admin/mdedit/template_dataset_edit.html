@@ -1,0 +1,301 @@
+{% load static %}
+
+<div id="content">
+	<form name="mdForm" novalidate>
+		<div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+
+			<!-- Panel 1 -->
+			<div class="panel panel-default" ng-show="vm.showAllFields">
+				<div class="panel-heading" role="tab" id="headingOne">
+					<h4 class="panel-title">
+						<a role="button" data-toggle="collapse" data-parent="#accordion" href="#mdInfo" aria-expanded="false" aria-controls="collapseOne">
+							<span uib-tooltip="Informations sur la fiche de métadonnées" tooltip-popup-close-delay="100" tooltip-trigger="mouseenter" tooltip-placement="up">Informations sur la fiche de métadonnées</span>
+							<!-- <a role="button" href="#help"><span class="bt-doc glyphicon glyphicon-info-sign" aria-hidden="true" ng-click="vm.openModalDoc('empty')"></span></a> -->
+						</a>
+					</h4>
+				</div>
+				<div id="mdInfo" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
+					<div class="panel-body">
+						<div class="row">
+							<!-- metadata.mdFileIdentifier -->
+							<div class="col-md-6 form-group">
+								<div edit-input field="mdFileIdentifier" help="mdFileIdentifier" template-url="{% static "mdedit/html/editInput.html" %}"></div>
+							</div>
+							<!-- metadata.mdLanguage -->
+							<div class="col-md-3 form-group">
+								<div edit-select field="mdLanguage" list="MD_LanguageCode" help="mdLanguage" template-url="{% static "mdedit/html/editSelect.html" %}"></div>
+							</div>
+						</div>
+						<div class="row">
+							<!-- mdStandardName -->
+							<div class="col-md-3 form-group">
+								<div edit-input field="mdStandardName" help="mdStandardName" template-url="{% static "mdedit/html/editInput.html" %}"></div>
+							</div>
+							<!-- mdStandardVersion -->
+							<div class="col-md-3 form-group">
+								<div edit-input field="mdStandardVersion" help="mdStandardVersion" template-url="{% static "mdedit/html/editInput.html" %}"></div>
+							</div>
+						</div>
+						<div class="row">
+							<!--mdHierarchyLevel -->
+							<div class="col-md-4 form-group">
+								<div edit-select field="mdHierarchyLevel" list="MD_ScopeCode" help="mdHierarchyLevel" template-url="{% static "mdedit/html/editSelect.html" %}"></div>
+							</div>
+							<!-- mdCharacterSet -->
+							<div class="col-md-4 form-group">
+								<div edit-select field="mdCharacterSet" list="MD_CharacterSetCode" disabled="true" help="mdCharacterSet" template-url="{% static "mdedit/html/editSelect.html" %}"></div>
+							</div>
+							<!-- mdDateStamp -->
+							<div class="col-md-4 form-group">
+								<div edit-date field="mdDateStamp" help="mdDateStamp" template-url="{% static "mdedit/html/editDate.html" %}"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Panel 2 -->
+			<div class="panel panel-default">
+				<div class="panel-heading" role="tab" id="headingTwo">
+					<h4 class="panel-title">
+						<a role="button" data-toggle="collapse" data-parent="#accordion" href="#mdContacts" aria-expanded="false" aria-controls="collapseTwo" uib-tooltip="Informations relatives aux auteurs et contacts pour la fiche de métadonnées" tooltip-popup-close-delay="100" tooltip-trigger="mouseenter" tooltip-placement="up">Auteurs et contacts pour la fiche de métadonnées</a>
+						<a role="button" href="#help"><span class="bt-doc glyphicon glyphicon-info-sign pull-right" aria-hidden="true" ng-click="vm.openModalDoc('mdContacts')"></span></a>
+					</h4>
+				</div>
+				<div id="mdContacts" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
+					<!-- directive editContact: mdContacts -->
+					<div class="panel-body" edit-contacts cnt-type="mdContacts" template-url="{% static "mdedit/html/editContacts.html" %}"></div>
+				</div>
+			</div>
+
+			<!-- Panel 3 -->
+			<div class="panel panel-default">
+				<div class="panel-heading" role="tab" id="headingThree">
+					<h4 class="panel-title">
+						<a role="button" data-toggle="collapse" data-parent="#accordion" href="#mdDesc" aria-expanded="false" aria-controls="collapseThree" uib-tooltip="Informations relatives à la description des données" tooltip-popup-close-delay="100" tooltip-trigger="mouseenter" tooltip-placement="top">Description des données</a>
+						<!-- <a role="button" href="#help"><span class="bt-doc glyphicon glyphicon-info-sign pull-right" aria-hidden="true" ng-click="vm.openModalDoc('empty')"></span></a> -->
+					</h4>
+				</div>
+				<div id="mdDesc" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree">
+					<div class="panel-body">
+						<!-- dataTitle -->
+						<div class="row">
+							<div class="col-md-8 form-group">
+								<div edit-input field="dataTitle" help="dataTitle" template-url="{% static "mdedit/html/editInput.html" %}"></div>
+							</div>
+						</div>
+						<!-- dataAbstract -->
+						<div class="row">
+							<div class="col-md-12 form-group">
+								<div edit-textarea field="dataAbstract" help="dataAbstract" template-url="{% static "mdedit/html/editTextarea.html" %}"></div>
+							</div>
+						</div>
+						<!-- dataIdentifiers -->
+						<div class="row">
+							<div class="col-md-12 form-group">
+								<div class="well" edit-data-identifiers multi="true" help="dataIdentifiers" template-url="{% static "mdedit/html/editDataIdentifiers.html" %}"></div>
+							</div>
+						</div>
+						<!-- dataBrowseGraphics -->
+						<div class="row">
+							<div class="col-md-12 form-group">
+								<div class="well" edit-data-browsegraphics multi="true" help="dataBrowseGraphics" template-url="{% static "mdedit/html/editDataBrowsegraphics.html" %}"></div>
+							</div>
+						</div>
+						<div class="row">
+							<!-- dataDateCreation -->
+							<div class="col-md-4 form-group">
+								<div edit-date field="dataDateCreation" help="dataDates" template-url="{% static "mdedit/html/editDate.html" %}"></div>
+							</div>
+							<!-- dataDateRevision -->
+							<div class="col-md-4 form-group">
+								<div edit-date field="dataDateRevision" help="dataDates" template-url="{% static "mdedit/html/editDate.html" %}"></div>
+							</div>
+							<!-- dataDatePublication -->
+							<div class="col-md-4 form-group">
+								<div edit-date field="dataDatePublication" help="dataDates" template-url="{% static "mdedit/html/editDate.html" %}"></div>
+							</div>
+						</div>
+						<div class="row">
+							<!-- dataMaintenanceFrequencyCode -->
+							<div class="col-md-6 form-group">
+								<div edit-select field="dataMaintenanceFrequency" list="MD_MaintenanceFrequencyCode" help="dataMaintenanceFrequency" template-url="{% static "mdedit/html/editSelect.html" %}"></div>
+							</div>
+						</div>
+						<div class="row" ng-show="vm.showAllFields">
+							<!-- dataTemporalExtents -->
+							<div class="col-md-12">
+								<div class="well" edit-data-temporal-extents multi="true" help="dataTemporalExtents" template-url="{% static "mdedit/html/editDataTemporalExtents.html" %}"></div>
+							</div>
+						</div>
+						<div class="row" ng-show="vm.showAllFields">
+							<!-- dataLanguages -->
+							<div class="col-md-12 form-group">
+								<div class="well" edit-multi-select field="dataLanguages" list="MD_LanguageCode" multi="true" template-url="{% static "mdedit/html/editMultiSelect.html" %}"></div>
+							</div>
+						</div>
+						<div class="row">
+							<!-- dataTopicCategories -->
+							<div class="col-md-12 form-group">
+								<div class="well" edit-multi-select field="dataTopicCategories" list="MD_TopicCategoryCode" multi="true" help="dataTopicCategories" template-url="{% static "mdedit/html/editMultiSelect.html" %}"></div>
+							</div>
+						</div>
+						<div class="row">
+							<!-- dataInspireKeywords -->
+							<div class="col-md-12 form-group">
+								<div class="well" edit-multi-select field="dataInspireKeywords" list="MD_InspireTopicCategoryCode" multi="true" help="dataInspireKeywords" template-url="{% static "mdedit/html/editMultiSelect.html" %}"></div>
+							</div>
+						</div>
+						<!-- dataKeywordsList -->
+						<!--
+						<div class="row">
+							<div class="col-md-12 form-group">
+								<label class="bt-doc control-label" for="~{fields.dataKeywordsList.id}~" uib-tooltip="~{fields.dataKeywordsList.description}~" tooltip-trigger="mouseenter" tooltip-placement="top" ng-click="vm.openModalDoc('empty', $event)">~{fields.dataKeywordsList.label}~</label>
+								<textarea class="form-control input-sm" id="~{fields.dataKeywordsList.id}~" name="~{fields.dataKeywordsList.id}~" placeholder="~{fields.dataKeywordsList.placeholder}~" rows="3" ng-model="metadata.dataKeywordsList"></textarea>
+							</div>
+						</div>
+						-->
+						<!--<div class="row" ng-show="vm.showAllFields">-->
+						<div class="row">
+							<!-- dataKeywords -->
+							<div class="col-md-12 form-group">
+								<div class="well" edit-data-keywords field="dataKeywords" multi="true" help="dataKeywords" template-url="{% static "mdedit/html/editDataKeywords.html" %}"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Panel 4 -->
+			<div class="panel panel-default">
+				<div class="panel-heading" role="tab" id="headingFour">
+					<h4 class="panel-title">
+						<a role="button" data-toggle="collapse" data-parent="#accordion" href="#dataPointOfContacts" aria-expanded="false" aria-controls="collapseFour" uib-tooltip="Informations relatives aux contacts pour la base de données" tooltip-popup-close-delay="100" tooltip-trigger="mouseenter" tooltip-placement="top">Contacts pour la base de données</a>
+						<a role="button" href="#help"><span class="bt-doc glyphicon glyphicon-info-sign pull-right" aria-hidden="true" ng-click="vm.openModalDoc('dataPointsOfContacts')"></span></a>
+					</h4>
+				</div>
+				<div id="dataPointOfContacts" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingFour">
+					<!-- directive editContact: dataPointOfContacts -->
+					<div class="panel-body" edit-contacts cnt-type="dataPointOfContacts" template-url="{% static "mdedit/html/editContacts.html" %}"></div>
+				</div>
+			</div>
+
+			<!-- Panel 5 -->
+			<div class="panel panel-default">
+				<div class="panel-heading" role="tab" id="headingFive">
+					<h4 class="panel-title">
+						<a role="button" data-toggle="collapse" data-parent="#accordion" href="#mdQuality" aria-expanded="false" aria-controls="collapseFive" uib-tooltip="Informations relatives aux références géographiques et à la qualité de la base de données" tooltip-popup-close-delay="100" tooltip-trigger="mouseenter" tooltip-placement="top">Références géographiques et qualité des données</a>
+						<!-- <a role="button" href="#help"><span class="bt-doc glyphicon glyphicon-info-sign" aria-hidden="true" ng-click="vm.openModalDoc('empty')"></span></a> -->
+					</h4>
+				</div>
+				<div id="mdQuality" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingFive">
+					<div class="panel-body">
+						<div class="row">
+							<div class="col-md-12 form-group">
+								<div edit-select field="dataSpatialRepresentationType" list="MD_SpatialRepresentationTypeCode" help="dataSpatialRepresentationType" template-url="{% static "mdedit/html/editSelect.html" %}"></div>
+							</div>
+						</div>
+						<!-- geographic extents -->
+						<div class="row">
+							<div class="col-md-12">
+								<div class="well" edit-data-geographic-extents multi="true" help="dataGeographicExtents" template-url="{% static "mdedit/html/editDataGeographicExtents.html" %}"></div>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-12 form-group">
+								<div class="well" edit-data-reference-systems field="dataReferenceSystems" multi="true" help="dataReferenceSystems" template-url="{% static "mdedit/html/editDataReferenceSystems.html" %}"></div>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-12 form-group">
+								<div edit-input field="dataScaleDenominator" help="dataScale" template-url="{% static "mdedit/html/editInput.html" %}"></div>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-12 form-group">
+								<div edit-input field="dataScaleDistance" help="dataScale" template-url="{% static "mdedit/html/editInput.html" %}"></div>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-12 form-group">
+								<div edit-textarea field="dataLiStatement" help="dataLiStatement" template-url="{% static "mdedit/html/editTextarea.html" %}"></div>
+							</div>
+						</div>
+						<div class="row" ng-show="vm.showAllFields">
+							<div class="col-md-12 form-group">
+								<div edit-multi-textarea field="dataUseLimitations" multi="true" rows="1" help="dataUseLimitations" template-url="{% static "mdedit/html/editMultiTextarea.html" %}"></div>
+							</div>
+						</div>
+						<!-- dataCharacterSet -->
+						<div class="row" ng-show="vm.showAllFields">
+							<div class="col-md-12 form-group">
+								<div edit-select field="dataCharacterSet" list="MD_CharacterSetCode" help="dataCharacterSet" template-url="{% static "mdedit/html/editSelect.html" %}"></div>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-12 form-group">
+								<div class="well" edit-data-distribution-formats field="dataDistributionFormats" multi="true" help="dataDistributionFormats" template-url="{% static "mdedit/html/editDataDistributionFormats.html" %}"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Panel 6 -->
+			<div class="panel panel-default">
+				<div class="panel-heading" role="tab" id="headingSix">
+					<h4 class="panel-title">
+						<a role="button" data-toggle="collapse" data-parent="#accordion" href="#mdAccess" aria-expanded="false" aria-controls="collapseSix" uib-tooltip="Informations relatives aux conditions légales d'accès et d'usage de la base de données" tooltip-popup-close-delay="100" tooltip-trigger="mouseenter" tooltip-placement="top">Conditions légales d'accès et d'usage</a>
+						<!-- <a role="button" href="#help"><span class="bt-doc glyphicon glyphicon-info-sign" aria-hidden="true" ng-click="vm.openModalDoc('empty')"></span></a> -->
+					</h4>
+				</div>
+				<div id="mdAccess" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingSix">
+					<div class="panel-body">
+						<div class="row">
+							<div class="col-md-12 form-group">
+								<div edit-select field="dataSecurityClassification" list="MD_ClassificationCode" help="dataSecurityClassification" template-url="{% static "mdedit/html/editSelect.html" %}"></div>
+							</div>
+						</div>
+						<!-- dataLegalAccessInspireConstraints -->
+						<div class="row">
+							<div class="col-md-12">
+								<div class="well" edit-multi-select field="dataLegalAccessInspireConstraints" list="MD_InspireRestrictionCode" multi="true" help="dataLegalAccessInspireConstraints" template-url="{% static "mdedit/html/editMultiSelect.html" %}"></div>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-12">
+								<div class="well" edit-multi-select field="dataLegalAccessConstraints" list="MD_RestrictionCode" multi="true" help="dataLegalAccessConstraints" template-url="{% static "mdedit/html/editMultiSelect.html" %}"></div>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-12">
+								<div class="well" edit-multi-select field="dataLegalUseConstraints" list="MD_RestrictionCode" multi="true" help="dataLegalUseConstraints" template-url="{% static "mdedit/html/editMultiSelect.html" %}"></div>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-12">
+								<div edit-multi-textarea field="dataLegalUseLimitations" multi="true" rows="2" help="dataLegalUseLimitations" template-url="{% static "mdedit/html/editMultiTextarea.html" %}"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Panel 7 -->
+			<div class="panel panel-default">
+				<div class="panel-heading" role="tab" id="headingSeven">
+					<h4 class="panel-title">
+						<a role="button" data-toggle="collapse" data-parent="#accordion" href="#mdResources" aria-expanded="false" aria-controls="collapseSeven" uib-tooltip="Ressorces associées à la base de données" tooltip-popup-close-delay="100" tooltip-trigger="mouseenter" tooltip-placement="top">Ressources associées</a>
+						<!-- <a role="button" href="#help"><span class="bt-doc glyphicon glyphicon-info-sign" aria-hidden="true" ng-click="vm.openModalDoc('empty')"></span></a> -->
+					</h4>
+				</div>
+				<div id="mdResources" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingSeven">
+					<div class="panel-body" style="padding-left: 10px; padding-right: 10px;">
+						<div edit-data-linkages field="dataLinkages" multi="true" help="dataLinkages" template-url="{% static "mdedit/html/editDataLinkages.html" %}"></div>
+					</div>
+				</div>
+			</div>
+
+		</div>
+	</form>
+</div>

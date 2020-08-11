@@ -1,0 +1,173 @@
+{% extends "idgo_admin/base.html" %}
+
+{% load bootstrap3 %}
+
+{% block breadcrumb_content %}
+<ol class="breadcrumb">
+	<li>
+		<span class="glyphicon glyphicon-home"></span>
+	</li>
+	<li>
+		<a href="{% url 'idgo_admin:handle_show_organisation' %}{% if id %}?id={{ id }}{% endif %}">Organisations</a>
+	</li>
+	<li class="active">
+		{% if id %}
+		<a href="{% url 'idgo_admin:update_organisation' id=id %}">{{ organisation.legal_name }}</a>
+		{% else %}
+		Nouvelle organisation
+		{% endif %}
+	</li>
+</ol>
+{% endblock breadcrumb_content %}
+
+{% block main_content %}
+
+{% include "idgo_admin/alert_messages.html" %}
+
+<form method="post" action="" enctype="multipart/form-data">
+	{% if organisation in user.profile.referent_for %}
+		{% if not organisation.jurisdiction %}
+	<div class="alert alert-info">
+		<div class="row">
+			<div class="col-xs-12">
+				L'organisation n'est rattachée à aucun territoire de compétence.
+				{% if user.profile.is_crige_admin %}
+				Vous pouvez sélectionner le territoire de compétence dans la liste ci-dessous :<br/>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-xs-12">
+				<div class="form-inline">
+					{% bootstrap_field form.jurisdiction show_label=False %}
+					<button type="submit" name="continue" class="btn btn-default">Enregistrer</button>
+				</div>
+			</div>
+		</div>
+			{% else %}
+				Vous pouvez en faire la demande en cliquant ici : <a class="btn btn-link" href="{% url 'idgo_admin:jurisdiction_editor' code='for' %}?organisation={{ organisation.id }}">définir le territoire de compétence</a>
+			</div>
+		</div>
+			{% endif %}
+	</div>
+		{% endif %}
+	{% endif %}
+	<div class="well">
+		{% if id and user.profile.is_admin %}
+		<div class="buttons-on-the-right-side">
+			<div class="btn-group">
+				<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+					Importer un catalogue <span class="caret"></span>
+				</button>
+				<ul class="dropdown-menu dropdown-menu-right">
+					<li><a href="{% url 'idgo_admin:edit_remote_csw_link' id=id %}">Importer un catalogue CSW</a></li>
+					<li><a href="{% url 'idgo_admin:edit_remote_ckan_link' id=id %}">Importer un catalogue CKAN</a></li>
+					<li><a href="{% url 'idgo_admin:edit_remote_dcat_link' id=id %}">Importer un catalogue DCAT</a></li>
+				</ul>
+			</div>
+		</div>
+		<br />
+			{% elif organisation in user.profile.referent_for %}
+		<div class="buttons-on-the-right-side">
+			<a href="{% url 'idgo_admin:edit_remote_ckan_link' id=id %}" class="btn btn-default">Importer un catalogue CKAN</a>
+		</div>
+		<br />
+		{% endif %}
+		<div class="row">
+			<div class="col-sm-12">
+				{% bootstrap_field form.legal_name %}
+			</div>
+		</div>
+		<br />
+		<div class="row">
+			<div class="col-xs-6">
+				<label>Contact</label>
+				<div class="row">
+					<div class="col-xs-12">
+						{% bootstrap_field form.address show_label=False %}
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-xs-6">
+						{% bootstrap_field form.postcode show_label=False %}
+					</div>
+					<div class="col-xs-6">
+						{% bootstrap_field form.city show_label=False %}
+					</div>
+				</div>
+			</div>
+			<div class="col-xs-6">
+				<div class="row">
+					<div class="col-sm-12">
+						{% bootstrap_field form.logo %}
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-xs-3 col-md-3">
+				{% bootstrap_field form.phone show_label=False %}
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-xs-5 col-md-4">
+				{% bootstrap_field form.email show_label=False %}
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-xs-5 col-md-4">
+				{% bootstrap_field form.website show_label=False %}
+			</div>
+		</div>
+		<br />
+		<div class="row">
+			<div class="col-xs-12">
+				{% bootstrap_field form.description show_label=True %}
+			</div>
+		</div>
+		<br />
+		<div class="row">
+			<div class="col-xs-10 col-sm-6">
+				{% bootstrap_field form.organisation_type %}
+			</div>
+		</div>
+		{% if organisation.jurisdiction %}
+		<div class="row">
+			<div class="col-xs-10 col-sm-6">
+				{% bootstrap_field form.jurisdiction %}
+			</div>
+		</div>
+		<br />
+		{% endif %}
+		<div class="row">
+			<div class="col-xs-10 col-sm-6">
+				{% bootstrap_field form.license %}
+			</div>
+		</div>
+		{% bootstrap_field form.rattachement_process show_label=False %}
+		{% bootstrap_field form.contributor_process show_label=False %}
+		{% bootstrap_field form.referent_process show_label=False %}
+		<br />
+		<div class="buttons-on-the-right-side">
+			<a class="btn btn-default" href="{% url 'idgo_admin:handle_show_organisation' %}{% if organisation %}?id={{ organisation.id }}{% endif %}">Annuler</a>
+			{% if update %}<button type="submit" name="continue" class="btn btn-default">Enregistrer et continuer les modifications</button>{% endif %}
+			<button type="submit" name="save" class="btn btn-primary">Enregistrer</button>
+		</div>
+		<hr />
+		<div class="row">
+			<div class="col-xs-12">
+				<small>* Les champs marqués d'un astérisque sont obligatoires.</small>
+			</div>
+		</div>
+	</div>
+</form>
+<script>
+$(function() {
+	const $inputMember = $('input[name="{{ form.rattachement_process.name }}"]').prop('checked', false);
+	const $inputContribution = $('input[name="{{ form.contributor_process.name }}"]').prop('checked', false);
+	const $inputReferent = $('input[name="{{ form.referent_process.name }}"]').prop('checked', false).change(function() {
+		this.checked ? $inputContribution.prop('checked', true).prop('disabled', true) : $inputContribution.prop('checked', true).prop('disabled', false);
+	});
+	$('#menu a[href=\'{% url "idgo_admin:handle_show_organisation" %}\']').parent().addClass('active');
+});
+</script>
+{% endblock main_content %}

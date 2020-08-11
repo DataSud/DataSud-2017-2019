@@ -1,0 +1,44 @@
+<input id="{{ widget.attrs.id }}" name="{{ widget.name }}" type="{{ widget.type }}" {% include "django/forms/widgets/attrs.html" %} multiple></input>
+<script>
+$(function() {
+	var readableFileSize = function(value) {
+		var len = String(value).length;
+		if (len > 6) {
+			return (value / 1024 / 1024).toLocaleString('fr-FR') + ' mo';
+		} else if (len > 3) {
+			return (value / 1024).toLocaleString('fr-FR') + ' ko';
+		} else {
+			return value + ' octets';
+		};
+	};
+	var $emptyFile = $('#{{ widget.attrs.id }}-empty')
+	var $inputFile = $('#{{ widget.attrs.id }}')
+
+	$inputFile.ezdz({
+		text: '<button class="btn btn-default">Parcourir...</button> ou déposez le fichier dans cette zone.',
+		value: {% if widget.is_initial %}'{{ widget.attrs.value }}'{% else %}null{% endif %},
+		{% if widget.attrs.max_size_info %}
+		validators: {
+			maxSize: {{ widget.attrs.max_size_info }}
+		},
+		{% endif %}
+		accept: function(file) {
+			$inputFile.parent().parent().parent().parent().removeClass('has-error');
+			$inputFile.parent().parent().parent().siblings('.help-block').remove();
+		},
+		format: function(fileName, fileSize) {
+			return fileName + (fileSize ? ' (' + readableFileSize(fileSize) + ')' : '');
+		},
+		reject: function(file, err) {
+			if (err.maxSize) {
+				var fileSize = readableFileSize(file.size);
+				var maxSize = readableFileSize({{ widget.attrs.max_size_info }});
+				var text = 'Le fichier ' + file.name + ' (' + fileSize + ') dépasse la limite de taille autorisée ' + maxSize + '.';
+				$inputFile.parent().parent().parent().siblings('.help-block').remove();
+				$inputFile.parent().parent().parent().parent().addClass('has-error');
+				$inputFile.parent().parent().parent().after($('<div class="help-block">' + text + '</div>'));
+			};
+		}
+	});
+});
+</script>

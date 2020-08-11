@@ -1,0 +1,53 @@
+{% extends "idgo_admin/organisation/organisations.html" %}
+{% block organisation_show %}
+<div class="row">
+	<div class="col-sm-12">
+		<div class="buttons-on-the-right-side" style="margin-bottom: 10px;">
+			<a href='{{ crige_url }}' target="_blank"  class="btn btn-default">Information CRIGE <span class="glyphicon glyphicon-info-sign"></span></a>
+			<a href='{% url "idgo_admin:create_organisation" %}' class="btn btn-primary">Ajouter une nouvelle organisation</a>
+		</div>
+		<br />
+	</div>
+</div>
+<div class="row">
+	<div class="col-sm-12">
+		<ul class="nav nav-tabs nav-tabs-default" role="tablist">
+			<li role="presentation" class="active">
+				<a href="#info" aria-controls="info" role="tab" data-toggle="tab">Informations générales</a>
+			</li>
+			<li role="presentation">
+				<a href="#members" aria-controls="members" role="tab" data-toggle="tab">Utilisateurs</a>
+			</li>
+			{% if organisation.ows_url %}
+			<li role="presentation">
+				<a href="#ows" aria-controls="ows" role="tab" data-toggle="tab">Service OGC</a>
+			</li>
+			{% endif %}
+			{% if user.profile.is_admin or organisation in user.profile.referent_for %}
+			<div class="floating-buttons-on-the-right-side">
+				<a href="{% url 'idgo_admin:update_organisation' id=organisation.id %}" name="edit" type="button" class="btn btn-default">Éditer l'organisation</a>
+			</div>
+			{% endif %}
+		</ul>
+		<div class="tab-content tab-content-default" style="margin-bottom: 0px;">
+			<div role="tabpanel" class="tab-pane active" id="info">
+				<div class="tab-pane-content">
+					{% include "idgo_admin/organisation/info.html" with organisation=organisation %}
+				</div>
+			</div>
+			<div role="tabpanel" class="tab-pane" id="members">
+				<div class="tab-pane-content">
+					{% include "idgo_admin/organisation/members.html" with organisation=organisation %}
+				</div>
+			</div>
+			{% if organisation.ows_url %}
+			<div role="tabpanel" class="tab-pane" id="ows">
+				<div class="tab-pane-content">
+					{% include "idgo_admin/organisation/ows.html" with organisation=organisation %}
+				</div>
+			</div>
+			{% endif %}
+		</div>
+	</div>
+</div>
+{% endblock organisation_show %}

@@ -1,0 +1,75 @@
+{% extends "idgo_admin/base.html" %}
+
+{% block breadcrumb_content %}
+<ol class="breadcrumb">
+	<li>
+		<span class="glyphicon glyphicon-home"></span>
+	</li>
+	<li class="active">{% if target == 'mine' %}
+		Mes jeux de données{% elif target == 'all' %}
+		Tous jeux de données{% elif target == 'ckan_harvested' %}
+		Jeux de données moissonnés CKAN{% elif target == 'csw_harvested' %}
+		Jeux de données moissonnés CSW{% elif target == 'dcat_harvested' %}
+		Jeux de données moissonnés DCAT{% endif %}
+	</li>
+</ol>
+{% endblock breadcrumb_content %}
+
+{% block main_content %}
+
+{% include "idgo_admin/alert_messages.html" %}
+
+{% with all_datasets|length as count %}
+{% if count == 0 %}
+	{% if all %}
+<div class="alert alert-warning" role="alert">
+	<span class="glyphicon glyphicon-bullhorn" aria-hidden="true"></span> Aucun jeu de données n'est trouvé.
+<div/>
+	{% else %}
+<div role="alert" class="alert alert-info">
+	<span class="glyphicon glyphicon-bell" aria-hidden="true"></span>
+	Vous êtes un utilisateur enregistré. Pour profiter des fonctionnalités participatives de DATASUD, vous pouvez parcourir <a href="{{ ckan_url }}" target="_blank">Le Catalogue</a>.
+</div>
+		{% if user.profile.is_contributor %}
+<div role="alert" class="alert alert-warning">
+	<span class="glyphicon glyphicon-bullhorn" aria-hidden="true"></span>Vous n'avez aucun jeu de données. <a href="{% url 'idgo_admin:dataset_editor' id='new' %}">Créer un nouveau jeu de données</a> pour commencer.
+<div/>
+		{% else %}
+<div role="alert" class="alert alert-warning">
+	<span class="glyphicon glyphicon-bullhorn" aria-hidden="true"></span>
+	Vous n'êtes contributeur d'aucune organisation. Dans le menu <a href="{% url 'idgo_admin:handle_show_organisation' %}">Les Organisations</a>, vous pouvez choisir une organisation à laquelle contribuer ou bien en créer <a href="{% url 'idgo_admin:create_organisation' %}">une nouvelle</a>.
+</div>
+		{% endif %}
+	{% endif %}
+{% else %}
+<div class="row">
+	<div class="col-sm-3">
+		{% include "idgo_admin/dataset/facets.html" %}
+	</div>
+	<div class="col-sm-9">
+		<div class="well">
+			<div class="buttons-on-the-right-side">
+				{% if count > 0 %}
+				{% include "idgo_admin/dataset/actions/export_csv.html" %}
+				{% endif %}
+				{% if not harvested %}
+				{% include "idgo_admin/dataset/actions/add_dataset.html" %}
+				{% endif %}
+			</div>
+			<br />
+			{% if pagination.count > 0 %}
+			{% include "idgo_admin/dataset/table.html" %}
+			{% else %}
+			<label>Aucun jeu de données</label>
+			{% endif %}
+		</div>
+	</div>
+</div>
+{% endif %}
+{% endwith %}
+<script>
+$(function() {
+	$('#menu a[name="datasets"]').parent().addClass('active');
+});
+</script>
+{% endblock main_content %}

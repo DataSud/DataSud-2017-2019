@@ -1,0 +1,568 @@
+{% load bootstrap3 %}
+
+{% include "idgo_admin/alert_messages.html" %}
+
+<template id="progressbar_template">
+	<div class="container-progress">
+		<span class="glyphicon glyphicon-send"></span>
+		<div class="progress">
+			<div class="progress-bar progress-bar-striped" role="progressbar"></div>
+		</div>
+		<div class="progress-status">-</div>
+	</div>
+</template>
+{% if resource.get_layers|length %}
+<div class="alert alert-info">
+	<div class="row">
+		<div class="col-xs-12">
+			<p>
+				Votre ressource fait l'objet d'une couche géographique publiée à travers l'API OGC de votre organisation. Ce service est disponible à l'adresse suivante :
+				<a target="_blank" href="{{ resource.dataset.organisation.ows_url }}">{{ resource.dataset.organisation.ows_url }}</a>
+			</p>
+			{% if not user.profile.crige_membership %}
+			<p>Pour configurer votre service, veuillez contacter le CRIGE.</p>
+			{% endif %}
+		</div>
+	</div>
+</div>
+{% endif %}
+<form method="post" action="" enctype="multipart/form-data" class="well">
+	{% csrf_token %}
+	<div class="buttons-on-the-right-side">
+		{% if not resource.get_layers|length %}
+		{# TODO #}
+		{% elif resource.get_layers|length == 1 %}
+		<a class="btn btn-default" href="{% url 'idgo_admin:resource' dataset_id=dataset.id %}?resource={{ resource.id }}&layer={{ resource.get_layers.0.pk }}">Éditer la ressource géographique</a>
+		{% else %}
+		<div class="btn-group">
+			<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+				Éditer les ressources géographiques <span class="glyphicon glyphicon-triangle-bottom" style="top: 0.2em"></span>
+			</button>
+			<ul class="dropdown-menu dropdown-menu-right">
+				{% for layer in resource.get_layers %}
+				<li>
+					<a role="button" href="{% url 'idgo_admin:resource' dataset_id=dataset.id %}?resource={{ resource.id }}&layer={{ layer.name }}" style="text-align: right;">{{ layer.name }}</a>
+				</li>
+				{% endfor %}
+			</ul>
+		</div>
+		{% endif %}
+		{% if resource.ckan_id %}
+		<a class="btn btn-default" target="_blank" href="{{ ckan_url }}/dataset/{{ dataset.slug }}/resource/{{ resource.ckan_id }}">Ouvrir dans CKAN</a>
+		{% endif %}
+		<a role="button" class="btn btn-secondary" target="_blank" href="{{ doc_url }}">
+			<span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span> Aide à la saisie
+		</a>
+	</div>
+	<br />
+	<div class="row">
+		<div class="col-xs-12">
+			<div id='{{ form.crs.name }}_container'>
+				<div class="row">
+					<div class="col-xs-8">
+						{% bootstrap_field form.crs %}
+					</div>
+				</div>
+				<br />
+			</div>
+			<div id='{{ form.encoding.name }}_container'>
+				<div class="row">
+					<div class="col-xs-8">
+						{% bootstrap_field form.encoding %}
+					</div>
+				</div>
+				<br />
+			</div>
+		{% if mode %}
+			{% if mode == 'up_file' %}
+				{% bootstrap_field form.up_file %}
+			{% elif mode == 'dl_url' %}
+				{% bootstrap_field form.dl_url %}
+			<div class="row">
+				<div class="col-xs-5 col-sm-5 col-md-4">
+					{% bootstrap_field form.synchronisation_dl %}
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-xs-5 col-sm-5 col-md-4">
+					{% bootstrap_field form.sync_frequency_dl show_label=False %}
+				</div>
+			</div>
+			{% elif mode == 'referenced_url' %}
+				{% bootstrap_field form.referenced_url %}
+			{% elif mode == 'ftp_file' %}
+				{% bootstrap_field form.ftp_file %}
+			<div class="row">
+				<div class="col-xs-5 col-sm-5 col-md-4">
+					{% bootstrap_field form.synchronisation_ftp %}
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-xs-5 col-sm-5 col-md-4">
+					{% bootstrap_field form.sync_frequency_ftp show_label=False %}
+				</div>
+			</div>
+			{% endif %}
+		{% else %}
+			<ul class="nav nav-tabs nav-tabs-default" name="data-selector" role="tablist">
+				<li role="presentation">
+					<a name="up_file" href="#up_file" aria-controls="up_file" role="tab" data-toggle="tab">Téléverser un fichier</a>
+				</li>
+				<li role="presentation">
+					<a name="dl_url" href="#dl_url" aria-controls="dl_url" role="tab" data-toggle="tab">Télécharger depuis une URL</a>
+				</li>
+				<li role="presentation">
+					<a name="referenced_url" href="#referenced_url" aria-controls="referenced_url" role="tab" data-toggle="tab">Référencer une URL</a>
+				</li>
+				<li role="presentation">
+					<a name="ftp_file" href="#ftp_file" aria-controls="ftp_file" role="tab" data-toggle="tab">Dépôt FTP</a>
+				</li>
+			</ul>
+			<div class="tab-content tab-content-default" name="data-selector-panel">
+				<div role="tabpanel" class="tab-pane" id="up_file">
+					{% bootstrap_field form.up_file show_label=False %}
+				</div>
+				<div role="tabpanel" class="tab-pane" id="dl_url">
+					<p>{{ form.dl_url.label }}</p>
+					{% bootstrap_field form.dl_url show_label=False %}
+					<div class="row">
+						<div class="col-xs-5 col-sm-5 col-md-4">
+							{% bootstrap_field form.synchronisation_dl %}
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-xs-5 col-sm-5 col-md-4">
+							{% bootstrap_field form.sync_frequency_dl show_label=False %}
+						</div>
+					</div>
+				</div>
+				<div role="tabpanel" class="tab-pane" id="referenced_url">
+					<p>{{ form.referenced_url.label }}</p>
+					{% bootstrap_field form.referenced_url show_label=False %}
+				</div>
+				<div role="tabpanel" class="tab-pane" id="ftp_file">
+				{% if user.profile.is_ftp_account_exists %}
+					<p>{{ form.ftp_file.label }}</p>
+					{% bootstrap_field form.ftp_file show_label=False %}
+					<div class="row">
+						<div class="col-xs-5 col-sm-5 col-md-4">
+							{% bootstrap_field form.synchronisation_ftp %}
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-xs-5 col-sm-5 col-md-4">
+							{% bootstrap_field form.sync_frequency_ftp show_label=False %}
+						</div>
+					</div>
+				{% else %}
+					<p>Votre compte FTP n'est pas activé. Pour l'activer, veuillez <a href="{% url 'idgo_admin:create_sftp_account' %}" class="btn btn-link">cliquez ici</a>.</p>
+				{% endif %}
+				</div>
+			</div>
+		{% endif %}
+		</div>
+	</div>
+	<br />
+	<div class="row">
+		<div class="col-xs-12">
+			{% bootstrap_field form.title %}
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-xs-12">
+			{% bootstrap_field form.description %}
+		</div>
+	</div>
+	<br />
+	<div class="row">
+		<div class="col-xs-4">
+			{% bootstrap_field form.lang %}
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-xs-4">
+			{% bootstrap_field form.data_type %}
+		</div>
+	</div>
+	<br />
+	<div class="row">
+		<div class="col-xs-4">
+			{% bootstrap_field form.format_type %}
+		</div>
+	</div>{% if resource and resource.crs %}
+	<div class="row">
+		<div class="col-xs-4">
+			<fieldset disabled>
+				<div class="form-group">
+				<label for="read_only_crs">Système de référence spatiale</label>
+				<input type="text" id="read_only_crs" class="form-control" value="{{ resource.crs.description }}">
+			</div>
+		</div>
+	</div>{% endif %}
+	<br />
+	<div class="row">
+		<div class="col-xs-6">
+			{% bootstrap_field form.restricted_level %}
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-xs-offset-1 col-xs-5">
+			<div class="collapse" id="permitted-users">
+				{{ form.profiles_allowed }}
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-xs-offset-1 col-xs-5">
+			<div class="collapse" id="permitted-organisations">
+				{{ form.organisations_allowed }}
+			</div>
+		</div>
+	</div>
+	{% if resource.get_layers %}
+	<br />
+	<div>
+		<div class="row">
+			<div class="col-xs-12">
+				<div class="form-group">
+					<div class="checkbox">
+						<label for="id_{{ form.geo_restriction.name }}">
+						{% if not user.profile.crige_membership %}
+							{% include "idgo_admin/extras/crige_restricted_access/checkbox.html" with type="checkbox" name=form.geo_restriction.name checked=form.geo_restriction.value %}
+						{% else %}
+							{{ form.geo_restriction }}
+						{% endif %}
+							{{ form.geo_restriction.label }}
+						</label>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-xs-12">
+				<div class="form-group">
+					<div class="checkbox">
+						<label for="id_{{ form.ogc_services.name }}">
+						{% if not user.profile.crige_membership %}
+							{% include "idgo_admin/extras/crige_restricted_access/checkbox.html" with type="checkbox" name=form.ogc_services.name checked=form.ogc_services.value %}
+						{% else %}
+							{{ form.ogc_services }}
+						{% endif %}
+							{{ form.ogc_services.label }}
+						</label>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-xs-12">
+				<div class="form-group">
+					<div class="checkbox">
+						<label for="id_{{ form.extractable.name }}">
+						{% if not user.profile.crige_membership %}
+							{% include "idgo_admin/extras/crige_restricted_access/checkbox.html" with type="checkbox" name=form.extractable.name checked=form.extractable.value %}
+						{% else %}
+							{{ form.extractable }}
+						{% endif %}
+							{{ form.extractable.label }}
+						</label>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	{% endif %}
+	<br />
+	<div class="buttons-on-the-right-side">
+		<a class="btn btn-default" href="{% url 'idgo_admin:dataset' %}?id={{ dataset.id }}#resources">Annuler</a>
+		<button type="submit" name="continue" value="continue" class="btn btn-default">Enregistrer et continuer les modifications</button>
+		<button type="submit" name="save" value="save" class="btn btn-primary">Enregistrer</button>
+	</div>
+	<hr />
+	<small>* Les champs marqués d'un astérisque sont obligatoires.</small>
+</form>
+
+<script>
+$(function() {
+
+	const $crsInputContainer = $('#{{ form.crs.name }}_container').hide();
+	const $encodingInputContainer = $('#{{ form.encoding.name }}_container').hide();
+
+	{% if form.errors %}
+		{% for field in form %}
+			{% for error in field.errors %}
+				{% if form.crs.name == field.name %}
+$crsInputContainer.show();
+				{% elif form.encoding.name == field.name %}
+$encodingInputContainer.show();
+				{% endif %}
+			{% endfor %}
+		{% endfor %}
+	{% endif %}
+
+	$('button[name="continue,save"]').prop('type', 'button');
+
+	const $permittedUsers = $('#permitted-users').collapse({toggle: false}).on('hidden.bs.collapse', function() {
+		$('#collapse-restriction input').each(function(i) {
+			$(this).val('');
+		});
+	});
+
+	const $permittedOrganisations = $('#permitted-organisations').collapse({toggle: false}).on('hidden.bs.collapse', function() {
+		$('#collapse-restriction input').each(function(i) {
+			$(this).val('');
+		});
+	});
+
+	const getAccessSelectedOption = function($this) {
+		const value = $this.find('option:selected').val();
+		if (value === 'only_allowed_users') {
+			$permittedOrganisations.collapse('hide');
+			$permittedUsers.collapse('show');
+		}
+		else if (value === 'any_organization') {
+			$permittedUsers.collapse('hide');
+			$permittedOrganisations.collapse('show');
+		}
+		else {
+			$permittedUsers.collapse('hide');
+			$permittedOrganisations.collapse('hide');
+		};
+	};
+
+	$selectFtpFile = $('select[name="{{ form.ftp_file.name }}"]').change(function() {
+		$this = $('select[name="{{ form.ftp_file.name }}"] option:selected')
+		$('input[name="{{ form.title.name }}"]').val($this.text());
+	});
+
+	$selectAccess = $('select[name="{{ form.restricted_level.name }}"]').change(function() {
+		getAccessSelectedOption($(this));
+	});
+
+	const disableSyncFrequencyDl = function(bool) {
+		if (bool) {
+			$('select[name="{{ form.sync_frequency_dl.name }}"]').prop('disabled', true).addClass('disabled');
+		} else {
+			$('select[name="{{ form.sync_frequency_dl.name }}"]').prop('disabled', false).removeClass('disabled');
+		};
+	};
+
+	$('input[name="{{ form.synchronisation_dl.name }}"]').change(function(e) {
+		disableSyncFrequencyDl(!this.checked);
+	});
+	{% if form.synchronisation_dl.value %}
+	disableSyncFrequencyDl(false);
+	{% endif %}
+
+	const disableSyncFrequencyFtp = function(bool) {
+		if (bool) {
+			$('select[name="{{ form.sync_frequency_ftp.name }}"]').prop('disabled', true).addClass('disabled');
+		} else {
+			$('select[name="{{ form.sync_frequency_ftp.name }}"]').prop('disabled', false).removeClass('disabled');
+		};
+	};
+
+	$('input[name="{{ form.synchronisation_ftp.name }}"]').change(function(e) {
+		disableSyncFrequencyFtp(!this.checked);
+	});
+	{% if form.synchronisation_ftp.value %}
+	disableSyncFrequencyFtp(false);
+	{% endif %}
+
+	$(document).on('change', ':file', function() {
+		const $this = $(this);
+		const $files = $this.get(0).files;
+		const count = $files ? $files.length : 1;
+		if (count == 1) {  // TODO count > 1
+			$('input[name="{{ form.title.name }}"]').val($files[0].name);
+			const fileExtension = $files[0].extension;
+			if (fileExtension) {
+				$('select[name="{{ form.format_type.name }}"] option').each(function() {
+					const $this = $(this);
+					const extension = $this.attr('extension');
+					if (extension && (fileExtension.toLowerCase() == extension.toLowerCase())) {
+						$this.prop('selected', true);
+					};
+				});
+			};
+		};
+	});
+
+	const $input = $('input[type="file"]').change(function(e) {
+		if ($input.val().length > 0) {
+			// TODO
+		};
+	});
+
+	$(document).ready(function() {
+		getAccessSelectedOption($('select[name="{{ form.restricted_level.name }}"]'));
+	});
+
+	$('button[type="submit"]').click(function(e) {
+		e.preventDefault();
+
+		const $form = $('form');
+		const modeName = $('ul.nav[name="data-selector"] li.active a').attr('name');
+
+		{% if mode %}
+			{% if mode == 'up_file' %}
+		const ajaxMode = $form.find('input[name="{{ form.up_file.name }}"][type="file"]').val() ? true : false;
+			{% elif mode == 'referenced_url' %}
+		const ajaxMode = true;
+			{% else %}
+		const ajaxMode = false;
+			{% endif %}
+		{% else %}
+		const ajaxMode = (
+			(
+				modeName == '{{ form.dl_url.name }}'  && $form.find('input[name="{{ form.dl_url.name }}"][type="url"]').val()
+			) || (
+				modeName == '{{ form.up_file.name }}' && $form.find('input[name="{{ form.up_file.name }}"][type="file"]').val())
+			) ? true : false;
+		{% endif %}
+
+		if (ajaxMode) {
+
+			window.scrollTo(0, 0);
+
+			const data = new FormData($form[0]);
+			data.append('ajax', true);
+			data.append(this.name, true);
+
+			const $progressBar = $($('#progressbar_template').prop('content')).clone();
+			$modal.addClass('progress-bar-modal');
+			$modal.find('.modal-header').remove();
+			$modal.find('.modal-body').append($progressBar);
+			$modal.modal('show').one('shown.bs.modal', function(e) {
+				e.preventDefault();
+				$.ajax({
+					type: 'POST',
+					url: '{% url 'idgo_admin:resource' dataset_id=dataset.id %}?id={{ resource.id }}',
+					data: data,
+					contentType: false,
+					processData: false,
+					success: function(data, status, xhr) {
+						$('.container-message').empty();
+						$('.help-block').remove();
+						$('.progress-bar-on-top .progress-bar').css('display', 'none').css('width', '0%');
+
+						$modal.one('hidden.bs.modal', function(e) {
+							e.preventDefault();
+							if (xhr.status == 278) {
+								window.location.href = xhr.getResponseHeader("Location");
+							};
+							if (xhr.status == 302) {
+								return window.location.href = xhr.getResponseHeader('Location');
+							} else if (xhr.status == 201) {
+								return window.location.href = xhr.getResponseHeader('Content-Location');
+							} else if (xhr.status == 200) {
+								try {
+									data = JSON.parse(data);
+								} catch (e) {
+									data = undefined;
+								};
+								if (data.error) {
+									for (const key in data.error) {
+										const val = data.error[key].join();
+										if (key == '{{ form.crs.name }}') {
+											$crsInputContainer.show();
+										};
+										if (key == '{{ form.encoding.name }}') {
+											$encodingInputContainer.show();
+										};
+										if (key == '__all__') {
+											$('.container-message').append('<div name="message-tags" class="alert alert-danger" role="alert"><span class="glyphicon glyphicon-ban-circle" aria-hidden="true"></span>' + val + '</div>');
+										} else {
+											if (key == '{{ form.up_file.name }}') {
+												$('#id_' + key).closest('.ezdz-dropzone').after('<div class="help-block">' + val + '</div>').closest('.form-group').addClass('has-error');
+											} else {
+												$('#id_' + key).after('<div class="help-block">' + val + '</div>').closest('.form-group').addClass('has-error');
+											};
+										};
+									};
+								};
+							};
+						}).modal('hide');
+					},
+					error: function(xhr) {
+						$('.container-message').empty();
+						$('.help-block').remove();
+						$('.progress-bar-on-top .progress-bar').css('display', 'none').css('width', '0%');
+						$modal.one('hidden.bs.modal', function(e) {
+							e.preventDefault();
+							if (xhr.status == 500) {
+								$('.container-message').append('<div name="message-tags" class="alert alert-danger" role="alert"><span class="glyphicon glyphicon-ban-circle" aria-hidden="true"></span>Une erreur s\'est produite, si le problème persiste veuillez contacter l\'administrateur du site</div>');
+							};
+						}).modal('hide');
+					},
+					xhr: function() {
+						const $progressBar = $('.progress-bar');
+						const $progressStatus = $('.progress-status');
+						const xhr = new window.XMLHttpRequest();
+
+						let value;
+						xhr.upload.addEventListener('loadstart', function(e) {
+							value = 0;
+						}, false);
+						xhr.upload.addEventListener('progress', function(e) {
+							if (e.lengthComputable) {
+								value = Math.round(e.loaded / e.total * 100);
+								$progressBar.css('width', value + '%');
+								if (value < 100) {
+									$progressStatus.html('<strong>' + value + ' %</strong>');
+								} else {
+									$progressStatus.html('Le fichier est envoyé');
+									setTimeout(function () {
+										$progressStatus.html('En attente de la réponse du serveur');
+										$progressBar.addClass('active');
+									}, 1234);
+								};
+							};
+						}, false);
+						// xhr.upload.addEventListener('loadend', function(e) {
+						// 	$progressBar.addClass('active');
+						// 	$progressStatus.html('En attente de la réponse du serveur');
+						// }, false);
+						xhr.upload.addEventListener('timeout', function(e) {
+							$progressBar.removeClass('active');
+							$progressStatus.html('Erreur : Impossible de joindre le serveur. Veuillez réessayer plus tard.');
+						});
+
+						return xhr;
+					},
+				});
+			});
+		} else {
+			$form.append($('<input/>').prop('name', this.name).hide());
+			$form.submit();
+			e.stopPropagation();
+		};
+
+	});
+
+	const onChangeGeoRestriction = function() {
+		const $target = $('[name="{{ form.ogc_services.name }}"]');
+		if (this.checked) {
+			$target.prop('checked', false).prop('disabled', true)
+		} else {
+			$target.prop('disabled', false);
+		};
+	};
+	$('[name="{{ form.geo_restriction.name }}"]').on('change', onChangeGeoRestriction).trigger('change');
+
+	// $('[data-toggle="tab"]').on('hide.bs.tab', function (e) {
+	// 	$target = $('[role="tabpanel"]#' + this.name);
+	// 	$target.find('input:not([type="checkbox"])').each(function(e) {
+	// 		$(this).val('').trigger('change');
+	// 	});
+	// 	$target.find('input[type="checkbox"]').each(function(e) {
+	// 		$(this).prop('checked', false).trigger('change');
+	// 	});
+	// 	$target.find('select').each(function(e) {
+	// 		$(this).val($(this).find('option:first').val()).trigger('change');
+	// 	});
+	// });
+
+
+});
+</script>

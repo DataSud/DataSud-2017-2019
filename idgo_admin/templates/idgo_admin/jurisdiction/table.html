@@ -1,0 +1,207 @@
+<div id="jurisdictions">
+	<div class="table-responsive" style="overflow-x: inherit;">
+		<table class="board table table-striped table-bordered table-hover table-condensed">
+			<thead>
+				<tr>
+					<th name="code">Code <a role="button" name="sort"><span class="glyphicon glyphicon-sort"></span></a></th>
+					<th name="name">Nom <a role="button" name="sort"><span class="glyphicon glyphicon-sort"></span></a></th>
+					<th name="organisations">Organisations rattachées</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for jurisdiction_instance in jurisdictions %}
+				<tr id="{{ jurisdiction_instance.code }}" name="{{ jurisdiction_instance.code }}">
+					<td name="code">{{ jurisdiction_instance.code }}</td>
+					<td name="name">{{ jurisdiction_instance.name }}</td>
+					{% if jurisdiction_instance.organisations|length > 1 %}
+					<td name="organisations" class="dropdown table-cell-dropdown">
+						<button class="btn btn-link dropdown-toggle" type="button" data-toggle="dropdown" style="text-align: left;">
+							Voir les {{ jurisdiction_instance.organisations|length }} organisations <span class="caret"></span>
+						</button>
+						<ul class="dropdown-menu" style="max-height: 404px; overflow-y: scroll;">
+							{% for organisation_instance in jurisdiction_instance.organisations %}
+							<li style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+								<a href="{% url 'idgo_admin:show_organisation' id=organisation_instance.id %}">{{ organisation_instance.legal_name }}</a>
+							</li>
+							{% endfor %}
+						</ul>
+					</td>
+					{% else %}
+					<td name="organisations">
+						{% if jurisdiction_instance.organisations|length == 1 %}
+							{% with jurisdiction_instance.organisations|first as organisation_instance %}
+						<a href='{% url "idgo_admin:show_organisation" id=organisation_instance.id %}'>{{ organisation_instance.legal_name }}</a>
+							{% endwith %}
+						{% endif %}
+					</td>
+					{% endif %}
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+	<div id="actions" class="buttons-on-the-right-side">
+		<a role="button" name="edit" class="btn btn-default disabled">Éditer</a>
+		<button type="button" name="delete" class="btn btn-danger disabled" data-toggle="modal" data-target="#modal" disabled>
+			Supprimer <span class="glyphicon glyphicon-trash"></span>
+		</button>
+	</div>
+	{% include "idgo_admin/widgets/paginator.html" with count=pagination.total current=pagination.current %}
+</div>
+<script>
+$(function() {
+	const $window = $(window);
+	const $document = $(document);
+
+	var qs = (function(items) {
+		var kvp = {};
+		for (var i = 0; i < items.length; i ++) {
+			const kv = items[i].split('=');
+			kvp[kv[0]]= kv[1];
+		};
+		return kvp;
+	})($window[0].location.search.substring(1).split('&'));
+
+	const reload = function(options) {
+		var kvp = [];
+		for (var k in qs) {
+			if (k) {
+				const key = encodeURI(k);
+				const val = qs[k] ? encodeURI(qs[k]) : null;
+				if (val) {
+					kvp.push(key + '=' + val);
+				}
+			};
+		};
+		if (options.withHash == false) {
+			$window[0].location.hash = '';
+		};
+		$window[0].location.search = kvp.join('&');
+	};
+
+	const $div = $('#jurisdictions');
+	const $actions = $div.find('#actions');
+	const $delete = $actions.find('[name="delete"]');
+	const $edit = $actions.find('[name="edit"]');
+	const $table = $div.find('table');
+
+	$table.find('tr>th>a[name="sort"]')
+		.on('click', function(e) {
+			e.preventDefault();
+			const $this = $(this);
+			const targetValue = $this.parent().attr('name');
+			qs['sortby'] = qs['sortby'] == targetValue ? '-' + targetValue : targetValue;
+			reload({withHash: false});
+		});
+
+	$table.find('tr')
+		.on('row.selected', function(e) {
+			const $row = $(this);
+			const id = $row.attr('id');
+
+			if (!id) {
+				return;
+			};
+
+			$row.prop('selected', true).addClass('selected');
+			$('#actions').find('.btn').each(function() {
+				$(this).prop('disabled', false).removeClass('disabled');
+			});
+
+			$edit.prop('href', '{% url "idgo_admin:jurisdiction" %}?id=' + id);
+			$delete.off('click').on('click', function(e) {
+				e.preventDefault();
+
+				const $button = $('<button/>')
+					.prop('type', 'button')
+					.prop('class', 'btn btn-danger disabled')
+					.prop('disabled', true)
+					.text('Oui, supprimer définitivement ce territoire de compétence')
+					.on('click', function(e) {
+						e.preventDefault();
+						closeAllModalDialog();
+						$.ajax({
+							type: 'DELETE',
+							// success: function() {},
+							url: '{% url "idgo_admin:jurisdiction" %}?id=' + id
+						})
+						.done(function(response, textStatus, jqXHR) {
+							location.reload();
+						})
+						.fail(function(jqXHR, textStatus, errorThrown) {
+							location.reload();
+						});
+						e.stopPropagation();
+					});
+
+				const $input = $('<input/>')
+					.prop('type', 'text')
+					.prop('class', 'form-control')
+					.prop('placeholder', 'Nom du jeu de données à supprimer')
+					.on('input', function(e) {
+						if ($(this).val() === $row.find('td[name="name"]')[0].innerText.trim()) {
+							$button.removeClass('disabled').prop('disabled', false);
+						} else {
+							$button.addClass('disabled').prop('disabled', true);
+						};
+					});
+
+				$modal.find('.modal-title').text('Êtes-vous absolument sûr ?');
+
+				$modal.find('.modal-body')
+					.append('<p>Cette action est irreversible et supprimera <strong>définitivement</strong> le territoire de compétence.</p>')
+					.append(
+						$('<form/>')
+							.append(
+								$('<div/>').prop('class', 'form-group')
+									.append('<p>Pour confirmer, veuillez réécrire le nom du territoire de compétence à supprimer.</p>')
+									.append($input))
+							.append(
+								$('<div class="buttons-on-the-right-side">')
+									.append($button)
+									.append('<button type="button" class="btn btn-default" data-dismiss="modal">Annuler</button>')));
+				$modal.modal('show');
+				e.stopPropagation();
+			});
+
+		})
+		.on('row.unselected', function(e) {
+			const $row = $(this);
+			$row.prop('selected', false).removeClass('selected');
+			$('#actions').find('.btn').each(function() {
+				$(this).prop('disabled', true).addClass('disabled');
+			});
+		})
+		.on('click', function(e) {
+			if (e.target.localName == 'a') {
+				return;
+			};
+			const $that = $table.find('tr:selected');
+			const $this = $(this);
+			if ($that) {
+				$that.trigger('row.unselected');
+				if ($this.index() != $that.index()) {
+					history.pushState(null, null, '#' + $this.attr('name'));
+					$this.trigger('row.selected');
+				} else {
+					history.pushState(null, null, '#');
+				};
+			};
+		});
+
+	$window
+		.bind('hashchange', function(e) {
+			const name = $window[0].location.hash.substring(1);
+			const $that = $table.find('tr:selected');
+			const $this = name ? $table.find('tr[name="' + name + '"]') : '';
+			if ($that) {
+				$that.trigger('row.unselected');
+				if ($this && ($this.index() != $that.index())) {
+					$this.trigger('row.selected');
+				};
+			};
+		})
+		.trigger('hashchange');
+
+});
+</script>

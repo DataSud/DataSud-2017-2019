@@ -1,0 +1,23 @@
+{% load static %}
+{% load bootstrap3 %}
+{% load extra_tags %}
+
+<span class="title">
+	<a href="{{ wordpress_url }}">
+		<img src="{% static "img/logo_datasud.png" %}" style="height: 90px;"/>
+	</a>
+	<img src="{% static "img/logo_region_sud.png" %}" style="height: 57px;"/>
+	<img src="{% static "img/logo_crige.png" %}" style="height: 57px;"/>
+</span>
+<div class="btn-group login">
+	{% if is_admin %}
+	<span class="user-status">admin</span>
+	{% endif %}
+	<button type="button" class="dropdown-toggle" data-toggle="dropdown">
+		{{ first_name}} {{ last_name }} <span class="glyphicon glyphicon-user"></span>
+	</button>
+	<ul class="dropdown-menu">
+		<li><a href="{% url 'idgo_admin:update_account' site_name='admin' %}">Mon profil</a></li>
+		<li><a href="{% url 'server_cas:signOut' %}">Me déconnecter</a></li>
+	</ul>
+</div>

@@ -1,0 +1,52 @@
+{% extends "idgo_admin/base.html" %}
+
+{% block breadcrumb_content %}
+<ol class="breadcrumb">
+	<li>
+		<span class="glyphicon glyphicon-home"></span>
+	</li>
+	<li class="active">{% if target == 'mine' %}
+		<a href="{% url 'idgo_admin:list_my_datasets' %}">Mes jeux de données</a>{% elif target == 'all' %}
+		<a href="{% url 'idgo_admin:list_all_datasets' %}">Tous jeux de données</a>{% elif target == 'ckan_harvested' %}
+		<a href="{% url 'idgo_admin:list_all_ckan_harvested_datasets' %}">Jeux de données moissonnés CKAN</a>{% elif target == 'csw_harvested' %}
+		<a href="{% url 'idgo_admin:list_all_csw_harvested_datasets' %}">Jeux de données moissonnés CSW</a>{% elif target == 'dcat_harvested' %}
+		<a href="{% url 'idgo_admin:list_all_dcat_harvested_datasets' %}">Jeux de données moissonnés DCAT</a>{% endif %}
+	</li>
+	<li class="active">{% if dataset %}
+		<a href="{% url 'idgo_admin:dataset' %}?id={{ dataset.id }}">{{ dataset.title_overflow }}</a>{% else %}
+		Nouveau jeu de données{% endif %}
+	</li>
+</ol>
+{% endblock breadcrumb_content %}
+
+{% block main_content %}
+<ul class="nav nav-tabs">
+	<li role="presentation">
+		<a href="#dataset" aria-controls="dataset" role="tab" data-toggle="tab">Éditer le jeu de données</a>
+	</li>
+	{% if dataset %}
+	<li role="presentation">
+		<a href="#resources" aria-controls="resources" role="tab" data-toggle="tab">Ressource(s) associée(s)</a>
+	</li>
+	<li role="presentation">
+		<a href="#owslayers" aria-controls="service" role="tab" data-toggle="tab">Service Géo-DataSud</a>
+	</li>
+	{% endif %}
+</ul>
+<div class="tab-content well">
+	<div id="dataset" role="tabpanel" class="tab-pane fade in">
+		<br />
+		{% include "idgo_admin/dataset/edit.html" %}
+	</div>
+	{% if dataset %}
+	<div id="resources" role="tabpanel" class="tab-pane fade in">
+		<br />
+		{% include "idgo_admin/dataset/resource/resources.html" %}
+	</div>
+	<div id="owslayers" role="tabpanel" class="tab-pane fade in">
+		<br />
+		{% include "idgo_admin/dataset/resource/layer/layers.html" %}
+	</div>
+	{% endif %}
+</div>
+{% endblock main_content %}

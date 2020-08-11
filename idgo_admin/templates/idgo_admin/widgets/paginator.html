@@ -1,0 +1,84 @@
+{% if count > 1 %}
+<nav style="text-align: center;">
+	<ul id="paginator" class="pagination pagination-sm">
+		{% if count > 2 %}
+		<li {% if current == 1 %}class="disabled"{% endif %}>
+			<a name="page" href="#" value="1">
+				<span class="glyphicon glyphicon-fast-backward"></span>
+			</a>
+		</li>
+		{% endif %}
+		<li {% if current == 1 %}class="disabled"{% endif %}>
+			<a name="page" href="#" value='{{ current|add:"-1" }}'>
+				<span class="glyphicon glyphicon-backward"></span>
+			</a>
+		</li>
+		{% with ''|center:count as range %}
+			{% for _ in range %}
+		<li {% if forloop.counter == current %}class="active"{% endif %}>
+			<a name="page" href="#" value="{{ forloop.counter }}">{{ forloop.counter }}</a>
+		</li>
+			{% endfor %}
+		{% endwith %}
+		<li {% if current == count %}class="disabled"{% endif %}>
+			<a name="page" href="#" value='{{ current|add:"1" }}'>
+				<span class="glyphicon glyphicon-forward"></span>
+			</a>
+		</li>
+		{% if count > 2 %}
+		<li {% if current == count %}class="disabled"{% endif %}>
+			<a name="page" href="#" value="{{ count }}">
+				<span class="glyphicon glyphicon-fast-forward"></span>
+			</a>
+		</li>
+		{% endif %}
+	</ul>
+</nav>
+{% endif %}
+<script>
+$(function() {
+	const $window = $(window);
+
+	var qs = (function(items) {
+		var kvp = {};
+		for (var i = 0; i < items.length; i ++) {
+			const kv = items[i].split('=');
+			kvp[kv[0]]= kv[1];
+		};
+		return kvp;
+	})($window[0].location.search.substring(1).split('&'));
+
+	const updateUrl = function(options) {
+		var kvp = [];
+		for (var k in qs) {
+			if (k) {
+				const key = encodeURI(k);
+				const val = qs[k] ? encodeURI(qs[k]) : null;
+				if (val) {
+					kvp.push(key + '=' + val);
+				}
+			};
+		};
+		if (options.withHash == false) {
+			$window[0].location.hash = '';
+		};
+		if (options.refresh == false) {
+			history.pushState(null, null, '?' + kvp.join('&'));
+		} else {
+			$window[0].location.search = kvp.join('&');
+		};
+	};
+
+	$('a[name="page"]').on('click', function(e) {
+		e.preventDefault();
+		qs['page'] = $(this).attr('value');
+		updateUrl({withHash: false});
+	});
+
+	if ({{ current }} != qs['page']) {
+		qs['page'] = {{ current }};
+		updateUrl({refresh: false});
+	};
+
+});
+</script>

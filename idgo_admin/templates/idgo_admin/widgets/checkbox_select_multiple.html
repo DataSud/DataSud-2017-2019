@@ -1,0 +1,95 @@
+{% with id=widget.attrs.id name=widget.name %}
+<div class="input-group">
+	<input id="id_typeahead_input_{{ name }}" type="text" class="form-control" placeholder="Rechercher..."></input>
+	<span class="input-group-btn">
+		<button id="id_typeahead_button_{{ name }}" type="button" class="btn btn-primary disabled" disabled>
+			<span class="glyphicon glyphicon-search"></span>
+		</button>
+	</span>
+</div>
+<div id="id_panel_{{ name }}" class="panel" style="">
+	<ul{% if id %} id="{{ id }}"{% endif %} class="list-group{% if widget.attrs.class %} {{ widget.attrs.class }}{% endif %}">
+	{% for group, options, index in widget.optgroups %}
+		{% for option in options %}
+		<li class="list-group-item">
+			{% include option.template_name with widget=option %}
+		</li>
+		{% endfor %}
+	{% endfor %}
+	</ul>
+</div>
+<script>
+$(function() {
+	function unescape(string) {
+		return new DOMParser().parseFromString(string, 'text/html').querySelector('html').textContent;
+	};
+
+	const $checkboxes = $('#{{ id }}');
+
+	const $btn = $('#id_typeahead_button_{{ name }}')
+		.click(function(e) {
+			const selected = $typeahead.typeahead("getActive");
+			selected && selectRowByDataId(selected['id']);
+		});
+
+	const $typeahead = $('#id_typeahead_input_{{ name }}')
+		.on('input', function(e) {
+			if (this.value.length > 0) {
+				$checkboxes.find('.active').removeClass('active');
+				$btn.removeClass('disabled').prop('disabled', false);
+			} else {
+				$btn.addClass('disabled').prop('disabled', true);
+			}
+		})
+		.typeahead({
+			source: [{% for group, options, index in widget.optgroups %}{% for option in options %}
+				{
+					'id': '{{ option.value }}',
+					'name': unescape("{{ option.label }}")
+				},{% endfor %}{% endfor %}
+			],
+			autoSelect: true,
+			fitToElement: true,
+			afterSelect: function(data) {
+				$checkboxes.find('.active').removeClass('active');
+
+				const pattern = 'input[type=checkbox][name={{ name }}][value=' + data.id + ']';
+				const $target = $checkboxes.find(pattern).parents().eq(1);
+				$target.addClass('active');
+
+				const $container = $checkboxes.parent();
+				const scrollTop = $target.offset().top - $container.offset().top + $container.scrollTop() - 7
+				const callback = function() {
+					$btn.addClass('disabled').prop('disabled', true);
+				};
+				$container.animate({scrollTop: scrollTop}, 303, undefined, callback);
+			}
+		});
+
+});
+</script>
+<style>
+#id_panel_{{ name }} {
+	overflow-y: scroll;
+	max-height: 290px;
+}
+
+#id_panel_{{ name }} {
+	border-color: #ccc;
+	border-radius: 0px;
+	margin-bottom: 15px;
+	box-shadow: none;
+	background-color: #ddd;
+}
+
+#id_panel_{{ name }}>.list-group:first-child .list-group-item:first-child{
+	border-top-left-radius: 0px;
+	border-top-right-radius: 0px;
+}
+
+#id_panel_{{ name }}>.list-group:last-child .list-group-item:last-child{
+	border-bottom-left-radius: 0px;
+	border-bottom-right-radius: 0px;
+}
+</style>
+{% endwith %}

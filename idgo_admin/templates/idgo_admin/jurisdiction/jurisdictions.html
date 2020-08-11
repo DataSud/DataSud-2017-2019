@@ -1,0 +1,33 @@
+{% extends "idgo_admin/base.html" %}
+
+{% block breadcrumb_content %}
+<ol class="breadcrumb">
+	<li><span class="glyphicon glyphicon-home"></span></li>
+	<li class="active">Territoires de compétence</li>
+</ol>
+{% endblock breadcrumb_content %}
+
+{% block main_content %}
+
+{% include "idgo_admin/alert_messages.html" %}
+
+{% if jurisdictions|length == 0 %}
+<div class="alert alert-warning" role="alert">
+	<span class="glyphicon glyphicon-bullhorn" aria-hidden="true"></span> Aucun territoire de compétence n'est trouvé. Créer un <a role="button" href="{% url "idgo_admin:jurisdiction_editor" code="new" %}">nouveau territoire de compétence</a>.
+</div>
+{% else %}
+<div class="well">
+	<div class="buttons-on-the-right-side">
+		<a role="button" class="btn btn-primary" href="{% url "idgo_admin:jurisdiction_editor" code="new" %}">Créer un nouveau territoire de compétence</a>
+	</div>
+	<br />
+	<label>{{ total }} territoire{% if total > 1 %}s{% endif %} de compétence</label>
+	{% include "idgo_admin/jurisdiction/table.html" %}
+</div>
+{% endif %}
+<script>
+$(function() {
+	$('#menu a[href="{% url "idgo_admin:jurisdictions" %}"]').parent().addClass('active');
+});
+</script>
+{% endblock main_content %}

@@ -1,0 +1,1045 @@
+{% extends "idgo_admin/dataset/resource/layer/base.html" %}
+{% load static %}
+
+{% block head_extras %}
+<script src="{% static 'libs/leaflet/leaflet.js' %}"></script>
+<script src="{% static 'libs/leaflet/leaflet-nontiledlayer.js' %}"></script>
+<script src="{% static 'libs/leaflet/leaflet-nontiledlayer-wms.js' %}"></script>
+<script src="{% static 'libs/bootstrap-slider/bootstrap-slider.js' %}"></script>
+<link rel="stylesheet" href="{% static 'libs/leaflet/leaflet.css' %}"/>
+<link rel="stylesheet" href="{% static 'libs/bootstrap-slider/css/bootstrap-slider.css' %}"/>
+{% endblock head_extras %}
+
+{% block layer_tab_content %}
+<script>
+$(function() {
+	$('#layer_menu a[href="{% url "idgo_admin:layer_style_editor" dataset_id=layer.resource.dataset.id resource_id=layer.resource.id layer_id=layer.id %}"]').parent().addClass('active');
+});
+</script>
+
+<!-- DEFINITION DES TEMPLATES  -->
+
+<template id="id_style_well_template">
+<div class="row">
+	<div class="col-xs-12">
+		<div class="form-group">
+			<label for="id_style_name" class="control-label">Nom du style</label>
+			<input class="form-control input-sm" id="id_style_name"></input>
+		</div>
+	</div>
+</div>
+<div class="form-group">
+	<label for="classes">Règles de représentation</label>
+	<div class="row">
+		<div class="col-xs-12">
+			<div class="btn-group-vertical" role="group" style="float: left; height: 106px; width: 24px;">
+				<button type="button" name="class-up" class="btn btn-xs btn-default" style="border-radius: 0;">
+					<span class="glyphicon glyphicon-arrow-up" aria-hidden="true"></span>
+				</button>
+				<button type="button" name="class-down" class="btn btn-xs btn-default" style="border-radius: 0;">
+					<span class="glyphicon glyphicon-arrow-down" aria-hidden="true"></span>
+				</button>
+				<button type="button" name="class-clone" class="btn btn-xs btn-default" style="border-radius: 0;">
+					<span class="glyphicon glyphicon-duplicate" aria-hidden="true"></span>
+				</button>
+				<button type="button" name="class-add" class="btn btn-xs btn-default" style="border-radius: 0;">
+					<span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+				</button>
+				<button type="button" name="class-remove" class="btn btn-xs btn-default" style="border-radius: 0;">
+					<span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+				</button>
+			</div>
+			<select class="form-control input-sm" id="classes" size="7" multiple style="float: right; height: 106px; width: calc(100% - 24px); border-radius: 0; border-left: none;"></select>
+		</div>
+	</div>
+</div>
+
+<div id="class_well">
+	<!-- class_well_template -->
+</div>
+<script>
+$(function() {
+
+});
+</script>
+</template>
+
+<template id="class_well_template">
+<div class="row">
+	<div class="col-xs-12">
+		<div class="form-group">
+			<label for="rule-name" class="control-label">Nom de la classe</label>
+			<input class="form-control input-sm" id="rule-name"></input>
+		</div>
+	</div>
+</div>
+<ul class="nav nav-tabs nav-tabs-xs nav-justified" role="tablist">
+	<li role="presentation" class="active">
+		<a href="#filter" aria-controls="configuration" role="tab" data-toggle="tab">Filtre</a>
+	</li>
+	<li role="presentation">
+		<a href="#representation" aria-controls="styles" role="tab" data-toggle="tab">Représentation</a>
+	</li>
+	<li role="label">
+		<a href="#label" aria-controls="styles" role="tab" data-toggle="tab">Étiquette</a>
+	</li>
+</ul>
+<div class="tab-content">
+	<div role="tabpanel" class="tab-pane active" id="filter">
+		<div class="tab-pane-content">
+			<div id='filter_well'><!-- filter_well_template --></div>
+		</div>
+	</div>
+	<div role="tabpanel" class="tab-pane" id="representation">
+		<div class="tab-pane-content">
+			<div id='symbolizer_well'><!-- {geometry type}_symbolizer_well_template --></div>
+		</div>
+	</div>
+	<div role="tabpanel" class="tab-pane" id="label">
+		<div class="tab-pane-content">
+			<div id='text_symbolizer_well'><!-- text_symbolizer_well_template --></div>
+		</div>
+	</div>
+</div>
+</template>
+
+<template id="filter_well_template">
+<div class="form-group">
+	<label for="filter-operator" class="control-label">Opérateur</label>
+	<select class="form-control input-sm" id="filter-operator" name="sld-handler">
+		<option value="" selected>Aucun</option>
+	</select>
+</div>
+<div class="row">
+	<div class="col-xs-6">
+		<div class="form-group">
+			<label for="property-name" class="control-label">Attribut</label>
+			<select class="form-control input-sm" id="property-name" name="sld-handler">
+				<option value="" selected>Aucun</option>
+			</select>
+		</div>
+	</div>
+	<div class="col-xs-6">
+		<div class="form-group">
+			<label for="literal" class="control-label">Valeur</label>
+			<input class="form-control input-sm" id="literal"></input>
+		</div>
+	</div>
+</div>
+</template>
+
+<template  id="polygon_symbolizer_well_template">
+<div class="row">
+	<div class="col-xs-6">
+		<div class="form-group">
+			<label for="fill" class="control-label">Couleur du fond</label>
+			<input type="color" class="form-control input-sm" id="fill" name="sld-handler"></input>
+		</div>
+	</div>
+	<div class="col-xs-6">
+		<div class="form-group">
+			<label for="fill-opacity" class="control-label">Opacité du fond</label>
+			<input name="sld-handler" class="form-control" id="fill-opacity" data-slider-id='fill-opacity-slider' type="text" data-slider-min="0" data-slider-max="1" data-slider-step="0.1" data-slider-value="1"/>
+		</div>
+	</div>
+</div>
+<div class="row">
+	<div class="col-xs-6">
+		<div class="form-group">
+			<label for="stroke" class="control-label">Couleur du contour</label>
+			<input type="color" class="form-control input-sm" id="stroke" name="sld-handler"></input>
+		</div>
+	</div>
+	<div class="col-xs-6">
+		<div class="form-group">
+			<label for="stroke-width" class="control-label">Epaisseur du contour</label>
+			<input class="form-control input-sm" id="stroke-width" name="sld-handler"></input>
+		</div>
+	</div>
+</div>
+</template>
+
+<template id="linestring_symbolizer_well_template">
+<div class="row">
+	<div class="col-xs-6">
+		<div class="form-group">
+			<label for="stroke" class="control-label">Couleur du trait</label>
+			<input type="color" class="form-control input-sm" id="stroke" name="sld-handler"></input>
+		</div>
+	</div>
+	<div class="col-xs-6">
+		<div class="form-group">
+			<label for="stroke-width" class="control-label">Epaisseur du trait</label>
+			<input class="form-control input-sm" id="stroke-width" name="sld-handler"></input>
+		</div>
+	</div>
+</div>
+</template>
+
+<template id="point_symbolizer_well_template">
+<div class="row">
+	<div class="col-xs-6">
+		<div class="form-group">
+			<label for="wellknownname" class="control-label">Symbole</label>
+			<select class="form-control input-sm" id="wellknownname" name="sld-handler">
+			</select>
+		</div>
+	</div>
+	<div class="col-xs-3">
+		<div class="form-group">
+			<label for="size" class="control-label">Taille</label>
+			<input type="text" class="form-control input-sm" id="size" name="sld-handler"></input>
+		</div>
+	</div>
+	<div class="col-xs-3">
+		<div class="form-group">
+			<label for="rotation" class="control-label">Rotation</label>
+			<input type="text" class="form-control input-sm" id="rotation" name="sld-handler"></input>
+		</div>
+	</div>
+</div>
+<div class="row">
+	<div class="col-xs-6">
+		<div class="form-group">
+			<label for="fill" class="control-label">Couleur du fond</label>
+			<input type="color" class="form-control input-sm" id="fill" name="sld-handler" placeholder="#000000"></input>
+		</div>
+	</div>
+	<div class="col-xs-6">
+		<div class="form-group">
+			<label for="fill-opacity" class="control-label">Opacité du fond</label>
+			<input name="sld-handler" class="form-control" id="fill-opacity" data-slider-id='fill-opacity-slider' type="text" data-slider-min="0" data-slider-max="1" data-slider-step="0.1" data-slider-value="1"/>
+		</div>
+	</div>
+</div>
+<div class="row">
+	<div class="col-xs-6">
+		<div class="form-group">
+			<label for="stroke" class="control-label">Couleur du trait</label>
+			<input type="color" class="form-control input-sm" id="stroke" name="sld-handler"></input>
+		</div>
+	</div>
+	<div class="col-xs-6">
+		<div class="form-group">
+			<label for="stroke-width" class="control-label">Epaisseur du trait</label>
+			<input class="form-control input-sm" id="stroke-width" name="sld-handler"></input>
+		</div>
+	</div>
+</div>
+</template>
+
+<template id="text_symbolizer_well_template">
+<div class="row">
+	<div class="col-xs-8">
+		<div class="form-group">
+			<label for="property-name" class="control-label">Attribut</label>
+			<select class="form-control input-sm" id="property-name" name="sld-handler">
+				<option value='' selected>Aucun</option>
+			</select>
+		</div>
+	</div>
+</div>
+<div class="row">
+	<div class="col-xs-8">
+		<div class="form-group">
+			<label for="font-family" class="control-label">Police de caractère</label>
+			<select class="form-control input-sm" id="font-family" name="sld-handler" placeholder="Arial">
+				<option value='' selected>Aucun</option>
+			</select>
+		</div>
+	</div>
+</div>
+<div class="row">
+	<div class="col-xs-6">
+		<div class="form-group">
+			<label for="fill" class="control-label">Couleur</label>
+			<input type="color" class="form-control input-sm" id="fill" name="sld-handler" placeholder="#000000"></input>
+		</div>
+	</div>
+</div>
+<div class="row">
+	<div class="col-xs-2">
+		<div class="form-group">
+			<label for="font-size" class="control-label">Taille</label>
+			<input class="form-control input-sm" id="font-size" name="sld-handler" placeholder="10"></input>
+		</div>
+	</div>
+	<div class="col-xs-4">
+		<div class="form-group">
+			<label for="font-style" class="control-label">Style</label>
+			<select class="form-control input-sm" id="font-style" name="sld-handler"></select>
+		</div>
+	</div>
+	<div class="col-xs-4">
+		<div class="form-group">
+			<label for="font-weight" class="control-label">Épaisseur</label>
+			<select class="form-control input-sm" id="font-weight" name="sld-handler"></select>
+		</div>
+	</div>
+</div>
+</template>
+
+<template id="import_sld_modal_well_template">
+<div class="modal-header">
+	<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+		<span aria-hidden="true">&times;</span>
+	</button>
+	<h4 class="modal-title">Importer un document SLD</h4>
+</div>
+<div class="modal-header">
+	<form style="font-size: 12px;" onSubmit="return false;">
+		<div class="form-group">
+			<label class="control-label" for="id_styledlayerdescriptor">StyledLayerDescriptor</label>
+			<textarea name="styledlayerdescriptor" rows="24" placeholder="<StyledLayerDescriptor ..." cols="40" id="id_styledlayerdescriptor" title="" class="form-control code"></textarea>
+		</div>
+		<div class="buttons-on-the-right-side">
+			<button type="button" class="btn btn-default" data-dismiss="modal">Annuler</button>
+			<button type="button" id="id_loadsld" class="btn btn-danger disabled" disabled>Enregistrer</button>
+		</div>
+	</form>
+	<script>
+	$(function() {
+		$(document).on('input propertychange', "textarea[name='styledlayerdescriptor']", function(e) {
+			e.preventDefault();
+			if ($(this).val()) {
+				$loadSldButton.prop('disabled', false).removeClass('disabled');
+			} else {
+				$loadSldButton.prop('disabled', true).addClass('disabled');
+			}
+		});
+		const $loadSldButton = $('#id_loadsld').click(function(e) {
+			e.preventDefault();
+			const val = $('#id_styledlayerdescriptor').val();
+			const $form = $('form');
+			$form.append($('<input type="text"/>').prop('name', 'sldBody').val(val));
+			$modalHourglass.one('show.bs.modal', function(e) {
+				$form.submit();
+			}).modal('show');
+		});
+	});
+	</script>
+</div>
+</template>
+<!--  -->
+<form method="post" style="font-size: 12px;">
+	<div class="row">
+		<div class="col-xs-12">
+			<div class="buttons-on-the-right-side">
+				<button type="button" id="id_import_sld" class="btn btn-sm btn-default" data-toggle="modal" data-target="#modal">Importer un SLD</button>
+				<script>
+				$(function() {
+					$('#id_import_sld').on('click', function(e) {
+						e.preventDefault();
+						const $template = $('#import_sld_modal_well_template');
+						const $content = $($template.prop('content')).clone();
+						const $modal = $('#modal-dialog');
+						const $modalContent = $modal.find('.modal-content');
+						$modalContent.empty();
+						$modalContent.append($content);
+						$modal.modal('show');
+						e.stopPropagation();
+					});
+				});
+				</script>
+				<a type="button" id="id_export_sld" class="btn btn-sm btn-default" href="#">Exporter le SLD</a>
+			</div>
+		</div>
+	</div>
+	<br />
+	<div class="row">
+		<div class="col-xs-4 col-sm-5 col-md-6 col-lg-7">
+			<div id="map_well">
+				<div id="map" style="height: 800px; margin-bottom: 15px;"></div>
+			</div>
+		</div>
+		<div class="col-xs-8 col-sm-7 col-md-6 col-lg-5">
+			<div id="style-editor-container">
+				<div name="form">
+					<div class="form-group disabled">
+						<label for="styles">Styles</label>
+						<div class="row">
+							<div class="col-xs-10">
+								<select class="form-control input-sm" id="id_styles" size="1" multiple></select>
+							</div>
+							<div class="col-xs-2">
+								<!--
+								<div class="btn-group-vertical" role="group">
+									<button type="button" name="style-up" class="btn btn-xs btn-default">
+										<span class="glyphicon glyphicon-arrow-up" aria-hidden="true"></span>
+									</button>
+									<button type="button" name="style-down" class="btn btn-xs btn-default">
+										<span class="glyphicon glyphicon-arrow-down" aria-hidden="true"></span>
+									</button>
+									<button type="button" name="style-clone" class="btn btn-xs btn-default">
+										<span class="glyphicon glyphicon-duplicate" aria-hidden="true"></span>
+									</button>
+									<button type="button" name="style-add" class="btn btn-xs btn-default">
+										<span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+									</button>
+									<button type="button" name="style-remove" class="btn btn-xs btn-default">
+										<span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+									</button>
+								</div>
+								-->
+							</div>
+						</div>
+					</div>
+					<div id="id_style_well">
+						<!-- id_style_well_template -->
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-xs-12">
+			<div class="buttons-on-the-right-side">
+				<button id="id_save_sld" type="button" class="btn btn-primary">Enregistrer</button>
+			</div>
+		</div>
+	</div>
+	<hr />
+<form>
+
+<script>
+$(function() {
+
+	let that = {};
+
+	$.expr[':'].textEquals = $.expr.createPseudo(function(arg) {
+		return function( elem ) {
+			return $(elem).text().match('^' + arg + '$');
+		};
+	});
+
+	const pullXml = function($xml) {
+		var xmlString = '';
+		$xml.children().each(function() {
+			var attrs = [];
+			for (var att, i = 0, atts = this.attributes, n = atts.length; i < n; i ++) {
+				att = atts[i];
+				attrs.push(att.nodeName + '="' + att.nodeValue + '"');
+			};
+			if ($(this).text()) {
+				if (attrs.length) {
+					xmlString += '<' + this.nodeName + ' ' + attrs.join(' ') + '>';
+				} else {
+					xmlString += '<' + this.nodeName + '>';
+				};
+			} else {
+				return;
+			};
+			if ($(this).children().length > 0) {
+				xmlString += pullXml($(this));
+			} else {
+				xmlString += $(this).text();
+			};
+			xmlString += '</' + this.nodeName + '>';
+		});
+		return xmlString;
+	};
+
+	const displayStyleForm = function($container, $sld, params) {
+
+		/* Utils */
+		var increment = function(value, m) {
+			if (m.indexOf(value) > -1) {
+				var str = m[m.indexOf(value)];
+				var i = parseInt(str.slice(-1)) || undefined;
+				if (i === undefined) {
+					str = str + ' 2';
+				} else {
+					str = str.substring(0, str.length - 1) + (i + 1);
+				};
+				return increment(str, m);
+			} else {
+				return value;
+			};
+		};
+		/* Utils */
+
+		// Selection du style
+
+		const getSelectedStyleName = function(callback) {
+			const $option = $styles.find('option:selected');
+			const $style = $stylesList.find('Name:textEquals("' + $option.val() + '")').parent();
+			callback($option, $style);
+		};
+
+		const $removeStyle = $container.find('button[name="style-remove"]').click(function(e) {
+			e.preventDefault();
+			if ($styles.find('option').length > 1) {
+				const $option = $styles.find('option:selected');
+				const $style = $sld.find('NamedLayer:last>UserStyle>Name:textEquals("' + $option.val() + '")').parent();
+				$option.remove();
+				$style.remove();
+				that.overviewingStyle();
+			};
+		});
+
+		const $addStyle = $container.find('button[name="style-add"]').click(function(e) {
+			e.preventDefault();
+			const m = []
+			for (var i = 0; i < $styles.children('option').length; i ++) {
+				m.push($($styles.children('option')[i]).val());
+			};
+			const value = increment('Nouveau style', m);
+			$sld.find('NamedLayer:last').append($.parseXML('<UserStyle><Name>' + value + '</Name></UserStyle>').documentElement);
+			$styles.append($('<option>', {value: value, text : value}));
+		});
+
+		// const $cloneStyle = $container.find('button[name="style-clone"]').click(function(e) {
+		// 	e.preventDefault();
+		// });
+
+		// const $moveUpStyle = $container.find('button[name="style-up"]').click(function(e) {
+		// 	e.preventDefault();
+		// });
+
+		// const $moveDownStyle = $container.find('button[name="style-down"]').click(function(e) {
+		// 	e.preventDefault();
+		// });
+
+		const $styles = $container.find('#id_styles');
+		$styles.change(function(e) {
+			$('#id_style_well').empty();
+
+			if (this.value) {
+				const $rule = getSelectedStyleName(function($container, $style) {
+
+					const $template = $('#id_style_well_template');
+					const $content = $($template.prop('content')).clone();
+
+					const $styleName = $style.children('Name');
+					$content.find('#id_style_name').val($styleName.text()).change(function() {
+						const value = ($(this).val());
+						$('#id_style_well').parent().find('#id_styles option[value="'+ $styleName.text() +'"]').prop({'text': value, 'value': value});
+						$styleName.text(value);
+						that.overviewingStyle();
+					});
+
+					// RULES
+
+					const $featureTypeStyle = $sld.find('NamedLayer:last>UserStyle:last>FeatureTypeStyle:last');
+
+					const getSelectedClassRule = function(callback) {
+						const $option = $classes.find('option:selected');
+						const $rule = $featureTypeStyle.find('Rule>Name:textEquals("' + $option.val() + '")').parent();
+						callback($option, $rule);
+					};
+
+					const $removeClass = $content.find('button[name="class-remove"]').click(function(e) {
+						e.preventDefault();
+						if ($classes.find('option').length > 1) {
+							getSelectedClassRule(function($option, $rule) {
+								$option.remove();
+								$rule.remove();
+								that.overviewingStyle();
+							});
+						};
+					});
+
+					$content.find('button[name="class-add"]').click(function(e) {
+						e.preventDefault();
+						const m = []
+						for (var i = 0; i < $classes.children('option').length; i ++) {
+							m.push($($classes.children('option')[i]).val());
+						};
+						const value = increment('Nouvelle classe', m);
+						$featureTypeStyle.append($.parseXML('<Rule><Name>' + value + '</Name></Rule>').documentElement);
+						$classes.append($('<option>', {value: value, text : value}));
+					});
+
+					$content.find('button[name="class-clone"]').click(function(e) {
+						e.preventDefault();
+						getSelectedClassRule(function($option, $rule) {
+							const m = []
+							for (var i = 0; i < $classes.children('option').length; i ++) {
+								m.push($($classes.children('option')[i]).val());
+							};
+							const value = increment($option.val(), m)
+							$clone = $rule.clone();
+							$clone.children('Rule>Name').text(value);
+							$rule.parent().append($clone);
+							$classes.append($('<option>', {value: value, text : value}));
+						});
+
+					});
+
+					$content.find('button[name="class-up"]').click(function(e) {
+						e.preventDefault();
+						getSelectedClassRule(function($option, $rule) {
+							if ($option.length) {
+								$option.first().prev().before($option);
+								$rule.first().prev().before($rule);
+							};
+							that.overviewingStyle();
+						});
+					});
+
+					$content.find('button[name="class-down"]').click(function(e) {
+						e.preventDefault();
+						getSelectedClassRule(function($option, $rule) {
+							if ($option.length) {
+								$option.last().next().after($option);
+								$rule.last().next().after($rule);
+							};
+							that.overviewingStyle();
+						});
+					});
+
+					const $classes = $content.find('#classes').change(function(e) {
+						$('#class_well').empty();
+						if (this.value) {
+							const $rule = $featureTypeStyle.find('Rule>Name:textEquals("' + this.value + '")').parent();
+							displayRuleForm($content, $rule, {
+								'type': params['type'],
+								'attributes': params['attributes'],
+								'operators': [
+									{
+										'value': 'PropertyIsEqualTo',
+										'text': 'Egal à (=)'
+										// 'attributes': {'matchCase': false}
+									}, {
+										'value': 'PropertyIsNotEqualTo',
+										'text': 'Différent de (≠)'
+									}, {
+										'value': 'PropertyIsLessThan',
+										'text': 'Inférieur à (<)'
+									}, {
+										'value': 'PropertyIsLessThanOrEqualTo',
+										'text': 'Inférieur ou égale à (≤)'
+									}, {
+										'value': 'PropertyIsGreaterThan',
+										'text': 'Supérieur à (>)'
+									}, {
+										'value': 'PropertyIsGreaterThanOrEqualTo',
+										'text': 'Supérieur ou égale à (≥)'
+									}, {
+										'value': 'PropertyIsLike',
+										'text': 'Comme (« LIKE »)',
+										'attributes': {'wildCard': '*', 'singleChar': '.', 'escape': '!'}
+									}
+								]
+							});
+						};
+					});
+
+					$style.find('FeatureTypeStyle:last>Rule').each(function() {
+						const value = $(this).children('Name').text()
+						$classes.append($('<option>', {value: value, text : value}));
+					});
+
+					// RULES END
+
+					$('#id_style_well').append($content);
+					// Sélectionne le premier
+					$classes.val($classes.children('option').first().val()).trigger('change');
+
+				});
+			};
+		});
+
+		const $namedLayer = $sld.children('NamedLayer').last();
+		($namedLayer.children('Name').last() == params['name']) || $namedLayer.children('Name').last().text(params['name']);
+
+		const $stylesList = $namedLayer.find('UserStyle').each(function() {
+			const $Name = $(this).getChildrenOrCreate('Name').last()
+			if (!$Name.text()) {
+				$Name.text('Style par défaut')
+			}
+			const value = $Name.text()
+			$styles.append($('<option>', {value: value, text : value}));
+		});
+		// Sélectionne le premier
+		$styles.val($styles.children('option').first().val()).trigger('change');
+
+		that.overviewingStyle = function() {
+			var sldBody = '<StyledLayerDescriptor>' + pullXml($sld) + '</StyledLayerDescriptor>';
+			const getPreviewSLD = $.post('{% url "idgo_admin:sld_preview_setter" %}', {'sld': sldBody}, function(data, textStatus, jqXHR) {
+				const location = jqXHR.getResponseHeader('Content-Location')
+				if (location) {
+					that.layer.remove();
+					that.layer = null;
+					that.layer = new L.NonTiledLayer.WMS('{% url "idgo_admin:ows_preview" %}', {
+						format: 'image/png',
+						layers: params['name'],
+						sld: location,
+						transparent: true
+					});
+					that.map.addLayer(that.layer);
+				}
+			})
+			.done(function() {
+				return false;
+			})
+			.fail(function(data, textStatus, jqXHR) {
+				return false
+			})
+			.always(function() {
+				return false;
+			});
+		};
+
+		$('#id_export_sld').click(function(e) {
+			const sldBody = '<StyledLayerDescriptor>' + pullXml($sld) + '</StyledLayerDescriptor>';
+			const filename = $sld.children('namedlayer').last().children('name').last().text();
+			$(this).attr('download', filename + '.sld');
+			$(this).attr('href', 'data:text/xml;charset=UTF-8,' + encodeURIComponent(sldBody));
+		});
+
+		$('#id_save_sld').click(function(e) {
+			const sldBody = '<StyledLayerDescriptor>' + pullXml($sld) + '</StyledLayerDescriptor>';
+			const $form = $('form');
+			$form.append($('<input type="text"/>').prop('name', 'sldBody').val(sldBody));
+			$modalHourglass.one('show.bs.modal', function(e) {
+				$form.submit();
+			}).modal('show');
+		});
+
+	};
+
+	$.fn.getChildrenOrCreate = function(name, attrs) {
+		const attrList = [];
+		for (const k in attrs) {
+			attrList.push(k + '="' + attrs[k] + '"');
+		};
+		const $children = this.children(attrList.length ? name + '[' + attrList.join() + ']' : name);
+		if ($children.length == 0) {
+			const element = $.parseXML('<' + name + ' ' + attrList.join(' ') + '/>').documentElement;
+			this.append(element);
+		};
+		return this.children(attrList.length ? name + '[' + attrList.join() + ']' : name);
+	};
+
+	const declareParameter = function($container, $element, nodeName, parameterName, attrName, defaultValue, optionsList, callback) {
+		var $parameter = $element.getChildrenOrCreate(nodeName);
+		if (parameterName && attrName) {
+			var $parameter = $parameter.getChildrenOrCreate(parameterName, attrName && {'name': attrName});
+		};
+		if ($parameter && !$parameter.text()) {
+			$parameter.text(defaultValue);
+		};
+		const $item = $container.find('#' + attrName);
+		$item.change(function(e) {
+			e.preventDefault();
+			const value = $(this).val();
+			$parameter.text(value);
+			that.overviewingStyle();
+		});
+		if (optionsList) {
+			for (var i = 0; i < optionsList.length; i ++) {
+				$item.append($('<option>', {value: optionsList[i], text: optionsList[i], selected: (optionsList[i] == ($parameter.text() || defaultValue) ? true : false)}));
+			};
+		};
+
+		switch($item.prop('nodeName').toLowerCase()) {
+			case 'input':
+				$item.val($parameter.text() || defaultValue).on('keydown', function(e) {
+					if (e.which == 13) {
+						e.preventDefault()
+						$item.trigger('change');
+					}
+				});
+			break;
+		};
+		return $item;
+	};
+
+	const parsePolygonSymbolizer = function($rule, $container) {
+		/*
+		<PolygonSymbolizer>
+			<Fill>
+				<CssParameter name="fill">#ffffff</CssParameter>
+				<CssParameter name="fill-opacity">1</CssParameter>
+			</Fill>
+			<Stroke>
+				<CssParameter name="stroke">#000000</CssParameter>
+				<CssParameter name="stroke-width">1</CssParameter>
+			</Stroke>
+		</PolygonSymbolizer>
+		*/
+		const $template = $('#polygon_symbolizer_well_template');
+		const $content = $($template.prop('content')).clone();
+		const $well = $container.find('#symbolizer_well');
+		const $symbolizer = $rule.getChildrenOrCreate('PolygonSymbolizer').last();
+		declareParameter($content, $symbolizer, 'Fill', 'CssParameter', 'fill', '#ffffff');
+		const $fillOpacity = declareParameter($content, $symbolizer, 'Fill', 'CssParameter', 'fill-opacity', '1');
+		const fillOpacityValue = $fillOpacity.val();
+		$fillOpacity.slider().slider('setValue', fillOpacityValue);
+		declareParameter($content, $symbolizer, 'Stroke', 'CssParameter', 'stroke', '#000000');
+		declareParameter($content, $symbolizer, 'Stroke', 'CssParameter', 'stroke-width', 0);
+		$well.append($content);
+	};
+
+	const parseLineSymbolizer = function($rule, $container) {
+		/*
+		<LineSymbolizer>
+			<Stroke>
+				<CssParameter name="stroke">#000000</CssParameter>
+				<CssParameter name="stroke-width">1</CssParameter>
+			</Stroke>
+		</LineSymbolizer>
+		*/
+		const $template = $('#linestring_symbolizer_well_template');
+		const $content = $($template.prop('content')).clone();
+		const $well = $container.find('#symbolizer_well');
+		const $symbolizer = $rule.getChildrenOrCreate('LineSymbolizer').last();
+		declareParameter($content, $symbolizer, 'Stroke', 'CssParameter', 'stroke', '#000000');
+		declareParameter($content, $symbolizer, 'Stroke', 'CssParameter', 'stroke-width', 1);
+		$well.append($content);
+	};
+
+	const parsePointSymbolizer = function($rule, $container) {
+		/*
+		<PointSymbolizer>
+			<Graphic>
+				<Mark>
+					<WellKnownName>circle</WellKnownName>
+					<Fill>
+						<CssParameter name="fill">#FF0000</CssParameter>
+						<CssParameter name="fill-opacity">1</CssParameter>
+					</Fill>
+					<Stroke>
+						<CssParameter name="stroke">#000000</CssParameter>
+						<CssParameter name="stroke-width">2</CssParameter>
+					</Stroke>
+				</Mark>
+				<Size>6</Size>
+			</Graphic>
+		</PointSymbolizer>
+		*/
+		const $template = $('#point_symbolizer_well_template');
+		const $content = $($template.prop('content')).clone();
+		const $well = $container.find('#symbolizer_well'); //.empty();
+		const $symbolizer = $rule.getChildrenOrCreate('PointSymbolizer').last();
+		const $graphic = $symbolizer.getChildrenOrCreate('Graphic').last();
+		const $mark = $graphic.getChildrenOrCreate('Mark').last();
+		declareParameter($content, $graphic, 'Size', undefined, 'size', 16);
+		declareParameter($content, $graphic, 'Rotation', undefined, 'rotation', 0);
+		declareParameter($content, $mark, 'WellKnownName', undefined, 'wellknownname', undefined, ['circle', 'square', 'star', 'cross', 'x', 'triangle']);
+		declareParameter($content, $mark, 'Fill', 'CssParameter', 'fill', '#ffffff');
+		const $fillOpacity = declareParameter($content, $mark, 'Fill', 'CssParameter', 'fill-opacity', '1');
+		const fillOpacityValue = $fillOpacity.val();
+		$fillOpacity.slider().slider('setValue', fillOpacityValue);
+		declareParameter($content, $mark, 'Stroke', 'CssParameter', 'stroke', '#000000');
+		declareParameter($content, $mark, 'Stroke', 'CssParameter', 'stroke-width', 1);
+
+		$well.append($content);
+	};
+
+	const parseTextSymbolizer = function($rule, $container, options) {
+		/*
+		<TextSymbolizer>
+			<Label>
+				<ogc:PropertyName>name</ogc:PropertyName>
+			</Label>
+			<Font>
+				<CssParameter name="font-family">arial</CssParameter>
+				<CssParameter name="font-size">10</CssParameter>
+				<CssParameter name="font-style">normal</CssParameter>
+				<CssParameter name="font-weight">normal</CssParameter>
+			</Font>
+			<Fill>
+				<CssParameter name="fill">#000000</CssParameter>
+			</Fill>
+		</TextSymbolizer>
+		*/
+		const $template = $('#text_symbolizer_well_template');
+		const $content = $($template.prop('content')).clone();
+		const $well = $container.find('#text_symbolizer_well');
+		const $symbolizer = $rule.getChildrenOrCreate('TextSymbolizer');
+		declareParameter($content, $symbolizer, 'Label', 'PropertyName', 'property-name', undefined, options.attributes);
+		declareParameter($content, $symbolizer, 'Font', 'CssParameter', 'font-family', undefined, {{ fonts_asjson | safe }});
+		declareParameter($content, $symbolizer, 'Font', 'CssParameter', 'font-size');
+		declareParameter($content, $symbolizer, 'Font', 'CssParameter', 'font-style', 'normal', ['normal', 'italic', 'oblique']);
+		declareParameter($content, $symbolizer, 'Font', 'CssParameter', 'font-weight', 'normal', ['normal', 'bold']);
+		declareParameter($content, $symbolizer, 'Fill', 'CssParameter', 'fill');
+		$well.append($content);
+	};
+
+	const parseFilter = function($rule, $container, options) {
+		/*
+		<PropertyIs{Operator}>
+			<PropertyName>Name</PropertyName>
+			<Literal>Value</Literal>
+		</PropertyIs{Operator}>
+		*/
+		const $template = $('#filter_well_template');
+		const $content = $($template.prop('content')).clone();
+		const $well = $container.find('#filter_well')
+		const $filter = $rule.getChildrenOrCreate('Filter');
+
+		var $filterTagOperator = $filter.children().last();
+		const tagName = ($filterTagOperator.length) ? $filterTagOperator.prop('tagName') : undefined;
+
+		const $filterOperator = $content.find('#filter-operator').change(function() {
+			const value = $(this).val();
+
+			if (value) {
+				$propertyName.prop('disabled', false);
+				$literal.prop('disabled', false);
+			} else {
+				$propertyName.prop('disabled', true);
+				$literal.prop('disabled', true);
+			};
+
+			const operator = (function(value) {
+				for (var i = 0; i < options.operators.length; i ++) {
+					const operator = options.operators[i];
+					if (operator.value == value) {
+						return operator;
+					};
+				};
+			})(value);
+
+			const attrList = [];
+			if (operator && operator.attributes) {
+				for (const k in operator.attributes) {
+					attrList.push(k + '="' + operator.attributes[k] + '"');
+				};
+			};
+			const $children = $filterTagOperator.children();
+			$filter.empty();
+			if (value) {
+				$filter.append($.parseXML('<' + value + ' ' + attrList.join(' ') + '/>').documentElement);
+				$filterTagOperator = $filter.children(value);
+				$filterTagOperator.append($children);
+			};
+			that.overviewingStyle();
+		});
+
+		if ($filterTagOperator.length) {
+			$filterOperator.val($filterTagOperator.prop('tagName'));
+		};
+
+		for (var i = 0; i < options.operators.length; i ++) {
+			const operator = options.operators[i];
+			$filterOperator.append($('<option>', {
+				value: operator.value,
+				text: operator.text,
+				selected: (operator.value == tagName ? true : false)
+			}));
+		};
+
+		// Property Name
+		const $propertyNameParameter = tagName ? $filter.children(tagName).getChildrenOrCreate('PropertyName') : undefined;
+		const $propertyName = $content.find('#property-name').change(function() {
+			const value = $(this).val();
+			const $children = $filterTagOperator.children().not('PropertyName');
+			$filterTagOperator.empty();
+			$filterTagOperator.append($.parseXML('<PropertyName>' + value + '</PropertyName>').documentElement);
+			$filterTagOperator.append($children);
+			that.overviewingStyle();
+		});
+		for (var i = 0; i < options.attributes.length; i ++) {
+			const value = options.attributes[i];
+			$propertyName.append($('<option>', {
+				value: value,
+				text: value,
+				selected: ($propertyNameParameter && value == $propertyNameParameter.text()) ? true : false
+			}));
+		};
+
+		// Literal
+		const $literalParameter = tagName ? $filter.children(tagName).getChildrenOrCreate('Literal') : undefined;
+		const $literal = $content.find('#literal').val($literalParameter && $literalParameter.text()).change(function() {
+			const value = $(this).val();
+			const $children = $filterTagOperator.children().not('Literal');
+			$filterTagOperator.empty();
+			$filterTagOperator.append($.parseXML('<Literal>' + value + '</Literal>').documentElement);
+			$filterTagOperator.append($children);
+			that.overviewingStyle();
+		});
+
+		if (tagName) {
+			$propertyName.prop('disabled', false);
+			$literal.prop('disabled', false);
+		} else {
+			$propertyName.prop('disabled', true);
+			$literal.prop('disabled', true);
+		};
+
+		$well.append($content);
+	};
+
+	const displayRuleForm = function($container, $rule, options) {
+
+		const $template = $('#class_well_template');
+		const $content = $($template.prop('content')).clone();
+		const $well = $('#class_well');
+
+		const $ruleName = $rule.children('Name');
+		$content.find('#rule-name').val($ruleName.text()).change(function() {
+			const value = ($(this).val());
+			$well.parent().find('#classes option[value="'+ $ruleName.text() +'"]').prop({'text': value, 'value': value});
+			$ruleName.text(value);
+			that.overviewingStyle();
+		});
+
+		parseFilter($rule, $content, {
+			attributes: options.attributes,
+			operators: options.operators
+		});
+
+		switch(options.type.toLowerCase()) {
+			case 'polygon': parsePolygonSymbolizer($rule, $content); break;
+			case 'linestring': parseLineSymbolizer($rule, $content); break;
+			case 'point': parsePointSymbolizer($rule, $content); break;
+		};
+
+		parseTextSymbolizer($rule, $content, {
+			attributes: options.attributes
+		});
+
+		$well.append($content);
+	};
+
+	var layerData = {{ layer_asjson | safe }};
+
+	const $style = $('select[name="style"]');
+
+	const $selectStyle = $('select[name="style"]');
+	const default_style = layerData['styles']['default'];
+
+	const styles = layerData['styles']['styles'];
+
+	const getSldByName = function(name) {
+		for (var i = 0; i < styles.length; i ++) {
+			if (styles[i]['name'] == name) {
+				return styles[i]['sld'];
+			};
+		};
+	};
+
+	for (var i = 0; i < styles.length; i ++) {
+		$selectStyle.append($('<option>', {
+			value: styles[i]['name'],
+			text: styles[i]['text'],
+		}));
+	};
+
+	that.layer = new L.NonTiledLayer.WMS('{% url "idgo_admin:ows_preview" %}', {
+		layers: layerData['name'],
+		format: 'image/png',
+		transparent: true,
+	});
+
+
+	const _sld = $.parseXML(getSldByName('default'));
+	const $sld  = $(_sld).children('StyledLayerDescriptor').last();
+
+
+	that.map = L.map('map').fitBounds(layerData['bbox']);
+
+	L.tileLayer('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
+		attribution: 'CartoDB',
+	}).addTo(that.map);
+
+	that.map.addLayer(that.layer);
+
+	displayStyleForm($('#style-editor-container'), $sld, layerData);
+
+});
+</script>
+{% endblock layer_tab_content %}

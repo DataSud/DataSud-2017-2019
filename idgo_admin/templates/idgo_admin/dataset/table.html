@@ -1,0 +1,281 @@
+<div id="datasets">
+	<label>{{ pagination.count }} jeu{% if pagination.count > 1 %}x{% endif %} de données</label>
+	<div class="table-responsive">
+		<table class="board table table-striped table-bordered table-hover table-condensed">
+			<tr>
+				<th name="title">Titre <a role="button" name="sort"><span class="glyphicon glyphicon-sort"></span></a></th>
+				<th name="date_creation">Créé <a role="button" name="sort"><span class="glyphicon glyphicon-sort"></span></a></th>
+				<th name="date_modification">Modifié <a role="button" name="sort"><span class="glyphicon glyphicon-sort"></span></a></th>
+				<th name="date_publication">Publié <a role="button" name="sort"><span class="glyphicon glyphicon-sort"></span></a></th>
+				<th name="organisation">Organisation <a role="button" name="sort"><span class="glyphicon glyphicon-sort"></span></a></th>
+				{% if all %}
+				<th name="editor">Éditeur <a role="button" name="sort"><span class="glyphicon glyphicon-sort"></span></a></th>
+				{% endif %}
+				<th name="private">Privé</th>
+				<th name="inspire">INSPIRE</th>
+			</tr>
+			{% for dataset in datasets %}
+			<tr id="{{ dataset.id }}" name="{{ dataset.slug }}">
+				<td name="title">{{ dataset.title }}</td>
+				<td name="date_creation">{{ dataset.date_creation|date:"d/m/y"|default:"" }}</td>
+				<td name="date_modification">{{ dataset.date_modification|date:"d/m/y"|default:"" }}</td>
+				<td name="date_publication">{{ dataset.date_publication|date:"d/m/y"|default:"" }}</td>
+				<td name="organisation" {% if dataset.organisation.is_crige_partner %}crige{% endif %}>{{ dataset.organisation }}</td>
+				{% if all %}
+				<td name="editor">{% if dataset.editor == user %}Moi{% else %}{{ dataset.editor.get_full_name }}{% endif %}</td>
+				{% endif %}
+				<td name="private" style="text-align: center;">{% if dataset.private %}
+					<span class="glyphicon glyphicon-ok"></span>{% endif %}
+				</td>
+				<td name="inspire" style="text-align: center;">{% if dataset.geonet_id %}
+					<span class="glyphicon glyphicon-ok"></span>{% endif %}
+				</td>
+			</tr>
+			{% endfor %}
+		</table>
+	</div>
+	<div id="actions" class="buttons-on-the-right-side">
+		<a role="button" name="view-ckan" class="btn btn-default disabled" href="#" target="_blank">Ouvrir dans CKAN</a>
+		<div class="btn-group">
+			<button type="button" class="btn btn-default dropdown-toggle disabled" data-toggle="dropdown" disabled>
+				Éditer <span class="glyphicon glyphicon-triangle-bottom" style="top: 0.2em"></span>
+			</button>
+			<ul class="dropdown-menu dropdown-menu-right">
+				<li>
+					<a role="button" name="edit-dataset" href="#" style="text-align: right;">Éditer le jeu de données</a>
+				</li>
+				<li>
+					<a role="button" name="edit-resources" href="#" style="text-align: right;">Éditer les ressources associées</a>
+				</li>
+				{% if user.profile.crige_membership %}
+				<li>
+					<a role="button" name="mdedit-dataset" href="#" style="text-align: right;">Éditer la fiche de métadonnées INSPIRE</a>
+				</li>
+				<li role="separator" class="divider"></li>
+				{% endif %}
+				<li>
+					<a role="button" name="publish-dataset" href="#" style="text-align: right;">Publier le jeu de données</a>
+				</li>
+			</ul>
+		</div>
+		<button type="button" name="delete-dataset" class="btn btn-danger disabled" data-toggle="modal" data-target="#modal" disabled>
+			Supprimer <span class="glyphicon glyphicon-trash"></span>
+		</button>
+	</div>
+	{% include "idgo_admin/widgets/paginator.html" with count=pagination.total current=pagination.current %}
+</div>
+<script>
+$(function() {
+	const $window = $(window);
+	const $document = $(document);
+
+	var qs = (function(items) {
+		var kvp = {};
+		for (var i = 0; i < items.length; i ++) {
+			const kv = items[i].split('=');
+			kvp[decodeURIComponent(kv[0])]= decodeURIComponent(kv[1]);
+		};
+		return kvp;
+	})($window[0].location.search.substring(1).split('&'));
+
+	const reload = function(options) {
+		var kvp = [];
+		for (var k in qs) {
+			if (k) {
+				const key = encodeURI(k);
+				const val = qs[k] ? encodeURI(qs[k]) : null;
+				if (val) {
+					kvp.push(key + '=' + val);
+				}
+			};
+		};
+		if (options.withHash == false) {
+			$window[0].location.hash = '';
+		};
+		$window[0].location.search = kvp.join('&');
+	};
+
+	const $div = $('#datasets');
+
+	const $viewCkan = $div.find('[name="view-ckan"]');
+	const $deleteDataset = $div.find('[name="delete-dataset"]');
+	const $editDataset = $div.find('[name="edit-dataset"]');
+	const $editResources = $div.find('[name="edit-resources"]');
+	{% if user.profile.crige_membership %}
+	const $MDEditDatasets = $div.find('[name="mdedit-dataset"]');
+	{% endif %}
+	const $publishDataset = $div.find('[name="publish-dataset"]');
+
+	const $table = $div.find('table');
+
+	$table.find('tr>th>a[name="sort"]')
+		.on('click', function(e) {
+			e.preventDefault();
+			const $this = $(this);
+			const targetValue = $this.parent().attr('name');
+			qs['sortby'] = qs['sortby'] == targetValue ? '-' + targetValue : targetValue;
+			reload({withHash: false});
+		});
+
+	$table.find('tr')
+		.on('row.selected', function(e) {
+			const $row = $(this);
+			const id = $row.attr('id');
+
+			if (!id) {
+				return;
+			};
+
+			$row.prop('selected', true).addClass('selected');
+			$('#actions').find('button, a').each(function() {
+				$(this).prop('disabled', false).removeClass('disabled');
+			});
+
+			$viewCkan.prop('href', '{{ ckan_url }}/dataset/' + $row.attr('name'));
+			$editDataset.prop('href', '{% url "idgo_admin:dataset" %}?id=' + id);
+			$editResources.prop('href', '{% url "idgo_admin:dataset" %}?id=' + id + '#resources');
+
+			{% if user.profile.crige_membership %}
+			const isCrige = $row.find('td[name="organisation"]').attr('crige');
+			if (typeof isCrige !== typeof undefined && isCrige !== false) {
+				$MDEditDatasets.show();
+				$MDEditDatasets.prop('href', '{% url "idgo_admin:mdhandler" type="dataset" %}?id=' + id);
+			} else {
+				$MDEditDatasets.hide();
+			};
+			{% endif %}
+
+			const isPrivate = $row.find('td[name="private"]').find('.glyphicon-ok').length ? true: false;
+			if (isPrivate) {
+				$publishDataset[0].innerText = "Publier le jeu de données"
+			} else {
+				$publishDataset[0].innerText = "Dépublier le jeu de données"
+			};
+
+			$publishDataset.off('click').on('click', function(e) {
+				e.preventDefault();
+				$modalHourglass.one('shown.bs.modal', function(e) {
+					$.ajax({
+						type: 'GET',
+						// success: function() {},
+						url: '{% url "idgo_admin:action" %}?id=' + id + '&publish=toggle'
+					})
+					.done(function(response, textStatus, jqXHR) {
+						$modalHourglass.one('hidden.bs.modal', function(e) {
+							// $modal.find('.close').remove();
+							$modal.find('.modal-title').text('Information');
+							$modal.find('.modal-body').append(jqXHR.responseText);
+							$modal.modal('show');
+						}).modal('hide');
+					})
+					.fail(function(jqXHR, textStatus, errorThrown) {
+						$modalHourglass.one('hidden.bs.modal', function(e) {
+							// $modal.find('.close').remove();
+							$modal.find('.modal-title').text("L'opération a échouée");
+							$modal.find('.modal-body').append(jqXHR.responseText);
+							$modal.modal('show');
+						}).modal('hide');
+					});
+				}).modal('show');
+				e.stopPropagation();
+			});
+
+			$deleteDataset.off('click').on('click', function(e) {
+				e.preventDefault();
+
+				const $button = $('<button/>')
+					.prop('type', 'button')
+					.prop('class', 'btn btn-danger disabled')
+					.prop('disabled', true)
+					.text('Oui, supprimer définitivement ce jeu de données')
+					.on('click', function(e) {
+						e.preventDefault();
+						closeAllModalDialog();
+						$modalHourglass.one('shown.bs.modal', function(e) {
+							$.ajax({
+								type: 'DELETE',
+								// success: function() {},
+								url: '{% url "idgo_admin:dataset" %}?id=' + id
+							})
+							.done(function(response, textStatus, jqXHR) {
+								location.reload();
+							})
+							.fail(function(jqXHR, textStatus, errorThrown) {
+								location.reload();
+							});
+							e.stopPropagation();
+						}).modal('show');
+					});
+
+				const $input = $('<input/>')
+					.prop('type', 'text')
+					.prop('class', 'form-control')
+					.prop('placeholder', 'Nom du jeu de données à supprimer')
+					.on('input', function(e) {
+						e.preventDefault();
+						if ($(this).val().trim() === $row.find('td[name="title"]')[0].innerText.trim()) {
+							$button.removeClass('disabled').prop('disabled', false);
+						} else {
+							$button.addClass('disabled').prop('disabled', true);
+						};
+					});
+
+				$modal.find('.modal-title').text('Êtes-vous absolument sûr ?');
+
+				$modal.find('.modal-body')
+					.append('<p>Cette action est irreversible et supprimera <strong>définitivement</strong> le jeu de données ainsi que toutes les ressources qui lui sont attachées.</p>')
+					.append(
+						$('<form/>')
+							.append(
+								$('<div/>').prop('class', 'form-group')
+									.append('<p>Pour confirmer, veuillez réécrire le nom du jeu de données à supprimer.</p>')
+									.append($input))
+							.append(
+								$('<div class="buttons-on-the-right-side">')
+									.append($button)
+									.append('<button type="button" class="btn btn-default" data-dismiss="modal">Annuler</button>')));
+				$modal.modal('show');
+				e.stopPropagation();
+			});
+
+		})
+		.on('row.unselected', function(e) {
+			const $row = $(this);
+			$row.prop('selected', false).removeClass('selected');
+			$('#actions').find('button, a').each(function() {
+				$(this).prop('disabled', true).addClass('disabled');
+			});
+		})
+		.on('click', function(e) {
+			if (e.target.localName == 'a') {
+				return;
+			};
+			const $that = $table.find('tr:selected');
+			const $this = $(this);
+			if ($that) {
+				$that.trigger('row.unselected');
+				if ($this.index() != $that.index()) {
+					history.pushState(null, null, '#' + $this.attr('name'));
+					$this.trigger('row.selected');
+				} else {
+					history.pushState(null, null, '#');
+				};
+			};
+		});
+
+	$window
+		.bind('hashchange', function(e) {
+			const name = $window[0].location.hash.substring(1);
+			const $that = $table.find('tr:selected');
+			const $this = name ? $table.find('tr[name="' + name + '"]') : '';
+			if ($that) {
+				$that.trigger('row.unselected');
+				if ($this && ($this.index() != $that.index())) {
+					$this.trigger('row.selected');
+				};
+			};
+		})
+		.trigger('hashchange');
+
+});
+</script>

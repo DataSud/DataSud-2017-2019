@@ -1,0 +1,122 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+{% block extrastyle %}
+<style>
+
+a.borderer {
+  border: 1px solid;
+  background: #eff4ff;
+  margin-right: 5px;
+}
+
+div.inner_form  {
+  border: solid lightgrey;
+  padding: 25px 25px;
+}
+
+.hoverTable{
+  width:100%;
+  border-collapse:collapse;
+}
+
+.hoverTable td{
+  padding:5px; border:#F6F6F6 1px solid;
+}
+
+/* Define the default color for all the table rows */
+.hoverTable tr{
+	background: #FFFFFF;
+}
+
+/* Define the hover highlight color for the table row */
+.hoverTable tr:hover {
+  background-color: #EBF3F4;
+}
+
+tbody {
+  display:block;
+  max-height:600px;
+  overflow-y:scroll;
+}
+
+thead, tbody tr {
+  display:table;
+  width:100%;
+  table-layout:fixed;
+}
+
+thead {
+  width:100%;
+}
+
+table {
+  width:100%;
+}
+
+#table_datasets {
+	margin-left: 3%;
+}
+
+a.cancel_btn {
+  padding:5px 15px;
+  background:#ccc;
+  border:0 none;
+  cursor:pointer;
+  -webkit-border-radius: 5px;
+  border-radius: 5px;
+}
+
+</style>
+{% endblock %}
+
+
+{% block content %}
+<form action="" method="post">
+  {% csrf_token %}
+
+  <div class="inner_form">
+  <p>Mots clés sélectionnés: </p>
+  {% for tag in tags %}
+    <p>
+      {{ tag.pk }} / {{ tag.name }} / {{ tag.slug }}
+    </p>
+    <input type="hidden" name="_selected_action" value="{{ tag.pk }}" />
+	{% endfor %}
+  </div>
+  <div class="inner_form">
+    <p>Datasets concernées: </p>
+    <table id="table_dataset" class="display hoverTable">
+      <thead>
+        <tr>
+        <th scope="col">Noms</th>
+        <th scope="col">Mots clés</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for dataset in datasets %}
+          <tr>
+          <td>{{ dataset.title }}</td>
+
+          <td>{% for kw in dataset.keywords.all %} {% if kw in tags %}<a class="borderer">{{ kw.name }}</a> {% else %} <a> {{ kw.name }}</a> {% endif %}{% endfor %}</td>
+
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <table id="header-fixed"></table>
+  </div>
+
+  <div class="inner_form">
+    <p>Veuillez indiquer le mot clé définitif remplacant les mots clés sélectionnés:</p>
+    {{ form.new_name.label_tag }} {{ form.new_name }}
+    {{ form.new_name.errors }}
+  </div>
+
+  <div class="submit-row">
+    <input type="hidden" name="action" value="merge_name" />
+    <input type="submit" name="apply" value="Valider"/>
+    <a href="" class="cancel_btn">{% trans "No, take me back" %}</a>
+  </div>
+
+</form>
+{% endblock %}

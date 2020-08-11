@@ -1,0 +1,8 @@
+<div class="input-group">
+	<label class="input-group-btn">
+		<span class="btn btn-default">
+			Parcourir...  <input id="{{ widget.attrs.id }}" name="{{ widget.name }}" type="{{ widget.type }}" style="display: none;" {% include "django/forms/widgets/attrs.html" %}></input>
+		</span>
+	</label>
+	<input type="text" {% if widget.is_initial %} value="{{ widget.value }}"{% endif %} class="form-control" readonly></input>
+</div>

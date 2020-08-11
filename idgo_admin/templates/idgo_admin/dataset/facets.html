@@ -1,0 +1,305 @@
+<div class="panel-group" id="datasets-filter" role="tablist" aria-multiselectable="true">
+	<div class="panel panel-default">
+		<div class="panel-heading" role="tab" id="headingOne">
+			<h4 class="panel-title">
+				<strong>Recherche</strong>
+			</h4>
+		</div>
+		<div class="panel-body">
+			<div class="input-group input-group-sm">
+				<input name="dataset" type="text" class="typeahead form-control" placeholder="Chercher un jeu de données" data-provide="typeahead"></input>
+				<span class="input-group-btn">
+					<button class="btn" type="button" name="clear">
+						<span class="glyphicon glyphicon-erase" aria-hidden="true"></span>
+					</button>
+				</span>
+			</div>
+			<div class="input-group input-group-sm">
+				<input name="organisation" type="text" class="typeahead form-control" placeholder="Chercher une organisation" data-provide="typeahead"></input>
+				<span class="input-group-btn">
+					<button class="btn" type="button" name="clear">
+						<span class="glyphicon glyphicon-erase" aria-hidden="true"></span>
+					</button>
+				</span>
+			</div>
+			<div class="input-group input-group-sm">
+				<select name="category" type="text" class="form-control">
+					<option disabled>Sélectionner une catégorie</option>
+				{% for category in all_categories %}
+					<option value="{{ category.id }}">{{ category.name }}</option>
+				{% endfor %}
+				</select>
+				<span class="input-group-btn">
+					<button class="btn" type="button" name="clear">
+						<span class="glyphicon glyphicon-erase" aria-hidden="true"></span>
+					</button>
+				</span>
+			</div>
+			<div class="form-group">
+				<div class="checkbox">
+					<label>
+						<input name="private" type="checkbox"><small> Uniquement les jeux de données privés</small>
+					</label>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="panel panel-default">
+		<div class="panel-heading" role="tab" id="more-filter-criteria-heading">
+			<h4 class="panel-title">
+				<a class="collapsed" role="button" name="more-filter-criteria" data-toggle="collapse" data-parent="#accordion" href="#more-filter-criteria" aria-expanded="false" aria-controls="collapseTwo">
+					Plus de critères <span class="glyphicon glyphicon-chevron-down" style="float: right;" aria-hidden="true"></span>
+				</a>
+			</h4>
+		</div>
+		<div id="more-filter-criteria" class="panel-collapse collapse" role="tabpanel" aria-labelledby="more-filter-criteria-heading">
+			<div class="panel-body">
+				<div class="form-group">
+					<div class="checkbox">
+						<label>
+							<input name="sync" type="checkbox"><small> Ressource synchronisée</small>
+						</label>
+					</div>
+				</div>
+				<div class="input-group input-group-sm">
+					<select name="syncfrequency" type="text" class="form-control">
+						<option disabled>Fréquence de synchronisation</option>
+					{% for update_frequency in all_update_frequencies %}
+						<option value="{{ update_frequency.id }}">{{ update_frequency.name }}</option>
+					{% endfor %}
+					</select>
+					<span class="input-group-btn">
+						<button class="btn" type="button" name="clear">
+							<span class="glyphicon glyphicon-erase" aria-hidden="true"></span>
+						</button>
+					</span>
+				</div>
+				<div class="input-group input-group-sm">
+					<select name="license" type="text" class="form-control">
+						<option disabled>Licence</option>
+					{% for license in all_licenses %}
+						<option value="{{ license.pk }}">{{ license.name }}</option>
+					{% endfor %}
+					</select>
+					<span class="input-group-btn">
+						<button class="btn" type="button" name="clear">
+							<span class="glyphicon glyphicon-erase" aria-hidden="true"></span>
+						</button>
+					</span>
+				</div>
+				<div class="input-group input-group-sm">
+					<select name="resourceformat" type="text" class="form-control">
+						<option disabled>Format de ressource</option>
+					{% for resourceformat in all_resourceformats %}
+						<option value="{{ resourceformat.id }}">{{ resourceformat.name }}</option>
+					{% endfor %}
+					</select>
+					<span class="input-group-btn">
+						<button class="btn" type="button" name="clear">
+							<span class="glyphicon glyphicon-erase" aria-hidden="true"></span>
+						</button>
+					</span>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="panel panel-default">
+		<div class="panel-body">
+			<div class="buttons-on-the-right-side">
+				<button type="button" name="clear-all" class="btn btn-sm btn-default">
+					Réinitialiser <span class="glyphicon glyphicon-erase" aria-hidden="true"></span>
+				</button>
+				<button type="button" name="submit" class="btn btn-sm btn-default">
+					Rechercher <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+				</button>
+			</div>
+		</div>
+	</div>
+</div>
+<script>
+$(function() {
+
+	function unescape(string) {
+		return new DOMParser().parseFromString(string, 'text/html').querySelector('html').textContent;
+	};
+
+	const $window = $(window);
+
+	var qs = (function(items) {
+		var kvp = {};
+		for (var i = 0; i < items.length; i ++) {
+			const kv = items[i].split('=');
+			kvp[decodeURIComponent(kv[0])]= decodeURIComponent(kv[1]);
+		};
+		return kvp;
+	})($window[0].location.search.substring(1).split('&'));
+
+	const $div = $('#datasets-filter');
+
+	$div.find('input.typeahead[name="dataset"]')
+		// Recherche libre ou filtre strict sur jeu de données
+		// Recherche libre sur paramètre `q` (« on change »)
+		// Recherche strict sur paramètre `dataset` (« on select »)
+		.on('input', function() {
+			qs['q'] = this.value;
+		})
+		.keypress(function(e) {
+			if (this.value && (e.which == 13 || e.keyCode == 13)) {
+				$submit.trigger('click');
+				return false;
+			};
+		})
+		.typeahead({
+			source: [{% for item in all_datasets %}
+				{id: '{{ item.id }}', name: unescape('{{ item.title }}')},{% endfor %}
+			],
+			autoSelect: false,
+			fitToElement: false,
+			afterSelect: function(val) {
+				qs['q'] = val.name;
+				qs['dataset'] = val.id;
+			}
+		})
+		.val(qs['q']);
+
+	const _organisationsSource = [{% for item in all_organisations %}
+		{id: '{{ item.id }}', name: unescape('{{ item.legal_name }}')},{% endfor %}
+	];
+
+	$div.find('input.typeahead[name="organisation"]')
+		// Recherche strict sur organisation
+		.on('input', function() {
+			qs['organisation'] = this.value;
+		})
+		.typeahead({
+			source: _organisationsSource,
+			autoSelect: false,
+			fitToElement: false,
+			afterSelect: function(val) {
+				qs['organisation'] = val.id;
+			}
+		})
+		.val((function(value) {
+			for(var i = 0; i < _organisationsSource.length; i++) {
+				var item = _organisationsSource[i];
+				if (item.id == value) { return item.name };
+			};
+		})(qs['organisation']));
+
+	const $selectCategory = $div.find('select[name="category"]')
+		// Recherche strict sur catégorie
+		.on('change', function() {
+			qs['category'] = this.value;
+		});
+
+	$selectCategory.val(qs['category'] || $selectCategory.find('option:first').val());
+
+	$div.find('input[name="private"]')
+		// Recherche strict sur le statut de publication des jeux de données
+		.on('change', function() {
+			qs['private'] = $(this).prop('checked');
+		})
+		.prop('checked', qs['private'] == 'true' ? true : false)
+
+	const $selectSyncFrequency = $div.find('select[name="syncfrequency"]')
+		// Recherche strict sur fréquence de synchronisation
+		// ..nécessite de cocher le checkbox `input[name="sync"]`
+		.on('change', function() {
+			qs['syncfrequency'] = this.value;
+		});
+
+	$selectSyncFrequency.val(qs['syncfrequency'] || $selectSyncFrequency.find('option:first').val());
+
+	$div.find('input[name="sync"]')
+		// Recherche strict sur les jeux de données qui ont au moins une ressource synchronisée
+		// ..active `select[name="syncfrequency"]`
+		.on('change', function() {
+			const checked = $(this).prop('checked')
+			qs['sync'] = checked;
+			if (checked) {
+				$selectSyncFrequency.removeClass('disabled').prop('disabled', false);
+			} else {
+				$selectSyncFrequency.addClass('disabled').prop('disabled', true);
+				$selectSyncFrequency.val($selectSyncFrequency.find('option:first').val());
+			};
+		})
+		.prop('checked', qs['sync'] == 'true' ? true : false)
+		.trigger('change');
+
+	const $selectLicense = $div.find('select[name="license"]')
+		// Recherche strict sur licence
+		.on('change', function() {
+			qs['license'] = this.value;
+		});
+
+	$selectLicense.val(qs['license'] || $selectLicense.find('option:first').val());
+
+	const $selectResourceFormat = $div.find('select[name="resourceformat"]')
+		// Recherche strict sur un format de ressource
+		.on('change', function() {
+			qs['resourceformat'] = this.value;
+		});
+
+	$selectResourceFormat.val(qs['resourceformat'] || $selectResourceFormat.find('option:first').val());
+
+	const clear = function($target) {
+		$target.is('input[type="checkbox"]') && $target.prop('checked', false);
+		$target.is('input[type="text"]') && $target.val('');
+		$target.is('select') && $target.val($target.find('option:first').val());
+		const targetName = $target.prop('name');
+		delete qs[targetName];
+		if (targetName == 'dataset') {  // Cas particulier de `q`
+			delete qs['q'];
+		};
+	};
+
+	$div.find('button[name="clear"]').click(function(e) {
+		e.preventDefault();
+		clear($(this).parent().siblings('input, select'));
+	});
+
+	$div.find('button[name="clear-all"]').click(function(e) {
+		e.preventDefault();
+		$div.find('input, select').each(function(i) {
+			clear($(this));
+		});
+		$submit.trigger('click');
+	});
+
+	const $moreFilterCriteriaButton = $('[role="button"][name="more-filter-criteria"]');
+
+	const $moreFilterCriteria = $('#more-filter-criteria')
+		.on('show.bs.collapse', function() {
+			$moreFilterCriteriaButton.html($moreFilterCriteriaButton.html().replace('Plus', 'Moins'));
+			$moreFilterCriteriaButton.children('.glyphicon').toggleClass('glyphicon-chevron-down glyphicon-chevron-up');
+			// Ajoute le paramètre de query-string `c` (indique collapse=show)
+			qs['c'] = true;
+		})
+		.on('hide.bs.collapse', function() {
+			$moreFilterCriteriaButton.html($moreFilterCriteriaButton.html().replace('Moins', 'Plus'));
+			$moreFilterCriteriaButton.children('.glyphicon').toggleClass('glyphicon-chevron-up glyphicon-chevron-down');
+			// Supprime le paramètre de query-string `c` (indique collapse=hide)
+			qs['c'] = false;
+			// Fermer le `collapse` réinitialise les critères optionnels
+			$(this).find('input, select').each(function(i) {
+				clear($(this));
+			});
+		})
+		.collapse(qs['c'] ? 'show' : 'hide');
+
+	const $submit = $div.find('button[name="submit"]')
+		.click(function(e) {
+			e.preventDefault();
+			var kvp = [];
+			for (var k in qs) {
+				if (k) {
+					const val = qs[k] || null
+					if (val) {
+						kvp.push(k + '=' + val)
+					}
+				};
+			};
+			$window[0].location.search = kvp.join('&');
+		});
+});
+</script>

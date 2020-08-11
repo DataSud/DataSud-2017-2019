@@ -1,0 +1,138 @@
+{% extends "idgo_admin/base.html" %}
+{% load bootstrap3 %}
+{% block breadcrumb_content %}
+<ol class="breadcrumb">
+	<li>
+		<span class="glyphicon glyphicon-home"></span>
+	</li>
+	<li>
+		<a href="{% url 'idgo_admin:show_organisation' id=organisation.id %}">Organisations</a>
+	</li>
+	<li class="active">
+		<a href="{% url 'idgo_admin:update_organisation' id=organisation.id %}">{{ organisation.legal_name }}</a>
+	</li>
+	<li class="active">
+		Importer un catalogue DCAT
+	</li>
+</ol>
+{% endblock breadcrumb_content %}
+{% block main_content %}
+{% include "idgo_admin/alert_messages.html" %}
+{% if datasets %}
+<div role="alert" class="alert alert-info">
+	<span class="glyphicon glyphicon-bell" aria-hidden="true"></span> Nombre de jeux de données importés : <strong>{{ datasets|length }}</strong>
+</div>
+{% endif %}
+<form method="post" action="" class="well">
+	<div class="row">
+		<div class="col-sm-10 col-md-8">
+			{% bootstrap_field form.url %}
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-xs-6 col-sm-6 col-md-5">
+			{% bootstrap_field form.sync_frequency %}
+		</div>
+	</div>
+	{% if form.url.value %}
+	<!--
+	<label>Correspondance des catégories et licences</label>
+	<div class="row">
+		<div class="col-sm-10 col-md-8">
+			<ul class="nav nav-tabs nav-tabs-default" name="mapping-selector" role="tablist">
+				<li role="presentation" class="active">
+					<a href="#categories" aria-controls="categories" role="tab" data-toggle="tab">Catégories</a>
+				</li>
+				<li role="presentation">
+					<a href="#licences" aria-controls="licences" role="tab" data-toggle="tab">Licences</a>
+				</li>
+			</ul>
+			<div class="tab-content tab-content-default">
+				<div role="tabpanel" class="tab-pane active" name="mapping-selector-panel" id="categories">
+					<div class="tab-pane-content">
+						<div class="table-responsive">
+							<table class="table table-condensed table-striped">
+								{% for field in form.get_category_fields %}
+								<tr id="{{ field.id }}" name="{{ field.id }}">
+									<td name="left" style="width: 50%; vertical-align: middle;">
+										{{ field.label }}
+									</td>
+									<td name="right" style="width: 50%; vertical-align: middle;">
+										{% bootstrap_field field show_label=False %}
+									</td>
+								</tr>
+								{% endfor %}
+							</table>
+						</div>
+					</div>
+				</div>
+				<div role="tabpanel" class="tab-pane" name="mapping-selector-panel" id="licences">
+					<div class="tab-pane-content">
+						<div class="table-responsive">
+							<table class="table table-condensed table-striped">
+								{% for field in form.get_licence_fields %}
+								<tr id="{{ field.id }}" name="{{ field.id }}">
+									<td name="left" style="width: 50%; vertical-align: middle;">
+										{{ field.label }}
+									</td>
+									<td name="right" style="width: 50%; vertical-align: middle;">
+										{% bootstrap_field field show_label=False %}
+									</td>
+								</tr>
+								{% endfor %}
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	-->
+	{% endif %}
+	<br />
+	<div class="buttons-on-the-right-side">
+		{% if instance %}
+		<button type="button" name="delete" class="btn btn-danger left">Supprimer</button>
+		{% endif %}
+		<a class="btn btn-default" href="{% url 'idgo_admin:update_organisation' id=organisation.id %}">Annuler</a>
+		{% if instance %}
+		<button type="submit" name="continue" class="btn btn-default">Enregistrer et continuer les modifications</button>
+		<button type="submit" name="save" class="btn btn-primary">Enregistrer</button>
+		{% else %}
+		<button type="submit" name="continue" class="btn btn-primary">Suivant</button>
+		{% endif %}
+	</div>
+	<hr />
+	<div class="row">
+		<div class="col-xs-12">
+			<small>* Les champs marqués d'un astérisque sont obligatoires.</small>
+		</div>
+	</div>
+</form>
+<!-- Template de la fenêtre `Modal` -->
+<template id="modal_template">
+	<p>Cette action est irreversible et supprimera <strong>définitivement</strong> tous les jeux de données et ressources synchronisés avec le catalogue DCAT.</p>
+	<form action="{% url 'idgo_admin:delete_remote_dcat_link' id=organisation.id %}" method="post">
+		<div class="buttons-on-the-right-side">
+			<button type="button" class="btn btn-default" data-dismiss="modal">Annuler</button>
+			<button type="submit" class="btn btn-danger">Confirmer la suppression</button>
+		</div>
+	</form>
+</template>
+<script>
+$(function() {
+	$('[name="delete"]').off('click').on('click', function(e) {
+		e.preventDefault();
+		const $modalContent = $($('#modal_template').prop('content')).clone();
+		$modal.find('.modal-title').text('Êtes-vous absolument sûr ?');
+		$modal.find('.modal-body').append($modalContent);
+		$modal.modal('show');
+		e.stopPropagation();
+	});
+	$('form').submit(function() {
+		$modalHourglass.modal('show');
+	});
+	$('#menu a[href=\'{% url "idgo_admin:handle_show_organisation" %}\']').parent().addClass('active');
+});
+</script>
+{% endblock main_content %}

@@ -1,0 +1,161 @@
+<div class="row">
+	<div class="col-sm-8">
+		<div class="row">
+			<div class="col-sm-12">
+				<h3>{{ organisation.legal_name }}</h3>
+				{% if organisation.is_crige_partner %}
+				<span class='crige-partner-badge'></span>
+				{% else %}
+					{% if user.profile.is_admin or organisation in user.profile.referent_for %}
+				<button role="button" name="ask-crige-partnership" class="btn btn-sm btn-default">Demander à être partenaire CRIGE</button>
+					{% endif %}
+				{% endif %}
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-sm-12">
+				<h4><span class="crige-partner-badge" hidden></span></h4>
+			</div>
+		</div>
+	</div>
+	<div class="col-sm-4">
+		<img src="{% if organisation.logo %}{{ organisation.logo.url }}{% else %}/static/img/logo_default_organisation.png{% endif %}" style="width: 100%;"></img>
+	</div>
+</div>
+<div class="row">
+	<div class="col-sm-12">
+		<p style="margin-top: 20px;">{{ organisation.description|default:'-' }}</p>
+	</div>
+</div>
+<div class="row">
+	<div class="col-sm-4">
+		<h5>CONTACT</h5>
+		<hr />
+		<address>
+			<span class="glyphicon glyphicon-home" aria-hidden="true"></span> {{ organisation.address|default:'-' }}<br />
+			<span class="glyphicon glyphicon-home" style="color: transparent;" aria-hidden="true"></span> {{ organisation.postcode|default:'-' }} {{ organisation.city|default:'-' }}<br />
+			<br />
+			<span class="glyphicon glyphicon-earphone" aria-hidden="true"></span> {{ organisation.phone|default:'-' }}<br />
+			<span class="glyphicon glyphicon-envelope" aria-hidden="true"></span> <a href="mailto:#">{{ organisation.email|default:'-' }}</a><br />
+			<span class="glyphicon glyphicon-globe" aria-hidden="true"></span> <a target="_blank">{{ organisation.website|default:'-' }}</a><br />
+		</address>
+	</div>
+	<div class="col-sm-8">
+		<h5>TERRITOIRE DE COMPÉTENCE</h5>
+		<hr />
+		{% if organisation.jurisdiction  %}
+		{{ organisation.jurisdiction }}
+		{% include "idgo_admin/organisation/jurisdiction.html" %}
+		{% else %}
+		<p>L'organisation n'est rattachée à aucun territoire de compétence.</p>
+			{% if user.profile.is_admin or organisation in user.profile.referent_for %}
+		<p>Vous pouvez en faire la demande en <a href="{% url 'idgo_admin:update_organisation' id=organisation.id %}"> éditant l'organisation</a>.</p>
+			{% endif %}
+		{% endif %}
+	</div>
+</div>
+<hr />
+<div class="row">
+	<div class="col-sm-offset-3 col-sm-6">
+		{% if not organisation == user.profile.awaiting_member_status %}
+		<button role="button" name="switch-member" class="btn btn-default btn-block">
+		{% if organisation == user.profile.organisation %}
+			Je <strong>n</strong>'appartiens <strong>plus</strong> à l'organisation
+		{% else %}
+			J'appartiens à l'organisation
+		{% endif %}
+		</button>
+		{% endif %}
+		{% if organisation not in user.profile.awaiting_contributor_status %}
+		<button role="button" name="switch-contributor" class="btn btn-default btn-block">
+			{% if organisation in user.profile.contribute_for %}
+			Je <strong>ne</strong> souhaite <strong>plus</strong> être contributeur
+			{% else %}
+			Je souhaite devenir contributeur
+			{% endif %}
+		</button>
+		{% endif %}
+		{% if not is_admin and organisation not in user.profile.awaiting_referent_statut %}
+		<button role="button" name="switch-referent" class="btn btn-default btn-block">
+			{% if organisation in user.profile.referent_for %}
+			Je <strong>ne</strong> souhaite <strong>plus</strong> être référent technique
+			{% else %}
+			Je souhaite devenir référent technique
+			{% endif %}
+		</button>
+		{% endif %}
+	</div>
+</div>
+<script>
+$(function() {
+
+	function openModalChangeStatus(baseUrl, organisationId) {
+		const $button = $('<button/>')
+			.prop('type', 'button')
+			.prop('class', 'btn btn-primary')
+			.text('Oui, je confirme ma demande')
+			.one('click', function(e) {
+				e.preventDefault();
+				closeAllModalDialog();
+				$.ajax({
+					type: 'GET',
+					url: baseUrl + '?id=' + organisationId
+				})
+				.done(function(response, textStatus, jqXHR) {
+					location.reload();
+				})
+				.fail(function(jqXHR, textStatus, errorThrown) {
+					location.reload();
+				});
+				e.stopPropagation();
+			});
+
+			$modal.find('.modal-title').text('Confirmation de votre demande');
+			$modal.find('.modal-body')
+				.append($('<form/>')
+					.append($('<div/>').prop('class', 'form-group')
+						.append('<p>Pour confirmer, veuillez cliquer sur le bouton ci-dessous.</p>'))
+					.append($('<div class="buttons-on-the-right-side">')
+						.append($button).append('<button type="button" class="btn btn-default" data-dismiss="modal">Annuler</button>')));
+
+		$modal.modal('show');
+	};
+
+	{% if user.profile.is_admin or organisation in user.profile.referent_for %}
+	$('button[name="ask-crige-partnership"]').click(function() {
+		openModalChangeStatus('{% url "idgo_admin:crige_partnership" %}', {{ organisation.id }})
+	});
+	{% endif %}
+
+	{% if not organisation == user.profile.awaiting_member_status %}
+	$('button[name="switch-member"]').click(function() {
+		{% if organisation == user.profile.organisation %}
+		openModalChangeStatus('{% url "idgo_admin:subscription" status="member" subscription="unsubscribe" %}', {{ organisation.id }});
+		{% else %}
+		openModalChangeStatus('{% url "idgo_admin:subscription" status="member" subscription="subscribe" %}', {{ organisation.id }});
+		{% endif %}
+	});
+	{% endif %}
+
+	{% if organisation not in user.profile.awaiting_contributor_status %}
+	$('button[name="switch-contributor"]').click(function() {
+		{% if organisation in user.profile.contribute_for %}
+		openModalChangeStatus('{% url "idgo_admin:subscription" status="contributor" subscription="unsubscribe" %}', {{ organisation.id }});
+		{% else %}
+		openModalChangeStatus('{% url "idgo_admin:subscription" status="contributor" subscription="subscribe" %}', {{ organisation.id }});
+		{% endif %}
+	});
+	{% endif %}
+
+	{% if not is_admin and organisation not in user.profile.awaiting_referent_statut %}
+	$('button[name="switch-referent"]').click(function() {
+		{% if organisation in user.profile.referent_for %}
+		openModalChangeStatus('{% url "idgo_admin:subscription" status="referent" subscription="unsubscribe" %}', {{ organisation.id }});
+		{% else %}
+		openModalChangeStatus('{% url "idgo_admin:subscription" status="referent" subscription="subscribe" %}', {{ organisation.id }});
+		{% endif %}
+	});
+	{% endif %}
+
+});
+</script>

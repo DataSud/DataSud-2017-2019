@@ -1,0 +1,21 @@
+{% load bootstrap3 %}
+
+<div class="container-message">
+{% if messages %}
+	{% for message in messages %}
+		{% if message.tags == 'success' %}
+	<div name='message-tags' class="alert alert-success" role="alert">
+		<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>{{ message | escape | safe }}
+	</div>
+		{% elif message.tags == 'error' %}
+	<div name='message-tags' class="alert alert-danger" role="alert">
+		<span class="glyphicon glyphicon-ban-circle" aria-hidden="true"></span>{{ message | escape | safe }}
+	</div>
+		{% elif message.tags == 'info' %}
+	<div name='message-tags' class="alert alert-info" role="alert">
+		<span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>{{ message | escape | safe }}
+	</div>
+		{% endif %}
+	{% endfor %}
+{% endif %}
+</div>

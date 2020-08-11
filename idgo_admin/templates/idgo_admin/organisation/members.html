@@ -1,0 +1,190 @@
+<div id="members">
+	{% if organisation.members|length == 0 %}
+	<div role="alert" class="alert alert-info">Aucun utilisateur.</div>
+	{% else %}
+	<div class="table-responsive">
+		<table class="board table table-striped table-bordered table-hover table-condensed">
+			<tr>
+				<th name="username">Utilisateur</th>
+				<th name="full_name">Nom</th>
+				<th name="is_member">Membre</th>
+				<th name="is_contributor">Contributeur</th>
+				<th name="is_referent">Référent</th>
+				{% if user.profile.is_crige_admin %}
+				<th name="is_crige_member">CRIGE</th>
+				{% endif %}
+				<th name="datasets_count">Jeux de données</th>
+			</tr>
+			{% for member in organisation.members %}
+			<tr id="{{ member.username }}">
+				<td name="username">{{ member.username }}</td>
+				<td name="full_name">{{ member.full_name }}</td>
+				<td name="is_member" style="text-align: center;">{% if member.is_member %}
+					<span class="glyphicon glyphicon-ok"></span>{% endif %}
+				</td>
+				<td name="is_contributor" style="text-align: center;">{% if member.is_contributor %}
+					<span class="glyphicon glyphicon-ok"></span>{% endif %}
+				</td>
+				<td name="is_referent" style="text-align: center;">{% if member.is_referent %}
+					<span class="glyphicon glyphicon-ok"></span>{% endif %}
+				</td>
+				{% if user.profile.is_crige_admin %}
+				<td name="is_crige_member" style="text-align: center;">{% if member.is_crige_member %}
+					<span class="glyphicon glyphicon-ok"></span>{% endif %}
+				</td>
+				{% endif %}
+				<td name="datasets_count" style="text-align: right;">{{ member.datasets_count }}</td>
+			</tr>
+			{% endfor %}
+		</table>
+	</div>
+</div>
+<div class="buttons-on-the-right-side">
+	<button role="button" name="ckan-card" class="btn btn-default disabled" disabled>Ouvrir la fiche Ckan</button>
+	<div class="btn-group dropup">
+		<button type="button" class="btn btn-default dropdown-toggle disabled" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" disabled>
+			Supprimer un statut <span class="caret"></span>
+		</button>
+		<ul class="dropdown-menu dropdown-menu-right">
+			<li class="disabled" disabled>
+				<a role="button" name="delete-member" style="text-align: right;" data-toggle="modal" data-target="#modal">Supprimer le statut de membre</a>
+			</li>
+			<li class="disabled" disabled>
+				<a role="button" name="delete-contributor" style="text-align: right;" data-toggle="modal" data-target="#modal">Supprimer le statut de contributeur</a>
+			</li>
+			<li class="disabled" disabled>
+				<a role="button" name="delete-referent" style="text-align: right;" data-toggle="modal" data-target="#modal">Supprimer le statut de référent technique</a>
+			</li>
+		</ul>
+	</div>
+</div>
+<script>
+$(function() {
+	const $div = $('#members');
+
+	const $ckanUserCard = $div.find('button[name="ckan-card"]');
+	const $btnGroup = $div.find('.btn-group');
+	const $dropdownButton = $div.find('.btn-group>button.dropdown-toggle');
+	const $deleteMember = $btnGroup.find('a[name="delete-member"]');
+	const $deleteContributor = $btnGroup.find('a[name="delete-contributor"]');
+	const $deleteReferent = $btnGroup.find('a[name="delete-referent"]');
+
+	const $table = $div.find('table');
+	$table.find('tr')
+		.on('row.selected', function(e) {
+			const $row = $(this);
+			const username = $row.attr('id');
+			if (!username) {
+				return;
+			};
+
+			const isMember = $row.find('td[name="is_member"]').find('.glyphicon-ok').length ? true : false;
+			const isContributor = $row.find('td[name="is_contributor"]').find('.glyphicon-ok').length ? true : false;
+			const isReferent = $row.find('td[name="is_referent"]').find('.glyphicon-ok').length ? true : false;
+			const isCrigeAdmin = $row.find('td[name="is_crige_admin"]').find('.glyphicon-ok').length ? true : false;
+
+			$row.prop('selected', true).addClass('selected');
+
+			$ckanUserCard.off('click').on('click', function(e) {
+				targetBlank('{{ ckan_url }}/user/' + username);
+			})
+			$ckanUserCard.removeClass('disabled').prop('disabled', false);
+
+			$deleteMember.off('click')
+			if (isMember) {
+				$deleteMember.on('click', function(e) {
+					openModalDelete(username, 'members');
+				});
+				$deleteMember.parent().removeClass('disabled').prop('disabled', false);
+			};
+
+			$deleteContributor.off('click');
+			if (isContributor) {
+				$deleteContributor.on('click', function(e) {
+					openModalDelete(username, 'contributors');
+				});
+				$deleteContributor.parent().removeClass('disabled').prop('disabled', false);
+			};
+
+			$deleteReferent.off('click');
+			if (isReferent) {
+				$deleteReferent.on('click', function(e) {
+					openModalDelete(username, 'referents');
+				});
+				$deleteReferent.parent().removeClass('disabled').prop('disabled', false);
+			};
+
+			$dropdownButton.removeClass('disabled').prop('disabled', false);
+
+		})
+		.on('row.unselected', function(e) {
+			const $row = $(this);
+			$row.prop('selected', false).removeClass('selected');
+			$ckanUserCard.addClass('disabled').prop('disabled', true);
+			$deleteMember.parent().addClass('disabled').prop('disabled', true);
+			$deleteContributor.parent().addClass('disabled').prop('disabled', true);
+			$deleteReferent.parent().addClass('disabled').prop('disabled', true);
+			$dropdownButton.addClass('disabled').prop('disabled', true);
+		})
+		.on('click', function(e) {
+			const $that = $table.find('tr:selected');
+			const $this = $(this);
+			if ($that) {
+				$that.trigger('row.unselected');
+				if ($this.index() != $that.index()) {
+					history.pushState(null, null, '#members/' + $this.attr('id'));
+					$this.trigger('row.selected');
+				} else {
+					history.pushState(null, null, '#members');
+				};
+			};
+		});
+
+		const openModalDelete = function(username, target) {
+			const $button = $('<button/>')
+				.prop('type', 'button')
+				.prop('class', 'btn btn-danger disabled')
+				.prop('disabled', true)
+				.text('Oui, je confirme')
+				.on('click', function(e) {
+					e.preventDefault();
+					closeAllModalDialog();
+					$.ajax({
+						type: 'DELETE',
+						url: '{% url "idgo_admin:all_members" %}?organisation=' + {{ organisation.id }} + '&username=' + username + '&target=' + target
+					})
+					.done(function(response, textStatus, jqXHR) {
+						location.reload();
+					})
+					.fail(function(jqXHR, textStatus, errorThrown) {
+						location.reload();
+					});
+					e.stopPropagation();
+				});
+
+			const $input = $('<input/>')
+				.prop('type', 'text')
+				.prop('class', 'form-control')
+				.prop('placeholder', 'Nom du compte de l\'utilisateur')
+				.on('input', function(e) {
+					if ($(this).val() === username) {
+						$button.removeClass('disabled').prop('disabled', false);
+					} else {
+						$button.addClass('disabled').prop('disabled', true);
+					};
+				});
+
+			$modal.find('.modal-title').text('Êtes-vous absolument sûr ?');
+			$modal.find('.modal-body')
+				.append($('<form/>')
+					.append($('<div/>').prop('class', 'form-group')
+						.append('<p>Pour confirmer, veuillez réécrire le nom du compte de l\'utilisateur.</p>').append($input))
+					.append($('<div class="buttons-on-the-right-side">')
+						.append($button).append('<button type="button" class="btn btn-default" data-dismiss="modal">Annuler</button>')));
+
+			$modal.modal('show');
+		};
+
+});
+</script>
+{% endif %}

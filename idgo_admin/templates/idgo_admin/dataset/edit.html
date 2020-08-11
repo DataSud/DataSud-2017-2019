@@ -1,0 +1,242 @@
+{% load bootstrap3 %}
+
+{% include "idgo_admin/alert_messages.html" %}
+
+<form name="dataset" method="post" action="" enctype="multipart/form-data">
+	<div class="buttons-on-the-right-side" style="margin-bottom: 20px;">
+		{% if dataset %}
+		<a class="btn btn-default" href="{% url 'idgo_admin:dataset_mdedit' id=dataset.pk %}">Éditer la fiche de métadonnées INSPIRE</a>
+		<a class="btn btn-default" target="_blank" href="{{ ckan_url }}/dataset/{{ dataset.slug }}">Ouvrir dans CKAN</a>
+		{% endif %}
+		<a role="button" class="btn btn-secondary" target="_blank" href="{{ doc_url }}">
+			<span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span> Aide à la saisie
+		</a>
+	</div>
+	{% csrf_token %}
+	{% if dataset.remote_ckan_dataset %}
+	{% include "idgo_admin/dataset/remote_dataset_frame.html" with remote=dataset.remote_ckan_dataset %}
+	{% elif dataset.remote_csw_dataset %}
+	{% include "idgo_admin/dataset/remote_dataset_frame.html" with remote=dataset.remote_csw_dataset %}
+  {% elif dataset.remote_dcat_dataset %}
+	{% include "idgo_admin/dataset/remote_dataset_frame.html" with remote=dataset.remote_dcat_dataset %}
+	{% endif %}
+	<div class="row">
+		<div class="col-xs-12">
+			{% bootstrap_field form.title %}
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-xs-12">
+			{% bootstrap_field form.slug %}
+		</div>
+	</div>
+	<br />
+	<div class="row">
+		<div class="col-xs-8">
+			{% bootstrap_field form.description %}
+		</div>
+		<div class="col-xs-4">
+			{% bootstrap_field form.thumbnail %}
+		</div>
+	</div>
+	<br />
+	<div class="row">
+		<div class="col-xs-12">
+			{% bootstrap_field form.keywords %}
+		</div>
+	</div>
+	<br />
+	<div class="form-group">
+		<label for="categories">Catégories (sélectionnez dans la liste ci-dessous une ou plusieurs catégories)</label>
+		<div id="categories" class="btn-group" data-toggle="buttons">
+			{% for category in form.categories %}
+			<label for="{{ category.id_for_label }}" class="btn">
+				{{ category.tag }}
+				<span class="badge">{{ category.choice_label }}</span>
+			</label>
+			{% empty %}
+			<p>Aucune catégorie n'est disponible.</p>
+			{% endfor %}
+		</div>
+	</div>
+	<br />
+	<div class="row">
+		<div class="col-xs-4">
+			{% bootstrap_field form.date_creation %}
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-xs-4">
+			{% bootstrap_field form.date_modification %}
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-xs-4">
+			{% bootstrap_field form.date_publication %}
+		</div>
+	</div>
+	<br />
+	<div class="row">
+		<div class="col-xs-4">
+			{% bootstrap_field form.update_frequency %}
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-xs-4">
+			{% bootstrap_field form.geocover %}
+		</div>
+	</div>
+	{% if dataset.geocover == 'jurisdiction' and not dataset.organisation.jurisdiction %}
+	<div class="row">
+		<div class="col-xs-8">
+			<div class="alert alert-info">
+				<span class="glyphicon glyphicon-alert"></span>
+				L'organisation à laquelle est rattaché ce jeu de données ne dispose pas de territoire de compétence. Veuillez contacter un administrateur CRIGE.
+			</div>
+		</div>
+	</div>
+	{% endif %}
+	<div class="row">
+		<div class="col-xs-4">
+			{% bootstrap_field form.granularity %}
+		</div>
+	</div>
+	<br />
+	<div class="row">
+		<div class="col-xs-8">
+			{% bootstrap_field form.organisation %}
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-xs-8">
+			{% bootstrap_field form.license %}
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-xs-8">
+			{% bootstrap_field form.support %}
+		</div>
+	</div>
+	<br />
+	<div class="row">
+		<div class="col-xs-4">
+			{% bootstrap_field form.data_type %}
+		</div>
+	</div>
+	<br />
+	<div class="row">
+		<div class="col-xs-6">
+			{% bootstrap_field form.owner_name %}
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-xs-6">
+			{% bootstrap_field form.owner_email %}
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-xs-6">
+			{% bootstrap_field form.broadcaster_name %}
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-xs-6">
+			{% bootstrap_field form.broadcaster_email %}
+		</div>
+	</div>
+	<br />
+	{% bootstrap_field form.published %}
+	<br />
+	<div class="buttons-on-the-right-side">
+		<a class="btn btn-default" href="{% url 'idgo_admin:list_my_datasets' %}">Annuler</a>
+		<button type="submit" name="continue" class="btn btn-default">Enregistrer et continuer les modifications</button>
+		<button type="submit" name="save" class="btn btn-primary">Enregistrer</button>
+	</div>
+	<hr />
+	<div class="row">
+		<div class="col-xs-12">
+			<small>* Les champs marqués d'un astérisque sont obligatoires.</small>
+		</div>
+	</div>
+</form>
+<script>
+$(function() {
+	$('#id_organisation').change(function() {
+		$('#id_license').val({{ licenses|safe }}[$(this).val()]);
+	});
+
+	$('.datepicker').datepicker();
+
+	$('form[name="dataset"] input[checked=""], form[name="dataset"] input[checked="checked"]').each(function() {
+		$('label[for="' + this.id + '"]').addClass('active');
+	});
+
+	const supports = {{ supports | safe }}
+
+	$('select[name="{{ form.support.name }}"]').change(function(e) {
+		let name;
+		let email;
+		if (supports[this.value]) {
+			name = supports[this.value]['name'];
+			email = supports[this.value]['email'];
+		} else {
+			name = '{{ platform_name }}';
+			email = '{{ contact_email }}';
+		};
+		$('input[name="{{ form.broadcaster_name.name }}"]').prop('placeholder', name)
+		$('input[name="{{ form.broadcaster_email.name }}"]').prop('placeholder', email)
+	});
+
+
+	const $name = $('[name="{{ form.title.name }}"]')
+	const $ckanSlug = $('[name="{{ form.slug.name }}"]').prop('readonly', true);
+
+	const btnText = 'Modifier le chemin';
+	$ckanSlug.siblings().find('button').text(btnText).click(function(e) {
+		if (!$ckanSlug.prop('readonly')) {
+			$(this).text(btnText);
+			$ckanSlug.prop('readonly', true);
+			$ckanSlug.val({% if dataset.slug %}'{{ dataset.slug }}'{% else %}window.slugify($name.val(), 100){% endif %});
+		} else {
+			$(this).text('Annuler la saisie');
+			$ckanSlug.prop('readonly', false);
+		};
+	});
+
+	{% if not dataset.slug %}
+	$name.on('input', function() {
+		$ckanSlug.val(window.slugify(this.value, 100))
+	});
+	{% else %}
+		$ckanSlug.val('{{ dataset.slug }}')
+	{% endif %}
+
+	function extractor(query) {
+		var result = /([^,]+)$/.exec(query);
+		if (result && result[1]) {
+			return result[1].trim();
+		};
+		return '';
+	};
+
+	$('#dataset .typeahead').typeahead({
+		source: {{ tags | safe }},
+		updater: function(item) {
+			return this.$element.val().replace(/[^,\s]*$/, '') + item + ', ';
+		},
+		matcher: function (item) {
+			var query = extractor(this.query);
+			if (!query) {
+				return false;
+			};
+			return ~item.toLowerCase().indexOf(query.toLowerCase())
+		},
+		highlighter: function (item) {
+			var query = extractor(this.query).replace(/[\-\[\]{}()*+?.,\\\^$|#\s]/g, '\\$&')
+			return item.replace(new RegExp('(' + query + ')', 'ig'), function ($1, match) {
+				return '<strong>' + match + '</strong>';
+			});
+		}
+	});
+});
+</script>

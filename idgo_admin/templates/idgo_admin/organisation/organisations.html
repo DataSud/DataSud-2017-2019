@@ -1,0 +1,64 @@
+{% extends "idgo_admin/base.html" %}
+
+{% block breadcrumb_content %}
+<ol class="breadcrumb">
+	<li><span class="glyphicon glyphicon-home"></span></li>
+	<li class="active">Organisations</li>
+</ol>
+{% endblock breadcrumb_content %}
+{% block main_content %}
+{% include "idgo_admin/alert_messages.html" %}
+<div id="organisations">
+{% if user.profile.awaiting_member_status %}
+	<div class="alert alert-info">
+		<p>
+			<span class="glyphicon glyphicon-bell" aria-hidden="true"></span>
+			Demande de <strong>rattachement</strong> à l'organisation « <a href="{% url 'idgo_admin:show_organisation' id=user.profile.awaiting_member_status.id %}">{{ user.profile.awaiting_member_status.legal_name }}</a> » en attente de validation.
+		</p>
+	</div>
+{% endif %}
+{% if user.profile.awaiting_contributor_status|length > 0 %}
+	<div class="alert alert-info">
+		<p>
+			<span class="glyphicon glyphicon-bell" aria-hidden="true"></span>
+			Demande(s) de statut de <strong>contributeur</strong> en attente de validation pour :
+			{% for instance in user.profile.awaiting_contributor_status %}
+			<span class="comma-separated-list"><a href="{% url 'idgo_admin:show_organisation' id=instance.id %}">{{ instance.legal_name }}</a></span>
+			{% endfor %}
+		</p>
+	</div>
+{% endif %}
+{% if user.profile.awaiting_referent_statut|length > 0 %}
+	<div class="alert alert-info">
+		<p>
+			<span class="glyphicon glyphicon-bell" aria-hidden="true"></span>
+			Demande(s) de statut de <strong>référent technique</strong> en attente de validation pour :
+			{% for instance in user.profile.awaiting_referent_statut %}
+			<span class="comma-separated-list"><a href="{% url 'idgo_admin:show_organisation' id=instance.id %}">{{ instance.legal_name }}</a></span>
+			{% endfor %}
+		</p>
+	</div>
+{% endif %}
+{% if not all_organisations|length %}
+	<div class="alert alert-warning" role="alert">
+		<span class="glyphicon glyphicon-bullhorn" aria-hidden="true"></span>Aucune organisation n'est encore disponible, <a href='{% url "idgo_admin:create_organisation" %}'>ajoutez une organisation</a>.
+	</div>
+{% else %}
+	<div class="row">
+		<div class="col-md-4" id="organisation-list">
+			{% include "idgo_admin/organisation/list.html" %}
+		</div>
+		<div class="col-md-8 well" id="organisation-show">
+			{% block organisation_show %}
+			{% endblock organisation_show %}
+		</div>
+	</div>
+</div>
+<script>
+$(function() {
+	$('#organisation-list').find('.well').height($('#organisation-show').innerHeight() - $('#organisation-list').find('.typeahead').outerHeight(true));
+	$('#menu a[href="{% url "idgo_admin:handle_show_organisation" %}"]').parent().addClass('active');
+});
+</script>
+{% endif %}
+{% endblock main_content %}

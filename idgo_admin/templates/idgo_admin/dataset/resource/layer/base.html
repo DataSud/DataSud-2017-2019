@@ -1,0 +1,65 @@
+{% extends "idgo_admin/base.html" %}
+
+{% load static %}
+{% load extra_tags %}
+
+{% block head_extras %}
+{% endblock head_extras %}
+
+{% block breadcrumb_content %}
+<ol class="breadcrumb">
+	<li>
+		<span class="glyphicon glyphicon-home"></span>
+	</li>
+	<li>{% if target == 'mine' %}
+		<a href="{% url 'idgo_admin:list_my_datasets' %}">Mes jeux de données</a>{% elif target == 'all' %}
+		<a href="{% url 'idgo_admin:list_all_datasets' %}">Tous jeux de données</a>{% elif target == 'ckan_harvested' %}
+		<a href="{% url 'idgo_admin:list_all_ckan_harvested_datasets' %}">Jeux de données moissonnés CKAN</a>{% elif target == 'csw_harvested' %}
+		<a href="{% url 'idgo_admin:list_all_csw_harvested_datasets' %}">Jeux de données moissonnés CSW</a>{% elif target == 'dcat_harvested' %}
+		<a href="{% url 'idgo_admin:list_all_dcat_harvested_datasets' %}">Jeux de données moissonnés DCAT</a>{% endif %}
+	</li>
+	<li>
+		<a href="{% url 'idgo_admin:dataset' %}?id={{ layer.resource.dataset.id }}#dataset/{{ layer.resource.dataset.id }}">{{ layer.resource.dataset.title_overflow }}</a>
+	</li>
+	<li>
+		<a href="{% url 'idgo_admin:dataset' %}?id={{ layer.resource.dataset.id }}#owslayers/{{ layer.id }}">Service Géo-Datasud</a>
+	</li>
+	<li class="active">
+		<a href="{% url 'idgo_admin:layer_editor' dataset_id=layer.resource.dataset.id resource_id=layer.resource.id layer_id=layer.id%}">{{ layer.resource.title_overflow }}</a>
+	</li>
+</ol>
+{% endblock breadcrumb_content %}
+{% block main_content %}
+{% include "idgo_admin/alert_messages.html" %}
+<div id="layer-container">
+	<div class="floating-buttons-on-the-right-side">
+	{% if layer.resource.extractable %}
+		{% if user.profile.crige_membership %}
+		<a href="{% url 'idgo_admin:extractor' site_name='extractor' %}?layer={{ layer.id }}" name="extractor" type="button" class="btn btn-secondary">Service d'extraction</a>
+		{% else %}
+		{% include "idgo_admin/extras/crige_restricted_access/link.html" with text="Service d'extraction" class="btn btn-secondary" target="modal_forbidden" body="<p>Vous devez vous authentifier ou disposer des droits nécessaires pour accéder à l'extraction de données géographiques.</p><p>Pour faire votre demande d'affiliation et en savoir plus, rendez-vous sur votre page Organisation dans l'espace utilisateur de DATA SUD.</p>" %}
+		{% endif %}
+	{% endif %}
+	</div>
+	<ul id="layer_menu" class="nav nav-tabs" role="tablist">
+		<li role="presentation">
+			<a href="{% url "idgo_admin:layer_editor" dataset_id=layer.resource.dataset.id resource_id=layer.resource.id layer_id=layer.id %}" role="tab">
+				Configuration générale
+			</a>
+		</li>
+		<li role="presentation">
+			{% if user.profile.crige_membership %}
+			<a href="{% url "idgo_admin:layer_style_editor" dataset_id=layer.resource.dataset.id resource_id=layer.resource.id layer_id=layer.id %}" role="tab">
+				Styles
+			</a>
+			{% else %}
+			{% include "idgo_admin/extras/crige_restricted_access/link.html" with text="Styles" target="modal_forbidden" body="<p>Vous ne disposez pas des droits nécessaires pour accéder à cette application.</p><p>Seules les organisations partenaires du CRIGE sont habilitées.</p><p>Pour faire votre demande d'affiliation et en savoir plus, rendez-vous à la section Organisation de l'espace utilisateur de DATA SUD.</p>" %}
+			{% endif %}
+		</li>
+	</ul>
+	<div class="tab-content well">
+		{% block layer_tab_content %}
+		{% endblock layer_tab_content %}
+	</div>
+</div>
+{% endblock main_content %}

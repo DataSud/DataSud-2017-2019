@@ -1,0 +1,203 @@
+{% extends "idgo_admin/base.html" %}
+{% load static %}
+
+{% block head_extras %}
+<base href=".">
+{% endblock head_extras %}
+
+{% block breadcrumb_content %}
+<ol class="breadcrumb">
+	<li>
+		<span class="glyphicon glyphicon-home"></span>
+	</li>
+	<li class="active">{% if target == 'mine' %}
+		<a href="{% url 'idgo_admin:list_my_datasets' %}">Mes jeux de données</a>{% elif target == 'all' %}
+		<a href="{% url 'idgo_admin:list_all_datasets' %}">Tous jeux de données</a>{% elif target == 'ckan_harvested' %}
+		<a href="{% url 'idgo_admin:list_all_ckan_harvested_datasets' %}">Jeux de données moissonnés CKAN</a>{% elif target == 'csw_harvested' %}
+		<a href="{% url 'idgo_admin:list_all_csw_harvested_datasets' %}">Jeux de données moissonnés CSW</a>{% elif target == 'dcat_harvested' %}
+    <a href="{% url 'idgo_admin:list_all_dcat_harvested_datasets' %}">Jeux de données moissonnés DCAT</a>{% endif %}
+	</li>
+	<li class="active">
+		<a href="{% url 'idgo_admin:dataset' %}?id={{ dataset.id }}">{{ dataset.title_overflow }}</a>
+	</li>
+	<li class="active">Édition de la fiche de métadonnées INSPIRE</li>
+</ol>
+{% endblock breadcrumb_content %}
+
+{% block main %}
+<div ng-app="mdEdit">
+	<div class="main-container" ng-controller="mdEditCtrl as vm">
+		<div class="container ng-scope">
+			<div class="row">
+				<div class="col-md-offset-0 col-md-12">
+					{% if messages %}
+						{% for message in messages %}
+							{% if message.tags == 'success' %}
+							<div class="alert alert-success" role="alert">{{ message | escape | safe }}</div>
+							{% elif message.tags == 'error' %}
+							<div class="alert alert-danger" role="alert">{{ message | escape | safe }}</div>
+							{% endif %}
+						{% endfor %}
+					{% endif %}
+					<div class="well">
+						<div class="buttons-on-the-right-side">
+							{% if dataset.geonet_id %}
+							<a class="btn btn-default" target="_blank" href="{{ dataset.geonet_url }}">Ouvrir dans Geonetwork</a>
+							{% endif %}
+							<span ng-show="vm.data.view == 1" ng-hide="vm.data.view == 3">
+								<a role="button" class="btn btn-default" target="_blank" href="{{ doc_url }}">
+									<span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span> Aide à la saisie
+								</a>
+								<a href="#" role="button" class="btn btn-default" ng-init="vm.showAllFields=False" ng-click="vm.showAllFields = !vm.showAllFields" ng-show="!vm.showAllFields" uib-tooltip="Permuter vers l'affichage complet" tooltip-trigger="mouseenter" tooltip-placement="left">
+									<span class="glyphicon glyphicon-th"></span>
+								</a>
+								<a href="#" role="button" class="btn btn-default" ng-click="vm.showAllFields = !vm.showAllFields" ng-show="vm.showAllFields" uib-tooltip="Revenir à l'affichage simple" tooltip-trigger="mouseenter" tooltip-placement="left">
+									<span class="glyphicon glyphicon-th-large"></span>
+								</a>
+							</span>
+							<a href="#" role="button" class="btn btn-default" ng-click="vm.changeView(1)" uib-tooltip="Revenir au mode d'édition" tooltip-trigger="mouseenter" tooltip-placement="left" ng-hide="vm.data.view == 1">
+								<span class="glyphicon glyphicon-pencil"></span>
+							</a>
+							<a href="#" role="button" class="btn btn-default" ng-click="vm.changeView(2)" uib-tooltip="Permuter vers le mode de visualisation" tooltip-trigger="mouseenter" tooltip-placement="left" ng-hide="vm.data.view != 1">
+								<span class="glyphicon glyphicon-eye-open"></span>
+							</a>
+						</div>
+						<br />
+						<div ng-hide="vm.data.pageLoaded" id="alert" class="" role="alert">
+							<uib-progressbar class="progress-striped active" value="100" type="info">Chargement...</uib-progressbar>
+						</div>
+						<form name="mdedit">
+							<div id="content" ng-include="vm.data.template_url">
+								<!-- Content -->
+							</div>
+							<br />
+							<div class="buttons-on-the-right-side">
+								{% if dataset.geonet_id %}
+								<button type="button" name="delete" value="delete" class="btn btn-danger left">Supprimer</button>
+								{% endif %}
+								<a class="btn btn-default" href="{% url 'idgo_admin:dataset' %}?id={{ dataset.id }}#dataset">Annuler</a>
+								<button type="button" name="continue" class="btn btn-default">Enregistrer et continuer les modifications</button>
+								<button type="button" name="save" class="btn btn-primary">Enregistrer</button>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<script src="{% static 'libs/mdedit/lib/showdown/showdown.min.js' %}"></script>
+<script src="{% static 'libs/mdedit/lib/angular/angular-1.5.3.min.js' %}"></script>
+<script src="{% static 'libs/mdedit/lib/ui-bootstrap/ui-bootstrap-tpls-1.3.0.min.js' %}"></script>
+<script src="{% static 'libs/mdedit/lib/vkbeautify/vkbeautify.js' %}"></script>
+<script src="{% static 'libs/mdedit/lib/mdjs/mdjs.js' %}"></script>
+<script>
+angular.module('mdEdit.services', []);
+angular.module('mdEdit.filters', []);
+angular.module('mdEdit.directives', []);
+
+angular.module('mdEdit', ['ui.bootstrap', 'mdEdit.services', 'mdEdit.directives', 'mdEdit.filters', 'modalDoc']);
+
+angular.module('mdEdit.directives').config(function($locationProvider) {
+	$locationProvider.html5Mode(true);
+});
+
+angular.module('mdEdit').run(['configSrv', 'modelsSrv', 'viewsSrv', 'xmlSrv', 'AppDataSrv', 'BroadcastSrv', runApp]);
+
+function runApp(configSrv, modelsSrv, viewsSrv, xmlSrv, AppDataSrv, BroadcastSrv) {
+	AppDataSrv.config = {{ config | safe }};
+
+	AppDataSrv.locales = AppDataSrv.config.languages;
+	AppDataSrv.userLanguage = AppDataSrv.config.defaultLanguage;
+	AppDataSrv.ui = AppDataSrv.config.locales.ui;
+	AppDataSrv.md_errors = AppDataSrv.config.locales.md_errors;
+	AppDataSrv.codelists = AppDataSrv.config.locales.codelists;
+
+	AppDataSrv.views = AppDataSrv.config.views.list;
+	viewsSrv.getViewLocales(false, AppDataSrv.views, AppDataSrv.userLanguage, function(view, data) {
+		AppDataSrv.view = view;
+		AppDataSrv.fields = data.fields;
+	});
+
+	AppDataSrv.models = AppDataSrv.config.models.list;
+	if (xmlSrv.getXml()) {
+		BroadcastSrv.send('configLoaded');
+	} else {
+		modelsSrv.getModel(AppDataSrv.models, false, function(model) {
+			BroadcastSrv.send('configLoaded');
+		});
+	};
+};
+</script>
+<script src="{% static 'libs/mdedit/app/mdEdit.controllers.js' %}"></script>
+<script src="{% static 'libs/mdedit/app/mdEdit.services/mdjs.js' %}"></script>
+<script src="{% static 'libs/mdedit/app/mdEdit.services/empty-json.js' %}"></script>
+<script src="{% static 'libs/mdedit/app/mdEdit.services/config.js' %}"></script>
+<script src="{% static 'libs/mdedit/app/mdEdit.services/appData.js' %}"></script>
+<script src="{% static 'libs/mdedit/app/mdEdit.services/broadcast.js' %}"></script>
+<script src="{% static 'libs/mdedit/app/mdEdit.services/xml.js' %}"></script>
+<script src="{% static 'libs/mdedit/app/mdEdit.services/jsonConverter.js' %}"></script>
+<script src="{% static 'libs/mdedit/app/mdEdit.services/locales.js' %}"></script>
+<script src="{% static 'libs/mdedit/app/mdEdit.services/models.js' %}"></script>
+<script src="{% static 'libs/mdedit/app/mdEdit.services/views.js' %}"></script>
+<script src="{% static 'libs/mdedit/app/mdEdit.services/extents.js' %}"></script>
+<script src="{% static 'libs/mdedit/app/mdEdit.services/checkValues.js' %}"></script>
+<script src="{% static 'libs/mdedit/app/mdEdit.services/permalink.js' %}"></script>
+<script src="{% static 'libs/mdedit/app/mdEdit.filters/array2string.js' %}"></script>
+<script src="{% static 'libs/mdedit/app/mdEdit.filters/string2array.js' %}"></script>
+<script src="{% static 'libs/mdedit/app/mdEdit.filters/nl2br.js' %}"></script>
+<script src="{% static 'libs/mdedit/app/mdEdit.filters/translateCode.js' %}"></script>
+<script src="{% static 'libs/mdedit/app/mdEdit.directives/edit/editAccordionHeader.js' %}"></script>
+<script src="{% static 'libs/mdedit/app/mdEdit.directives/edit/editInput.js' %}"></script>
+<script src="{% static 'libs/mdedit/app/mdEdit.directives/edit/editTextarea.js' %}"></script>
+<script src="{% static 'libs/mdedit/app/mdEdit.directives/edit/editSelect.js' %}"></script>
+<script src="{% static 'libs/mdedit/app/mdEdit.directives/edit/editMultiSelect.js' %}"></script>
+<script src="{% static 'libs/mdedit/app/mdEdit.directives/edit/editMultiTextarea.js' %}"></script>
+<script src="{% static 'libs/mdedit/app/mdEdit.directives/edit/editDate.js' %}"></script>
+<script src="{% static 'libs/mdedit/app/mdEdit.directives/edit/editContacts.js' %}"></script>
+<script src="{% static 'libs/mdedit/app/mdEdit.directives/edit/editDataIdentifiers.js' %}"></script>
+<script src="{% static 'libs/mdedit/app/mdEdit.directives/edit/editDataBrowsegraphics.js' %}"></script>
+<script src="{% static 'libs/mdedit/app/mdEdit.directives/edit/editDataTemporalExtents.js' %}"></script>
+<script src="{% static 'libs/mdedit/app/mdEdit.directives/edit/editDataGeographicExtents.js' %}"></script>
+<script src="{% static 'libs/mdedit/app/mdEdit.directives/edit/editDataLinkages.js' %}"></script>
+<script src="{% static 'libs/mdedit/app/mdEdit.directives/edit/editDataReferenceSystems.js' %}"></script>
+<script src="{% static 'libs/mdedit/app/mdEdit.directives/edit/editDataDistributionFormats.js' %}"></script>
+<script src="{% static 'libs/mdedit/app/mdEdit.directives/edit/editDataKeywords.js' %}"></script>
+<script src="{% static 'libs/mdedit/app/mdEdit.directives/changeLocales/changeLocales.js' %}"></script>
+<script src="{% static 'libs/mdedit/app/modalDoc.module/modalDoc.controllers.js' %}"></script>
+<script src="{% static 'libs/mdedit/app/modalDoc.module/modalDoc.services.js' %}"></script>
+<script>
+$(function() {
+	$("#menu a[href=\"{% url 'idgo_admin:list_my_datasets' %}\"]").parent().addClass('active');
+
+	const $scope = angular.element('div[ng-controller="mdEditCtrl as vm"]').scope();
+
+	{% if record_xml %}
+	$scope.vm.record = '{{ record_xml | safe }}';
+	{% elif record_obj %}
+	$scope.vm.record = {{ record_obj | safe }};
+	{% endif %}
+
+	$('button[name="delete"]').click(function(e) {
+		const $form = $('form').attr('method', 'POST');
+		$('<input/>').attr('type', 'hidden').attr('name', "delete").appendTo($form);
+		$modalHourglass.one('show.bs.modal', function(e) {
+			$form.submit();
+		}).modal('show');
+		e.stopPropagation();
+	});
+
+	$('button[name="save"], button[name="continue"]').click(function(e) {
+		const $form = $('form').attr('method', 'POST');
+		$inputBtnName = $('<input/>').attr('type', 'hidden').attr('name', this.name);
+		$inputBtnName.appendTo($form);
+		$inputXML = $('<input/>').attr('type', 'hidden').attr('name', "xml").val($scope.vm.getXml());
+		$inputXML.appendTo($form);
+		$modalHourglass.one('show.bs.modal', function(e) {
+			$form.submit();
+		}).modal('show');
+		e.stopPropagation();
+	});
+});
+</script>
+{% endblock main %}

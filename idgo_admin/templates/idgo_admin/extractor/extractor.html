@@ -1,0 +1,651 @@
+{% extends "idgo_admin/base.html" %}
+
+{% load static %}
+{% load extra_tags %}
+
+{% block head_extras %}
+<script src="{% static 'libs/leaflet/leaflet.js' %}"></script>
+<script src="{% static 'libs/leaflet/leaflet-nontiledlayer.js' %}"></script>
+<script src="{% static 'libs/leaflet/leaflet-nontiledlayer-wms.js' %}"></script>
+<script src="{% static 'libs/leaflet.draw/leaflet.draw.js' %}"></script>
+<script src="{% static 'libs/bootstrap-slider/bootstrap-slider.js' %}"></script>
+<script src="{% static 'libs/turf/turf.min.js' %}"></script>
+<script src="{% static 'libs/wicket/wicket.js' %}"></script>
+<link rel="stylesheet" href="{% static 'libs/leaflet/leaflet.css' %}"/>
+<link rel="stylesheet" href="{% static 'libs/leaflet.draw/leaflet.draw.css' %}"/>
+<link rel="stylesheet" href="{% static 'css/extractor-crige.css' %}"/>
+{% endblock head_extras %}
+
+{% block body %}
+{% if messages|length %}
+<div id="messageModal" class="modal fade" tabindex="-1" role="dialog">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-body">
+	{% for message in messages %}
+		{% if message.tags == 'error' %}
+				<div name='message-tags' class="alert alert-danger" role="alert">
+					<span class="glyphicon glyphicon-ban-circle" aria-hidden="true"></span>{{ message | escape | safe }}
+				</div>
+		{% endif %}
+	{% endfor %}
+				<div class="buttons-on-the-right-side">
+					<button type="button" class="btn btn-default" data-dismiss="modal">Fermer</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{% endif %}
+<div id="extractor">
+	<div id="map" class="map"></div>
+	<div class="page-header">
+		<div class="container-fluid">
+			<div class="row">
+				<div class="col-md-12">
+					<div class="btn-group login">
+						<!--
+						<button type="button" class="btn btn-default link">
+							<span class="glyphicon glyphicon-envelope"></span>
+						</button>
+						<button type="button" class="btn btn-default link">
+							<span class="glyphicon glyphicon-earphone"></span>
+						</button>
+						-->
+						<button type="button" class="btn btn-default link disabled">
+							<span class="glyphicon glyphicon-user"></span>
+						</button>
+						{% if is_admin %}
+						<span class="user-status">admin</span>
+						{% endif %}
+						<button type="button" class="dropdown-toggle" data-toggle="dropdown">
+							{{ first_name}} {{ last_name }}
+						</button>
+						<ul class="dropdown-menu">
+							<li>
+								<a href="{% url 'idgo_admin:update_account' site_name='admin' %}">Mon profil</a>
+							</li>
+							<li>
+								<a href="{% url 'server_cas:signOut' %}">Me déconnecter</a>
+							</li>
+							<li role="separator" class="divider"></li>
+							<li>
+								<a href="{% url 'idgo_admin:extractor_dashboard' site_name='admin' %}" aria-controls="all-extracts" role="tab">Mes extractions</a>
+							</li>
+						</ul>
+					</div>
+					<img class="logo-crige" src="{% static 'img/logo_crige_rond.png' %}"/>
+					<h1 class=title>Extracteur de données</h1>
+					<div class="logo-title">
+						<span class="logo-title-background"></span>
+						<span class="logo-title-image">
+							<img src="{% static 'img/logo_geodatasud.png' %}"/>
+						</span>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	{% block main %}
+	<div class="main-container">
+		<div class="wrapper" style="pointer-events: none;">
+			<div class="container-fluid">
+				<div class="row">
+					<div class="col-md-12">
+						{% block main_content %}
+							<div class="row">
+								<div class="col-xs-offset-8 col-xs-4">
+									<div class="panel panel-default" style="pointer-events: auto;">
+										<div class="panel-heading">
+											<h1 class="panel-title">Paramètres</h1>
+										</div>
+										<div class="panel-body">
+											<form>
+												<div class="form-group{% if not organisations %} disabled{% endif %}">
+													<label for="organisation">Organisation</label>
+													<div class="input-group input-group">
+														<select class="form-control" id="organisation" required>
+															<option disabled {% if not organisation %}selected{% endif %}>Sélectionnez une organisation</option>
+															{% for instance in organisations %}
+															<option value="{{ instance.slug }}" {% if instance.id == organisation.id %}selected{% endif %}>{{ instance.legal_name }}</option>
+															{% endfor %}
+														</select>
+														<span class="input-group-btn">
+															<button class="btn btn-default" type="button" name="clear">
+																<span class="glyphicon glyphicon-erase" aria-hidden="true"></span>
+															</button>
+														</span>
+													</div>
+												</div>
+												<div class="form-group{% if not datasets %} disabled{% endif %}">
+													<label for="dataset">Jeu de données</label>
+													<div class="input-group input-group">
+														<select class="form-control" id="dataset" required>
+															<option disabled {% if not dataset %}selected{% endif %}>Sélectionnez un jeu de données</option>
+															{% for instance in datasets %}
+															<option value="{{ instance.slug }}" {% if instance.id == dataset.id %}selected{% endif %}>{{ instance.title }}</option>
+															{% endfor %}
+														</select>
+														<span class="input-group-btn">
+															<button class="btn btn-default" type="button" name="clear">
+																<span class="glyphicon glyphicon-erase" aria-hidden="true"></span>
+															</button>
+														</span>
+													</div>
+												</div>
+												<div class="form-group{% if not resources %} disabled{% endif %}">
+													<label for="resource">Ressource</label>
+													<div class="input-group input-group">
+														<select class="form-control" id="resource" required>
+															<option disabled {% if not resource %}selected{% endif %}>Extraire toutes les ressources</option>
+															{% for instance in resources %}
+															<option value="{{ instance.ckan_id }}" {% if instance.id == resource.id %}selected{% endif %}>{{ instance.title }}</option>
+															{% endfor %}
+														</select>
+														<span class="input-group-btn">
+															<button class="btn btn-default" type="button" name="clear">
+																<span class="glyphicon glyphicon-erase" aria-hidden="true"></span>
+															</button>
+														</span>
+													</div>
+												</div>
+												<hr/>
+												<div class="form-group{% if not dataset %} disabled{% endif %}">
+													<div class="checkbox">
+														<label>
+															<input type="checkbox" id="jurisdiction"{% if not dataset %} disabled{% endif %}{% if jurisdiction %} checked{% endif %}> Extraire sur mon territoire de compétence
+														</label>
+													</div>
+												</div>
+												<hr/>
+												<div class="form-group{% if not dataset %} disabled{% endif %}">
+													<label for="crs">Système de coordonnées</label>
+													<select class="form-control" id="crs" required>
+														<option value="" disabled>Sélectionnez un système de coordonnées</option>
+														{% for item in supported_crs %}
+														<option value="{{ item.authority }}"{% if crs == item.authority %} selected{% endif %}>{{ item }}</option>
+														{% endfor %}
+													</select>
+												</div>
+												<div class="form-group{% if not dataset %} disabled{% endif %}">
+													<label for="format">Format de données vectoriel</label>
+													<select class="form-control" id="format_vector" name="vector" required>
+														<option value="" disabled selected>Sélectionnez un format</option>
+														{% for item in supported_format %}
+															{% if item.type == 'vector' %}
+														<option value="{{ item.name }}"{% if format_vector == item.details or format_vector == item.name %} selected{% endif %}>{{ item.description }}</option>
+															{% endif %}
+														{% endfor %}
+													</select>
+												</div>
+												<div class="form-group{% if not dataset %} disabled{% endif %}">
+													<label for="format">Format de données raster</label>
+													<select class="form-control" id="format_raster" name="raster" required>
+														<option value="" disabled selected>Sélectionnez un format</option>
+														{% for item in supported_format %}
+															{% if item.type == 'raster' %}
+														<option value="{{ item.name }}"{% if format_raster == item.details or format_raster == item.name %} selected{% endif %}>{{ item.description }}</option>
+															{% endif %}
+														{% endfor %}
+													</select>
+												</div>
+												<div style="text-align: center; margin-top: 30px; margin-bottom: 30px;">
+													<button type="button" name="extract" class="btn btn-default{% if not dataset %} disabled{% endif %}">Extraire <span class="glyphicon glyphicon-chevron-right"></span></button>
+												</div>
+											</form>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						{% endblock main_content %}
+					</div>
+				</div>
+			</div>
+		</div>
+		{% block footer %}
+		<div class="footer-container">
+			<div class="footer navbar-fixed-bottom">
+				<div class="container-fluid">
+					<div class="row">
+						<div class="col-xs-3">
+							<span style="font-size: 18px;">
+								<span style="color: #bdcb1c;">
+									<strong>Une question ?</strong> <span class="glyphicon glyphicon-earphone"></span>
+								</span>
+								<span style="color: #fff">
+									04 42 90 71 22
+								</span>
+							</span>
+						</div>
+						<div class="col-xs-6">
+							<span>
+								© Tous droits réservés - <span name="current-year"></span> - <a href="http://www.crige-paca.org" target="blank">CRIGE Provence-Alpes-Côte d'Azur</a>
+							</span>
+						</div>
+						<div class="col-xs-2">
+							<span style="font-size: 12px;">
+								Propulsé par <a href="http://www.neogeo.fr" target="_blank">Neogeo-Technologies</a> & <a href="http://www.spatialys.fr" target="_blank">Spatialys</a>
+							</span>
+						</div>
+						<div class="col-xs-1">
+
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		{% endblock footer %}
+	</div>
+	{% endblock main %}
+</div>
+<script>
+$(function() {
+	const $window = $(window);
+
+	var ctrlPressed;
+	var targetLayer;
+	var footprintLayer;
+	var layers = [];
+	var bounds = [[41.15, -9.86], [51.56, 10.38]];
+	var boundsOptions = {paddingTopLeft: [-400, 0]};
+
+	var query = window.location.search.substring(1);
+	var vars = query.split('&');
+	var qs = {};
+	for (var i = 0; i < vars.length; i ++) {
+		const pair = vars[i].split('=');
+		qs[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1]);
+	};
+
+	const updateUrl = function(options) {
+		var kvp = [];
+		for (var k in qs) {
+			if (k) {
+				const key = encodeURI(k);
+				const val = qs[k] ? encodeURI(qs[k]) : null;
+				if (val) {
+					kvp.push(key + '=' + val);
+				}
+			};
+		};
+		if (options.withHash == false) {
+			$window[0].location.hash = '';
+		};
+		if (options.refresh == false) {
+			history.pushState(null, null, '?' + kvp.join('&'));
+		} else {
+			$modalHourglass.one('show.bs.modal', function(e) {
+				$window[0].location.search = kvp.join('&');
+			}).modal('show');
+		};
+	};
+
+	const $extract = $('button[name="extract"]').click(function(e) {
+		e.preventDefault();
+
+		const dataset = '{{ dataset.slug }}' || undefined;
+		const resource = '{{ resource.ckan_id }}' || undefined;
+		const layer = targetLayer ? targetLayer.options.layers : undefined;
+		const geojson = editableLayers.toGeoJSON()
+
+		var footprint = undefined;
+		if (geojson.type == 'FeatureCollection' && geojson.features.length == 1) {
+			footprint = geojson.features[0].geometry
+		};
+
+		const crs = $('#crs').val();
+		const formatVector = $('#format_vector').val();
+		const formatRaster = $('#format_raster').val();
+
+		const $form = $('form').attr('method', 'POST');
+		layer && $form.append($('<input type="text" name="layer"/>').hide().val(layer));
+		dataset && $form.append($('<input type="text" name="dataset"/>').hide().val(dataset));
+		resource && $form.append($('<input type="text" name="resource"/>').hide().val(resource));
+		$form.append($('<input type="text" name="footprint"/>').hide().val(JSON.stringify(footprint)));
+		$form.append($('<input type="text" name="crs"/>').hide().val(crs));
+		$form.append($('<input type="text" name="format-vector"/>').hide().val(formatVector));
+		$form.append($('<input type="text" name="format-raster"/>').hide().val(formatRaster));
+
+		$modalHourglass.one('show.bs.modal', function(e) {
+			$form.submit();
+		}).modal('show');
+	});
+
+	const clear = function($target) {
+		$target.is('select') && $target.val($target.find('option:first').val()).trigger('change');
+	};
+
+	$('form').find('button[name="clear"]').click(function(e) {
+		e.preventDefault();
+		clear($(this).parent().siblings('input, select'));
+	});
+
+	var baseMaps = {};
+	{% if basemaps %}
+		{% if basemaps|length > 1 %}
+			{% for basemap in basemaps %}
+	baseMaps['{{ basemap.name }}'] = L.tileLayer('{{ basemap.url }}', {{ basemap.options|safe }});
+			{% endfor %}
+		{% else %}
+	baseMaps['{{ basemaps.0.name}}'] = L.tileLayer('{{ basemaps.0.url }}', {{ basemaps.0.options|safe }});
+		{% endif %}
+	{% else %}
+	baseMaps['CartoDB'] = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {});
+	{% endif %}
+
+	for (var defaultBaseMap in baseMaps) {
+		layers.push(baseMaps[defaultBaseMap]);
+		break;
+	};
+
+	{% if organisation and dataset and resource and layer %}
+	targetLayer = new L.NonTiledLayer.WMS('{% url "idgo_admin:ows_preview" site_name="admin" %}', {
+		format: 'image/png',
+		layers: '{{ layer.mra_info.name }}',
+		{% if layer.mra_info.styles.default %}
+		styles: '{{ layer.mra_info.styles.default }}',
+		{% endif %}
+		transparent: true
+	});
+	layers.push(targetLayer);
+	// bounds = {{ layer.mra_info.bbox|default:None|safe }};
+
+	delete qs['layer'];
+	qs['organisation'] = '{{ organisation.slug }}';
+	qs['dataset'] = '{{ dataset.slug }}';
+	qs['resource'] = '{{ resource.ckan_id }}';
+	updateUrl({withHash: false, refresh: false});
+
+	{% elif organisation and dataset %}
+		{% for instance in resources %}
+			{% for layer in instance.get_layers %}
+	layers.push(
+		new L.NonTiledLayer.WMS('{% url "idgo_admin:ows_preview" site_name="admin" %}', {
+			format: 'image/png',
+			layers: '{{ layer.mra_info.name }}',
+			// styles: '{{ layer.mra_info.styles.default }}',
+			transparent: true
+		})
+	);
+			{% endfor %}
+		{% endfor %}
+	bounds = {{ dataset.bounds|default:None|safe }};
+	{% endif %}
+
+	const communesLayers = new L.FeatureGroup();
+	{% for commune in communes %}
+	communesLayers.addLayer(L.geoJSON({{ commune.geom.geojson|safe }}, {
+		style: {
+			weight: 1.2,
+			fillColor: "#fff",
+			fillOpacity: 0,
+			color: '#167374',
+			opacity: .9
+		},
+		{% if not jurisdiction %}
+		onEachFeature: function (feature, layer) {
+			layer.on({
+				click: function(e) {
+					const layer = e.target;
+
+					var backup;
+					var geojson = layer.toGeoJSON();
+
+					if (ctrlPressed && footprintLayer) {
+						try {
+							geojson = turf.union(geojson, footprintLayer.toGeoJSON());
+						} catch {
+							/* pass */
+						};
+					};
+
+					footprintLayer = L.geoJSON(geojson).setStyle({
+						weight: 3,
+						color: '#ec6446'
+					});
+
+					map.fire(L.Draw.Event.CREATED, {layerType: 'featureCollection', layer: footprintLayer.getLayers()[0]});
+				},
+				mouseover : function(e) {
+					const layer = e.target;
+					layer.setStyle({
+						weight: 4
+					});
+				},
+				mouseout : function(e) {
+					const layer = e.target;
+					layer.setStyle({
+						weight: 1.2
+					});
+				}
+			});
+		}
+		{% endif %}
+	}));
+	{% endfor %}
+	layers.push(communesLayers);
+
+	const editableLayers = new L.FeatureGroup();
+
+	{% if task %}
+	delete qs['task'];
+	{% endif %}
+
+	{% if footprint %}
+	editableLayers.addLayer(L.geoJSON({{ footprint|safe }}));
+	{% else %}
+	if (qs['footprint']) {
+		var wicket = new Wkt.Wkt();
+		wicket.read(qs['footprint']);
+		editableLayers.addLayer(L.geoJSON(wicket.toJson()));
+	};
+	{% endif %}
+
+	layers.push(editableLayers);
+
+	{% if bounds %}
+	bounds = {{ bounds|safe }};
+	boundsOptions = {};
+	{% endif %}
+
+	L.drawLocal.draw.toolbar.actions.title = 'Annuler le dessin';
+	L.drawLocal.draw.toolbar.actions.text = 'Annuler';
+	L.drawLocal.draw.toolbar.finish.title = 'Valider le dessin';
+	L.drawLocal.draw.toolbar.finish.text = 'Valider';
+	L.drawLocal.draw.toolbar.undo.title = 'Supprimer le dernier vertex dessiné';
+	L.drawLocal.draw.toolbar.undo.text = 'Supprimer le dernier vertex';
+	L.drawLocal.draw.toolbar.buttons.polygon = 'Dessiner un polygone';
+	L.drawLocal.draw.toolbar.buttons.rectangle = 'Dessiner un rectangle',
+	L.drawLocal.draw.toolbar.buttons.circle = 'Dessiner un cercle'
+	L.drawLocal.draw.handlers.circle.tooltip.start = 'Cliquez et faites glisser pour dessiner un cercle.';
+	L.drawLocal.draw.handlers.circle.radius = 'Rayon';
+	L.drawLocal.draw.handlers.circlemarker.tooltip.start = 'Cliquez sur la carte pour placer le centre du cercle.';
+	L.drawLocal.draw.handlers.polygon.tooltip.start = 'Cliquez sur la carte pour commencer.';
+	L.drawLocal.draw.handlers.polygon.tooltip.cont = 'Cliquez sur la carte pour continuer.';
+	L.drawLocal.draw.handlers.polygon.tooltip.end = 'Cliquez sur le premier vertex pour valider.'
+	L.drawLocal.draw.handlers.rectangle.tooltip.start = 'Cliquez et faites glisser pour dessiner un rectangle.';
+	L.drawLocal.edit.toolbar.actions.save.title = 'Sauvegarder les modifications';
+	L.drawLocal.edit.toolbar.actions.save.text = 'Sauvegarder';
+	L.drawLocal.edit.toolbar.actions.cancel.title = 'Annuler toutes les modifications';
+	L.drawLocal.edit.toolbar.actions.cancel.text = 'Annuler';
+	L.drawLocal.edit.toolbar.actions.clearAll.title = 'Effacer la couche « dessin »';
+	L.drawLocal.edit.toolbar.actions.clearAll.text = 'Effacer';
+	L.drawLocal.edit.toolbar.buttons.edit = 'Éditer';
+	L.drawLocal.edit.toolbar.buttons.editDisabled = 'Aucun objet à éditer';
+	L.drawLocal.edit.toolbar.buttons.remove = 'Supprimer';
+	L.drawLocal.edit.toolbar.buttons.removeDisabled = 'Aucun objet à supprimer';
+	L.drawLocal.edit.handlers.edit.tooltip.text = "Déplacer les vertex pour modifier l'objet.",
+	L.drawLocal.edit.handlers.edit.tooltip.subtext = 'Cliquez sur « Annuler » pour annuler les modification.'
+	L.drawLocal.edit.handlers.remove.tooltip.text = "Cliquez sur l'objet pour le supprimer.";
+
+	const map = L
+		.map('map', {
+			'layers': layers
+		})
+		.fitBounds(bounds, boundsOptions)
+		.addControl(new L.control.layers(baseMaps, {
+			'Communes': communesLayers
+		}, {
+			collapsed: false
+		})){% if not jurisdiction %}
+		.addControl(new L.Control.Draw({
+			draw: {
+				toolbar: {
+					actions: {
+						title: 'Annuler',
+						text: 'Annuler'
+					},
+					finish: {
+						title: 'Valider',
+						text: 'Valider'
+					},
+					undo: {
+						title: 'Supprimer le dernier vertex',
+						text: 'Supprimer le dernier vertex'
+					},
+					buttons: {
+						polygon: 'Dessiner un polygone',
+						rectangle: 'Dessiner un rectangle'
+					}
+				},
+				polygon: {
+					allowIntersection: false,
+					drawError: {
+						color: '#8b0000',
+						message: ''  // Pas de message
+					},
+					shapeOptions: {
+						color: '#f6546a'
+					}
+				},
+				rectangle: {
+					shapeOptions: {
+						clickable: false
+					}
+				},
+				marker: false,
+				polyline: false,
+				circle: false,
+				circlemarker: false
+			},
+			edit: {
+				featureGroup: editableLayers,
+				remove: false
+			},
+			position: 'topright'
+		}))
+		.on(L.Draw.Event.CREATED, function(e) {
+			editableLayers.clearLayers();
+			if (e.layer instanceof L.FeatureGroup) {
+				e.layer.eachLayer(function(layer) {
+				editableLayers.addLayer(layer);
+				});
+			} else {
+				editableLayers.addLayer(e.layer);
+			};
+			footprintLayer = e.layer;
+			var wicket = new Wkt.Wkt();
+			wicket.read(JSON.stringify(footprintLayer.toGeoJSON()));
+			qs['footprint'] = wicket.write();
+			updateUrl({withHash: false, refresh: false});
+		}){% endif %};
+
+	$('#organisation').change(function(e) {
+		e.preventDefault();
+		const organisation = $(this).val();
+		const bounds = map.getBounds();
+		const bbox = bounds._southWest.lng.toFixed(2) + ',' + bounds._southWest.lat.toFixed(2) + ',' + bounds._northEast.lng.toFixed(2) + ',' + bounds._northEast.lat.toFixed(2);
+		qs['bbox'] = bbox;
+		if (organisation) {
+			qs['organisation'] = organisation;
+			delete qs['dataset'];
+			delete qs['resource'];
+			delete qs['layer'];
+		} else {
+			delete qs['organisation'];
+			delete qs['dataset'];
+			delete qs['resource'];
+			delete qs['layer'];
+		};
+		updateUrl({withHash: false, refresh: true});
+	});
+
+	{% if organisation %}
+	$('#dataset').change(function(e) {
+		e.preventDefault();
+		const dataset = $(this).val();
+		const bounds = map.getBounds();
+		const bbox = bounds._southWest.lng.toFixed(2) + ',' + bounds._southWest.lat.toFixed(2) + ',' + bounds._northEast.lng.toFixed(2) + ',' + bounds._northEast.lat.toFixed(2);
+		qs['bbox'] = bbox;
+		qs['organisation'] = '{{ organisation.slug }}';
+		if (dataset) {
+			qs['dataset'] = dataset;
+			delete qs['resource'];
+			delete qs['layer'];
+		} else {
+			delete qs['dataset'];
+			delete qs['resource'];
+			delete qs['layer'];
+		};
+		updateUrl({withHash: false, refresh: true});
+	});
+	{% endif %}
+
+	{% if organisation and dataset %}
+	$('#resource').change(function(e) {
+		e.preventDefault();
+		const resource = $(this).val();
+		const bounds = map.getBounds();
+		const bbox = bounds._southWest.lng.toFixed(2) + ',' + bounds._southWest.lat.toFixed(2) + ',' + bounds._northEast.lng.toFixed(2) + ',' + bounds._northEast.lat.toFixed(2);
+		qs['bbox'] = bbox;
+		qs['organisation'] = '{{ organisation.slug }}';
+		qs['dataset'] = '{{ dataset.slug }}';
+		if (resource) {
+			qs['resource'] = resource;
+			delete qs['layer'];
+		} else {
+			delete qs['resource'];
+			delete qs['layer'];
+		}
+		updateUrl({withHash: false, refresh: true});
+	});
+	{% endif %}
+
+	$('#jurisdiction').change(function(e) {
+		e.preventDefault();
+		qs['jurisdiction'] = $(this).prop('checked');
+		updateUrl({withHash: false, refresh: true});
+	});
+
+	$('#format_vector, #format_raster, #crs').change(function(e) {
+		e.preventDefault();
+		if ($('#organisation').val() &&
+			$('#dataset').val() &&
+			$('#format_vector').val() &&
+			$('#format_raster').val() &&
+			$('#crs').val()) {
+			$extract.prop('disabled', false).removeClass('disabled');
+		} else {
+			$extract.prop('disabled', true).addClass('disabled');
+		};
+		qs[this.id] = $(this).val();
+		updateUrl({withHash: false, refresh: false});
+	}).trigger('change');
+
+	$window.keydown(function(e) {
+		if (e.which == 17) {
+			ctrlPressed = true;
+		};
+	}).keyup(function(e) {
+		if (e.which == 17) {
+			ctrlPressed = false;
+		};
+	});
+	{% if messages|length %}
+	$('#messageModal').modal('show');
+	{% endif %}
+
+});
+</script>
+{% endblock body %}

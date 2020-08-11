@@ -1,0 +1,296 @@
+{% load bootstrap3 %}
+{% load extra_tags %}
+
+{% include "idgo_admin/alert_messages.html" %}
+
+<div class="buttons-on-the-right-side">
+	<a name="add-resource" class="btn btn-primary" href="{% url "idgo_admin:resource" dataset_id=dataset.id %}">Ajouter une nouvelle ressource</a>
+</div>
+<br />
+<div id="table-resources" class="table-responsive"></div>
+<nav aria-label="Page navigation" style="text-align: center;">
+	<ul id="table-resources-paginator" class="pagination pagination-sm"></ul>
+</nav>
+<div class="buttons-on-the-right-side">
+	{% if user.profile.crige_membership %}
+	<button name="resource-extractor" class="btn btn-default">Service d'extraction</button>
+	{% else %}
+	{% include "idgo_admin/extras/crige_restricted_access/button.html" with class="btn btn-default" text="Service d'extraction" name="resource-extractor" modal_target="modal_forbidden" %}
+	{% endif %}
+	<button name="view-ckan-resource" class="btn btn-default">Ouvrir dans CKAN</button>
+	<button name="edit-resource" class="btn btn-secondary">Éditer <span class="glyphicon glyphicon-pencil"></span></button>
+	<button name="delete-resource" class="btn btn-danger" data-toggle="modal" data-target="#modal">Supprimer <span class="glyphicon glyphicon-trash"></span></button>
+</div>
+
+<script>
+$(function() {
+	var RESOURCE_URL = '{% url "idgo_admin:resource" dataset_id=dataset.id %}';
+	var RESOURCES = {{ resource_rows | safe }};
+	var RESOURCES_CONTAINER = 'table-resources';
+	var RESOURCES_METADATA = [
+		{
+			name: 'title',
+			label: 'Titre',
+			editable: false,
+			datatype: 'string'
+		}, {
+			name: 'format',
+			label: 'Format',
+			editable: false,
+			datatype: 'string'
+		}, {
+			name: 'type',
+			label: 'Type',
+			editable: false,
+			datatype: 'string'
+		}, {
+			name: 'date_creation',
+			label: 'Date de création',
+			editable: false,
+			datatype: 'string'
+		}, {
+			name: 'last_modification',
+			label: 'Dernière modification',
+			editable: false,
+			datatype: 'string'
+		}, {
+			name: 'restrictions',
+			label: "Restrictions d'accès",
+			editable: false,
+			datatype: 'string'
+		}, {
+			name: 'ckan_id',
+			label: '_HIDDEN',
+			editable: false,
+			datatype: 'string'
+		}, {
+			name: 'datagis_id',
+			label: '_HIDDEN',
+			editable: false,
+			datatype: 'object'
+		}, {
+			name: 'ogc_services',
+			label: '_HIDDEN',
+			editable: false,
+			datatype: 'object'
+		}, {
+			name: 'extractable',
+			label: '_HIDDEN',
+			editable: false,
+			datatype: 'object'
+		}, {
+			name: 'id',
+			label: '_HIDDEN',  //->https://github.com/webismymind/editablegrid/issues/153
+			editable: false,
+			datatype: 'integer'
+		}
+	];
+
+	var tableGrid = new EditableGrid('Resources', {pageSize: 10});
+
+	{% if user.profile.crige_membership %}
+	$('button[name="resource-extractor"]').on('click', function(e) {
+		e.preventDefault();
+		targetBlank('{% url "idgo_admin:extractor" site_name="extractor" %}?&resource=' + tableGrid.getRowValues(tableGrid.lastSelectedRowIndex)['ckan_id']);
+		e.stopPropagation();
+	});
+	{% endif %}
+
+	$('#resources [name="view-ckan-resource"]').on('click', function(e) {
+		e.preventDefault();
+		targetBlank('{{ ckan_url }}/dataset/{{ dataset.slug }}/resource/' + tableGrid.getRowValues(tableGrid.lastSelectedRowIndex)['ckan_id']);
+		e.stopPropagation();
+	});
+
+	const $multipleCkanView = $('#resources [name="view-multiple-ckan"]').hide();
+
+	$('#resources button[name="delete-resource"]')
+		.on('click', function(e) {
+			e.preventDefault();
+
+			var $button = $('<button/>')
+				.prop('type', 'button')
+				.prop('class', 'btn btn-danger disabled')
+				.prop('disabled', true)
+				.text('Oui, supprimer définitivement cette ressource')
+				.on('click', function(e) {
+					e.preventDefault();
+					closeAllModalDialog();
+					$modalHourglass.one('shown.bs.modal', function(e) {
+						$.ajax({
+							type: 'DELETE',
+							// success: function() {},
+							url: RESOURCE_URL + '?id=' + tableGrid.getRowValues(tableGrid.lastSelectedRowIndex)['id']
+						})
+						.done(function(response, textStatus, jqXHR) {
+							location.reload();
+						})
+						.fail(function(jqXHR, textStatus, errorThrown) {
+							location.reload();
+						});
+						e.stopPropagation();
+					}).modal('show');
+				});
+
+			var $input = $('<input/>')
+				.prop('type', 'text')
+				.prop('class', 'form-control')
+				.prop('placeholder', 'Nom de la ressource à supprimer')
+				.on('input', function(e) {
+					if ($(this).val() === tableGrid.getRowValues(tableGrid.lastSelectedRowIndex)['title']) {
+						$button.removeClass('disabled').prop('disabled', false);
+					} else {
+						$button.addClass('disabled').prop('disabled', true);
+					};
+				});
+
+			$modal.find('.modal-title').text('Êtes-vous absolument sûr ?');
+
+			$modal.find('.modal-body')
+				.append('<p>Cette action est irreversible et supprimera <strong>définitivement</strong> la ressource.</p>')
+				.append(
+					$('<form/>')
+						.append(
+							$('<div/>').prop('class', 'form-group')
+								.append('<p>Pour confirmer, veuillez réécrire le nom de la ressource à supprimer.</p>')
+								.append($input))
+						.append(
+							$('<div class="buttons-on-the-right-side">')
+								.append($button)
+								.append('<button type="button" class="btn btn-default" data-dismiss="modal">Annuler</button>')));
+
+			$modal.modal('show');
+
+			e.stopPropagation();
+		});
+
+	$('#resources button[name="edit-resource"]')
+		.on('click', function(e) {
+			e.preventDefault();
+			redirect(RESOURCE_URL + '?id=' + tableGrid.getRowValues(tableGrid.lastSelectedRowIndex)['id']);
+			e.stopPropagation();
+		});
+
+	tableGrid.initializeGrid = function() {
+		var grid = tableGrid;
+		var $buttons = $($('#' + this.currentContainerid).parent().get(0)).find('button');
+
+		with (this) {
+			tableRendered = function() {
+				this.updatePaginator(grid);
+			};
+			rowSelected = function(pRowIdx, nRowIdx) {
+				$(grid.getRow(pRowIdx)).removeClass('selected');
+				$buttons.each(function() {
+					deactivateButton($(this));
+				});
+				if (pRowIdx != nRowIdx) {
+					window.location = '#resources/' + getRowValues(nRowIdx).id;
+					$(grid.getRow(nRowIdx)).addClass('selected');
+					if (getRowValues(nRowIdx).datagis_id.length && getRowValues(nRowIdx).extractable) {
+					 	activateButton($('button[name="resource-extractor"]'));
+					};
+					activateButton($('#resources button[name="view-ckan-resource"]'));
+					activateButton($('#resources button[name="edit-resource"]'));
+					activateButton($('#resources button[name="delete-resource"]'));
+				};
+			};
+			var DATE_FORMAT = 'DD/MM/YY';
+			setCellRenderer('date_creation', new CellRenderer({
+				render: function(cell, value) {
+					cell.innerHTML = value ? moment(value).format(DATE_FORMAT) : '-';
+				}
+			}));
+			setCellRenderer('last_modification', new CellRenderer({
+				render: function(cell, value) {
+					cell.innerHTML = value ? moment(value).format(DATE_FORMAT) : '-';
+				}
+			}));
+			setCellRenderer('restrictions', new CellRenderer({
+				render: function(cell, value) {
+					cell.innerHTML = value ? value : '-';
+				}
+			}));
+		};
+	};
+
+	const selectRowByDataId = function(dataId) {
+		for (var i = 0; i < tableGrid.data.length; i ++) {
+			if (tableGrid.data[i].columns[tableGrid.getColumnIndex('id')] == dataId) {
+				tableGrid.setPageIndex(0);
+				// TODO Pas good
+				while (tableGrid.currentPageIndex < tableGrid.getPageCount()) {
+					const rowIndex = tableGrid.getRowIndex(tableGrid.data[i].id);
+					if (tableGrid.getRow(rowIndex)) {
+						tableGrid.rowSelected(tableGrid.lastSelectedRowIndex, rowIndex);
+						tableGrid.lastSelectedRowIndex = rowIndex;
+						break;
+					};
+					tableGrid.setPageIndex(tableGrid.currentPageIndex + 1);
+				};
+			};
+		};
+	};
+
+	function updateTableGrid(grid, containerId, metadata, data) {
+		var $containerId = $('#' + containerId);
+		var $parent = $($containerId.parent().get(0));
+		$parent.find('div[role="alert"]not:div[name="message-tags"]').remove();
+		$parent.find('button').each(function() {
+			deactivateButton($(this));
+		});
+		if (data.length > 0) {
+			grid.load({'metadata': metadata, 'data': data});
+			grid.renderGrid(containerId, 'board table table-striped table-bordered table-hover table-condensed');
+			grid.initializeGrid();
+			grid.refreshGrid();
+			$containerId.show();
+		} else {
+			$containerId.hide();
+		};
+
+		if (data.length == 0) {
+			$parent.find('button.btn, a.btn').each(function() {
+				deactivateButton($(this));
+				$(this).hide();
+			});
+			$containerId.before('<div role="alert" class="alert alert-warning"><span class="glyphicon glyphicon-bullhorn" aria-hidden="true"></span>Vous n\'avez encore jamais ajouté de ressource. <a name="add-resource" href="{% url "idgo_admin:resource" dataset_id=dataset.id %}">Créer une nouvelle ressource</a> pour commencer.<div/>');
+		};
+
+	};
+
+	updateTableGrid(
+		tableGrid,
+		RESOURCES_CONTAINER,
+		RESOURCES_METADATA,
+		(function(data) {
+			var m = [];
+			for (var i = 0; i < data.length; i ++) {
+				m.push({
+					id: i,
+					values: [
+						data[i][1],  // title
+						data[i][2],  // format
+						data[i][3],  // type
+						data[i][4],  // date_creation
+						data[i][5],  // last_modification
+						data[i][6],  // restrictions
+						data[i][7],  // ckan_id
+						data[i][8],  // datagis_id
+						data[i][9],  // ogc_services
+						data[i][10],  // extractable
+						data[i][0]   // id
+					]
+				});
+			};
+			return m;
+		})(RESOURCES)
+	);
+
+	$(window).bind('hashchange', function(e) {
+		selectRowByDataId(location.hash.split('/')[1]);
+	});
+	selectRowByDataId(location.hash.split('/')[1]);
+
+});
+</script>

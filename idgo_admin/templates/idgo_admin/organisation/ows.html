@@ -1,0 +1,59 @@
+<div id="#ows">
+	<div class="row">
+		<div class="col-xs-12">
+			<div class="form-group">
+				<label for="ows-onlineresource">URL du service</label>
+				<div class="form-control-static">
+					<a target="_blank" href="{{ organisation.ows_url }}">{{ organisation.ows_url }}</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-xs-12">
+			<div class="form-group">
+				<label for="ows_title">Titre</label>
+				<input class="form-control" id="ows_title" name="title" value="{{ organisation.ows_settings.title }}"></input>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-xs-12">
+			<div class="form-group">
+				<label for="ows_abstract">Description</label>
+				<textarea class="form-control" id="ows_abstract" name="abstract" rows=6>{{ organisation.ows_settings.abstract }}</textarea>
+			</div>
+		</div>
+	</div>
+	<div class="buttons-on-the-right-side">
+		<button type="button" name="save" class="btn btn-primary">Enregistrer</button>
+	</div>
+</div>
+<script>
+$(function() {
+
+	const $div = $('#ows');
+	const $title = $div.find('input[name=title]');
+	const $abstract = $div.find('textarea[name=abstract]');
+	const $save = $div.find('button[name=save]');
+
+	$save.click(function(e) {
+		e.preventDefault();
+		$.ajax({
+			type: 'POST',
+			url: '{% url "idgo_admin:organisation_ows" %}?id={{ organisation.id }}',
+			data: {
+				'title': $title.val(),
+				'abstract': $abstract.val()
+			},
+			success: function(data, status, xhr) {
+				location.reload();
+			},
+			error: function(xhr, statut, error) {
+				location.reload();
+			}
+		});
+	});
+
+});
+</script>

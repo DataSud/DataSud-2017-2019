@@ -1,0 +1,65 @@
+{% extends "admin/change_form.html" %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+{% block extrahead %}
+{{ form.media.css }}
+{{ form.media }}
+{% endblock %}
+
+{% block content %}
+<form action="" method="post">
+  {% csrf_token %}
+  {{ form.non_field_errors }}
+  <div class="row">
+    <div class="column">
+      <div class="fieldWrapper">
+        {{ form.subject.errors }}
+        {{ form.subject.label_tag }}
+        <br>
+        {{ form.subject }}
+        {% if form.subject.help_text %}
+        <p class="help">{{ form.subject.help_text|safe }}</p>
+        {% endif %}
+      </div>
+      <br>
+      <div class="fieldWrapper">
+        {{ form.body.errors }}
+        {{ form.body.label_tag }}
+        <br>
+        {{ form.body }}
+        {% if form.subject.help_text %}
+        <p class="help">{{ form.subject.help_text|safe }}</p>
+        {% endif %}
+      </div>
+      <br>
+      <div class="fieldWrapper" style="display: inline-block;">
+        {{ form.dest.errors }}
+        {{ form.dest.label_tag }}
+        <br>
+        {{ form.dest }}
+        {% if field.help_text %}
+        <p class="help">{{ field.help_text|safe }}</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="submit-row">
+    <input type="submit" class="default" name="send_mail" value="Envoyer">
+  </div>
+</form>
+
+<script type="text/javascript" src="{% url 'admin:jsi18n' %}"></script>
+<script type="text/javascript" src="{% static 'admin/js/core.js' %}"></script>
+<script type="text/javascript" src="{% static 'admin/js/vendor/jquery/jquery.js' %}"></script>
+<script type="text/javascript" src="{% static 'admin/js/jquery.init.js' %}"></script>
+<script type="text/javascript" src="{% static 'admin/js/SelectBox.js' %}"></script>
+<script type="text/javascript" src="{% static 'admin/js/SelectFilter2.js' %}"></script>
+
+<link rel = "stylesheet" type = "text/css" href = "{% static 'admin/css/widgets.css' %}">
+<style>
+.selector h2 {
+  margin: 0;
+}
+</style>
+{% endblock %}

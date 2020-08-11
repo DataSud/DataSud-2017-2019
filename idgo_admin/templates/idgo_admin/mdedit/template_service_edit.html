@@ -1,0 +1,75 @@
+{% load static %}
+
+<div id="content">
+	<form name="mdForm" novalidate>
+		<div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+
+			<!-- Panel 1 -->
+			<div class="panel panel-default" ng-show="vm.showAllFields">
+				<div class="panel-heading" role="tab" id="headingOne">
+					<h4 class="panel-title">
+						<a role="button" data-toggle="collapse" data-parent="#accordion" href="#mdInfo" aria-expanded="false" aria-controls="collapseOne">
+							<span uib-tooltip="Informations sur la fiche de métadonnées" tooltip-popup-close-delay="100" tooltip-trigger="mouseenter" tooltip-placement="up">Informations sur la fiche de métadonnées</span>
+							<!-- <a role="button" href="#help"><span class="bt-doc glyphicon glyphicon-info-sign" aria-hidden="true" ng-click="vm.openModalDoc('empty')"></span></a> -->
+						</a>
+					</h4>
+				</div>
+				<div id="mdInfo" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
+					<div class="panel-body">
+						<div class="row">
+							<!-- metadata.mdFileIdentifier -->
+							<div class="col-md-6 form-group">
+								<div edit-input field="mdFileIdentifier" help="mdFileIdentifier" template-url="{% static "mdedit/html/editInput.html" %}"></div>
+							</div>
+							<!-- metadata.mdLanguage -->
+							<div class="col-md-3 form-group">
+								<div edit-select field="mdLanguage" list="MD_LanguageCode" help="mdLanguage" template-url="{% static "mdedit/html/editSelect.html" %}"></div>
+							</div>
+						</div>
+						<div class="row">
+							<!-- mdStandardName -->
+							<div class="col-md-3 form-group">
+								<div edit-input field="mdStandardName" help="mdStandardName" template-url="{% static "mdedit/html/editInput.html" %}"></div>
+							</div>
+							<!-- mdStandardVersion -->
+							<div class="col-md-3 form-group">
+								<div edit-input field="mdStandardVersion" help="mdStandardVersion" template-url="{% static "mdedit/html/editInput.html" %}"></div>
+							</div>
+						</div>
+						<div class="row">
+							<!--mdHierarchyLevel -->
+							<div class="col-md-4 form-group">
+								<div edit-select field="mdHierarchyLevel" list="MD_ScopeCode" help="mdHierarchyLevel" template-url="{% static "mdedit/html/editSelect.html" %}"></div>
+							</div>
+							<!-- mdCharacterSet -->
+							<div class="col-md-4 form-group">
+								<div edit-select field="mdCharacterSet" list="MD_CharacterSetCode" disabled="true" help="mdCharacterSet" template-url="{% static "mdedit/html/editSelect.html" %}"></div>
+							</div>
+							<!-- mdDateStamp -->
+							<div class="col-md-4 form-group">
+								<div edit-date field="mdDateStamp" help="mdDateStamp" template-url="{% static "mdedit/html/editDate.html" %}"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Panel 2 -->
+			<div class="panel panel-default">
+				<div class="panel-heading" role="tab" id="headingTwo">
+					<h4 class="panel-title">
+						<a role="button" data-toggle="collapse" data-parent="#accordion" href="#mdContacts" aria-expanded="false" aria-controls="collapseTwo" uib-tooltip="Informations relatives aux auteurs et contacts pour la fiche de métadonnées" tooltip-popup-close-delay="100" tooltip-trigger="mouseenter" tooltip-placement="up">Auteurs et contacts pour la fiche de métadonnées</a>
+						<a role="button" href="#help"><span class="bt-doc glyphicon glyphicon-info-sign pull-right" aria-hidden="true" ng-click="vm.openModalDoc('mdContacts')"></span></a>
+					</h4>
+				</div>
+				<div id="mdContacts" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
+					<!-- directive editContact: mdContacts -->
+					<div class="panel-body" edit-contacts cnt-type="mdContacts" template-url="{% static "mdedit/html/editContacts.html" %}"></div>
+				</div>
+			</div>
+
+			<!-- TODO -->
+
+		</div>
+	</form>
+</div>

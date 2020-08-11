@@ -1,0 +1,41 @@
+{% extends "admin/change_form.html" %}
+
+{% load i18n admin_static admin_modify %}
+
+{% block content %}
+
+<div id="content-main">
+	<form action="" method="POST">
+		{% csrf_token %}
+
+		{% if form.non_field_errors|length > 0 %}
+		<div class="form-row">
+			<p class="errornote">Ces éléments empêchent la suppression de cet utilisateur.</p>
+			{{ form.non_field_errors }}
+		</div>
+		{% endif %}
+
+		{% if related_datasets  %}
+		<div class="form-row">
+			<p>Choisissez un compte utilisateur pour réaffecter les jeux de données orphelins : </p>
+			{{ form.new_user }}
+		</div>
+		<div class="form-row">
+			<p>Attention, si vous ne choisissez aucun compte de réaffectation, les jeux de données ci-après et leurs ressources seront définitivement <strong>supprimés</strong>.</p>
+			<ul>
+			{% for dataset in related_datasets %}
+				<li>{{ dataset.title }}</li>
+			{% endfor %}
+			</ul>
+		</div>
+		{% endif %}
+		<div class="form-row">
+			{{ form.confirm.label_tag }} {{ form.confirm }}
+		</div>
+		<div class="submit-row">
+			<input type="submit" value="Supprimer le compte utilisateur" class="default">
+			<!-- <a href="{% url "admin:idgo_admin_profile_changelist" %}">Revenir</a> -->
+		</div>
+	</form>
+</div>
+{% endblock %}

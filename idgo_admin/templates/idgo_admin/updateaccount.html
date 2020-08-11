@@ -1,0 +1,89 @@
+{% extends "idgo_admin/base.html" %}
+
+{% load bootstrap3 %}
+
+{% block breadcrumb_content %}
+<ol class="breadcrumb">
+	<li><span class="glyphicon glyphicon-home"></span></li>
+	<li class="active">Mes informations de profil</li>
+</ol>
+{% endblock breadcrumb_content %}
+
+{% block nav_content_extra %}
+<li role="presentation" name="account">
+	<a href="{% url "idgo_admin:update_account" %}" role="tab">Mon profil</a>
+</li>
+{% endblock nav_content_extra %}
+
+{% block main_content %}
+{% include "idgo_admin/alert_messages.html" %}
+<form method="post" class="well">
+	{% csrf_token %}
+	<div class="row">
+		<div class="col-xs-4">
+			{% bootstrap_field form.first_name %}
+		</div>
+		<div class="col-xs-4">
+			{% bootstrap_field form.last_name %}
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-xs-5">
+			{% bootstrap_field form.email %}
+		</div>
+		<div class="col-xs-3">
+			{% bootstrap_field form.phone %}
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-xs-8">
+			<div class="well">
+				<label>Entrez votre nouveau mot de passe ci-dessous si vous souhaitez le modifier.</label>
+				<p><small>Assurez-vous que votre mot de passe comporte au minimum 6 caractères, et que celui-ci contienne des chiffres, lettres minuscules et caractères spéciaux.</small></p>
+				<div class="row">
+					<div class="col-xs-8">
+						{% bootstrap_field form.password1 show_label=False %}
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-xs-8">
+						{% bootstrap_field form.password2 show_label=False %}
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="buttons-on-the-right-side">
+		<a class="btn btn-default" href="{% url "idgo_admin:update_account" %}">Annuler</a>
+		<button type="submit" class="btn btn-primary">Valider</button>
+	</div>
+</form>
+
+<div class="well">
+	<h4 class="modal-title">Compte FTP</h4>
+	<br />
+{% if not user.profile.is_ftp_account_exists %}
+	<p>Votre compte FTP n'est pas encore activé.</p>
+	<a class="btn btn-default" href="{% url "idgo_admin:create_sftp_account" %}">Créer mon compte FTP</a>
+{% else %}
+	<p>Adresse FTP : <strong>{{ ftp_url }}</strong></p>
+	<p>Votre compte FTP est activé : <em>compte utilisateur</em> <strong>{{ user.username }}</strong> / <em>mot de passe</em> <strong>{{ user.profile.sftp_password }}</strong></p>
+	<p>Attention, l'accès à ce compte FTP est sécurisé. Il ne peut se faire qu'avec le protocole SFTP (sur le port 22), donc avec une application spécifique comme FileZilla (<a class="link" href="https://filezilla-project.org">https://filezilla-project.org</a>)</p>
+	<a class="btn btn-default" href="{% url "idgo_admin:delete_sftp_account" %}">Supprimer mon compte FTP</a></li>
+{% endif %}
+</div>
+
+<div class="well">
+	<h3 class="modal-title">Supprimer mon compte</h3>
+	<br />
+	<p>Attention, cette action est irreversible et supprimera <strong>définitivement</strong> votre compte.</p>
+	<div>
+		<a class="btn btn-danger" href="{% url "idgo_admin:deleteAccount" %}">Je souhaite supprimer mon compte</a></li>
+	</div>
+</div>
+<script>
+$(function() {
+	$('#menu a[href="{% url "idgo_admin:update_account" %}"]').parent().addClass('active');
+});
+</script>
+{% endblock main_content %}

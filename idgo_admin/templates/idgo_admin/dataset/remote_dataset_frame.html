@@ -1,0 +1,15 @@
+<div class="well">
+	<p><strong>Le jeu de données est moissonné depuis un catalogue de données distant.</strong></p>
+	<dl>
+		<dt>URL indiquée pour le moissonnage</dt>
+		<dd>
+			<a type="button" class="btn btn-link" href="{{ remote.url }}">{{ remote.remote_instance.url }}</a>
+		</dd>
+		<dt>Fiche ou catalogue d'origine</dt>
+		<dd>
+			<a type="button" class="btn btn-link" href="{{ remote.url }}">{{ remote.url }}</a>
+		</dd>
+		<dt>Dernier moissonnage</dt>
+		<dd>{{ remote.updated_on|date:"d/m/Y"|default:"" }}</dd>
+	</dl>
+</div>

@@ -1,0 +1,33 @@
+<div class="btn-group">
+	<button role="button" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+		Exporter <span class="glyphicon glyphicon-triangle-bottom" style="top: 0.2em"></span>
+	</button>
+	<ul class="dropdown-menu dropdown-menu-right">
+		<li><a role="button" name="export-csv" format="odl" style="text-align: right;">Exporter au format ODL</a></li>
+		<li><a role="button" name="export-csv" format="datasud" style="text-align: right;">Exporter au format DataSud</a></li>
+	</ul>
+</div>
+<script>
+$(function() {
+	var query = window.location.search.substring(1);
+	var vars = query.split('&');
+	var qs = {};
+	for (var i = 0; i < vars.length; i ++) {
+		const pair = vars[i].split('=');
+		qs[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1]);
+	};
+	$('a[name="export-csv"]').on('click', function(e) {
+		e.preventDefault();
+		qs['format'] = $(this).attr('format');
+		qs['mode'] = '{{ target }}';
+		var kvp = [];
+		for (var k in qs) {
+			const key = encodeURI(k);
+			const val = qs[k] && encodeURI(qs[k]);
+			kvp.push(val ? key + '=' + val : key);
+		};
+		targetBlank('{% url "idgo_admin:export" %}?' + kvp.join('&'));
+		e.stopPropagation();
+	});
+});
+</script>

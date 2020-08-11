@@ -1,0 +1,327 @@
+{% extends "idgo_admin/base.html" %}
+
+{% load static %}
+{% load extra_tags %}
+
+{% block head_extras %}
+<script src="{% static 'libs/leaflet/leaflet.js' %}"></script>
+<script src="{% static 'libs/leaflet/leaflet-nontiledlayer.js' %}"></script>
+<script src="{% static 'libs/leaflet/leaflet-nontiledlayer-wms.js' %}"></script>
+<link rel="stylesheet" href="{% static 'libs/leaflet/leaflet.css' %}"/>
+{% endblock head_extras %}
+
+{% block breadcrumb_content %}
+<ol class="breadcrumb">
+	<li><span class="glyphicon glyphicon-home"></span></li>
+	<li class="active">Mes extractions</li>
+</ol>
+{% endblock breadcrumb_content %}
+
+{% block main_content %}
+
+{% include "idgo_admin/alert_messages.html" %}
+
+<template id="modal-body-template-on-success">
+	<div>
+		<dl>
+			<dt>Utilisateur</dt>
+			<dd name="user"></dd>
+			<dt>Cible</dt>
+			<dd name="target"></dd>
+			<dt>Système de coordonnées</dt>
+			<dd name="crs"></dd>
+			<dt>Format de données vecteur</dt>
+			<dd name="format_vector"></dd>
+			<dt>Format de données raster</dt>
+			<dd name="format_raster"></dd>
+			<dt>Date de la demande</dt>
+			<dd name="submission" type="datetime-local"></dd>
+			<dt>Date de début du traitement</dt>
+			<dd name="start" type="datetime-local"></dd>
+			<dt>Date de fin de traitement</dt>
+			<dd name="stop" type="datetime-local"></dd>
+		</dl>
+		<div class="form-group">
+			<label for="submission" class="control-label">Aperçu</label>
+			<div id="map" style="height: 238px;"></div>
+		</div>
+	</div>
+	<div class="buttons-on-the-right-side">
+		<a type="button" name="modify" class="btn btn-default">Ouvrir l'extracteur</a>
+		<button type="button" class="btn btn-default" data-dismiss="modal">Fermer</button>
+	</div>
+</template>
+
+<template id="modal-body-template-on-error">
+	<p>Une erreur s'est produite</p>
+	<div class="buttons-on-the-right-side">
+		<button type="button" class="btn btn-default" data-dismiss="modal">Fermer</button>
+	</div>
+</template>
+
+<div class="well">
+	<div name="actions" class="buttons-on-the-right-side">
+		<a type="button" class="btn btn-primary" href="{% url 'idgo_admin:extractor' site_name='extractor' %}">Nouvelle extraction</a>
+	</div>
+	<br />
+{% if tasks|length == 0 %}
+	{% if is_admin %}
+	<div role="alert" class="alert alert-info">
+		<span class="glyphicon glyphicon-bell" aria-hidden="true"></span>Le service d'extraction n'a pas encore été utilisé.
+	</div>
+	{% else %}
+	<div role="alert" class="alert alert-info">
+		<span class="glyphicon glyphicon-bell" aria-hidden="true"></span> Vous n'avez effectué aucune extraction.
+	</div>
+	{% endif %}
+{% else %}
+	<form method="POST">
+		<div class="table-responsive">
+			<table id="extractor-dashboard" class="board table table-striped table-bordered table-hover table-condensed">
+				<tr>
+					<th name="status">État <a name="sort" href="#"><span class="glyphicon glyphicon-sort" style="float: right;"></span></a></th>
+					<th name="target">Cible</th>
+					<th name="submission">Demande <a name="sort" href="#"><span class="glyphicon glyphicon-sort" style="float: right;"></span></a></th>
+					<th name="start">Début du traitement</th>
+					<th name="stop">Fin de traitement</th>
+					<th name="elapsed-time">Temps écoulé</th>
+				</tr>
+				{% for task in tasks %}
+				<tr id="{{ task.uuid }}" name="{{ task.uuid }}" success="{{ task.success|yesno:'true,false,null' }}">
+					<td name="status">{{ task.status }}</td>
+					<td name="target">
+						{% if task.model == 'Layer' %}
+							{% if task.target_object %}
+						<a href="{% url 'idgo_admin:dataset_editor' id=task.target_object.resource.dataset.pk %}#resources/{{ task.target_object.resource.pk }}">{{ task.target_object }}</a>
+							{% else %}
+						La ressource n'existe plus
+							{% endif %}
+						{% else %}
+						<a href="{% url 'idgo_admin:'|add:task.model|lower|add:'s' %}?id={{ task.target_object.id }}">{{ task.target_object }}</a>
+						{% endif %}
+					</td>
+					<td name="submission">{{ task.submission_datetime|date:"d/m/Y H:i" }}</td>
+					<td name="start">{{ task.start_datetime|date:"d/m/Y H:i"|default:"" }}</td>
+					<td name="stop">{{ task.stop_datetime|date:"d/m/Y H:i"|default:"" }}</td>
+					<td name="elapsed-time">{{ task.elapsed_time|default:"inf. à 1s" }}</td>
+				</tr>
+				{% endfor %}
+			</table>
+		</div>
+		<div name="actions" class="buttons-on-the-right-side">
+			<button type="button" name="open" class="btn btn-default disabled" disabled>Ouvrir</button>
+			<button type="submit" name="revoke" class="btn btn-danger disabled" disabled>Révoquer</button>
+		</div>
+	</form>
+	{% include "idgo_admin/widgets/paginator.html" with count=pagination.total current=pagination.current %}
+</div>
+
+<script>
+$(function() {
+	const $window = $(window);
+	const $document = $(document);
+
+	var qs = (function(items) {
+		var kvp = {};
+		for (var i = 0; i < items.length; i ++) {
+			const kv = items[i].split('=');
+			kvp[kv[0]]= kv[1];
+		};
+		return kvp;
+	})($window[0].location.search.substring(1).split('&'));
+
+	const reload = function(options) {
+		var kvp = [];
+		for (var k in qs) {
+			if (k) {
+				const key = encodeURI(k);
+				const val = qs[k] ? encodeURI(qs[k]) : null;
+				if (val) {
+					kvp.push(key + '=' + val);
+				}
+			};
+		};
+		if (options.withHash == false) {
+			$window[0].location.hash = '';
+		};
+		$window[0].location.search = kvp.join('&');
+	};
+
+	const openCmd = function(taskId) {
+		$modalHourglass.one('show.bs.modal', function(e) {
+			$.ajax({
+				type: 'GET',
+				url: '{% url "idgo_admin:extractor_task" %}?id=' + taskId,
+				success: function(data, status, xhr) {
+					const $template = $('#modal-body-template-on-success');
+					var $content = $($template.prop('content')).clone();
+
+					if (data.error) {
+						$content = $content.prepend('<dl><dt>Erreur</dt><dd>' + data.error + '</dd></dl>');
+					};
+
+					for (const k in data) {
+						const $target = $content.find('dd[name="' + k + '"]');
+						const text = ($target.attr('type') == 'datetime-local') ? moment(data[k]).format('DD/MM/YY HH:MM') : data[k];
+						$target.text(text);
+					};
+
+					$modal.find('.modal-title').html('<code>' + taskId + '</code>');
+					$modal.find('.modal-body').append($content);
+					$modal.find('a[name="modify"]').attr('href', '{% url "idgo_admin:extractor" site_name="extractor" %}?task=' + taskId);
+
+					var baseMaps = {};
+					{% if basemaps %}
+						{% if basemaps|length > 1 %}
+							{% for basemap in basemaps %}
+					baseMaps['{{ basemap.name }}'] = L.tileLayer('{{ basemap.url }}', {{ basemap.options|safe }});
+							{% endfor %}
+						{% else %}
+					baseMaps['{{ basemaps.0.name}}'] = L.tileLayer('{{ basemaps.0.url }}', {{ basemaps.0.options|safe }});
+						{% endif %}
+					{% else %}
+					baseMaps['CartoDB'] = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {});
+					{% endif %}
+
+					for (var defaultBaseMap in baseMaps) {
+						break;
+					};
+
+					const wmsLayer = new L.NonTiledLayer.WMS('{% url "idgo_admin:ows_preview" %}', {
+						format: 'image/png',
+						layers: data['layer'],
+						transparent: true
+					});
+
+					let layers = [baseMaps[defaultBaseMap], wmsLayer];
+
+					const footprintLayer = data.footprint ? L.geoJSON(data.footprint, {}) : undefined;
+					const bounds = footprintLayer ? footprintLayer.getBounds() : {{ bounds }};
+
+					if (footprintLayer) {
+						layers.push(footprintLayer)
+					};
+
+					const map = L
+						.map('map', {
+							'attributionControl': false,
+							'boxZoom': false,
+							'doubleClickZoom': false,
+							'dragging': false,
+							'layers': [baseMaps[defaultBaseMap], wmsLayer, footprintLayer],
+							'zoomControl': false
+						})
+						.fitBounds(bounds)
+						.addControl(new L.control.layers(baseMaps, null, {}))
+
+					$modal
+						.on('shown.bs.modal', function(e) {
+							e.preventDefault();
+							map.invalidateSize().fitBounds(bounds);
+						})
+						.modal('show');
+				},
+				error: function(xhr, statut, error) {
+					const $template = $('#modal-body-template-on-error');
+					const $content = $($template.prop('content')).clone();
+
+					$modal.find('.modal-title').html('<code>' + taskId + '</code>');
+					$modal.find('.modal-body').append($content);
+					$modal.modal('show');
+				}
+			})
+		}).modal('show');
+	};
+
+	const revokeCmd = function(taskId) {
+		const $form = $('form').attr('method', 'POST');
+		$form.append($('<input type="text" name="revoke"/>').hide());
+		$form.append($('<input type="text" name="task"/>').hide().val(taskId));
+		$modalHourglass.one('show.bs.modal', function(e) {
+			$form.submit();
+		}).modal('show');
+	};
+
+	const $open = $('[name="open"]');
+	const $revoke = $('[name="revoke"]');
+
+	const $table = $('#extractor-dashboard');
+
+	$table.find('tr>th>a[name="sort"]')
+		.click(function(e) {
+			e.preventDefault();
+			const $this = $(this);
+			const targetValue = $this.parent().attr('name');
+			qs['sortby'] = qs['sortby'] == targetValue ? '-' + targetValue : targetValue;
+			reload({withHash: false});
+		});
+
+	$table.find('tr')
+		.on('row.selected', function(e) {
+			const $row = $(this);
+
+			const success = $row.attr('success');
+
+			$row.prop('selected', true).addClass('selected');
+			$('[name="actions"]').find('button, a[role="button"]').each(function() {
+				if ($(this).prop('name') == 'revoke' && success != 'null') {
+					return;
+				};
+				$(this).prop('disabled', false).removeClass('disabled');
+			});
+
+			$open.off('click').on('click', function(e) {
+				e.preventDefault();
+				openCmd($row.prop('id'));
+			});
+
+			$revoke.off('click').on('click', function(e) {
+				e.preventDefault();
+				revokeCmd($row.prop('id'));
+			});
+
+		})
+		.on('row.unselected', function(e) {
+			const $row = $(this);
+			$row.prop('selected', false).removeClass('selected');
+			$('[name="actions"]').find('button, a[role="button"]').each(function() {
+				$(this).prop('disabled', true).addClass('disabled');
+			});
+		})
+		.on('click', function(e) {
+			if (e.target.localName == 'a') {
+				return;
+			};
+			const $that = $table.find('tr:selected');
+			const $this = $(this);
+			if ($that) {
+				$that.trigger('row.unselected');
+				if ($this.index() != $that.index()) {
+					history.pushState(null, null, '#' + $this.attr('name'));
+					$this.trigger('row.selected');
+				} else {
+					history.pushState(null, null, '#');
+				};
+			};
+		});
+
+	$window
+		.bind('hashchange', function(e) {
+			const name = $window[0].location.hash.substring(1);
+			const $that = $table.find('tr:selected');
+			const $this = name ? $table.find('tr[name="' + name + '"]') : '';
+			if ($that) {
+				$that.trigger('row.unselected');
+				if ($this && ($this.index() != $that.index())) {
+					$this.trigger('row.selected');
+				};
+			};
+		})
+		.trigger('hashchange');
+
+	$('#menu a[href="{% url "idgo_admin:extractor_dashboard" %}"]').parent().addClass('active');
+});
+</script>
+{% endif %}
+
+{% endblock main_content %}

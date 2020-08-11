@@ -1,0 +1,12 @@
+{% extends "admin/change_list.html" %}
+{% load i18n admin_urls %}
+
+{% block object-tools-items %}
+{{ block.super }}
+<li>
+  <a href="{% url 'admin:contact_users' %}" class="viewsitelink">Contacter les utilisateurs</a>
+</li>
+<li>
+  <a href="{% url 'admin:export_users_csv' %}">Exporter les utilisateurs au format CSV</a>
+</li>
+{% endblock %}

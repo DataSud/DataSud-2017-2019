@@ -1,0 +1,32 @@
+{% load static %}
+{% with id=widget.attrs.id name=widget.name placeholder=widget.attrs.placeholder %}
+<div class="form-group">
+	<input id="id_{{ name }}_typeahead" type="text" class="form-control" placeholder="{{ placeholder }}" autocomplete="off">
+	<input type="hidden" name="{{ name }}" id="id_{{ name }}" value="{% for group, options, index in widget.optgroups %}{% for option in options %}{% if option.selected %}{{ option.value }}{% endif %}{% endfor %}{% endfor %}">
+</div>
+<script src="{% static 'libs/bootstrap-typeahead/bootstrap3-typeahead.js' %}"></script>
+<script>
+$(function() {
+	function unescape(string) {
+		return new DOMParser().parseFromString(string, 'text/html').querySelector('html').textContent;
+	};
+	$('#id_{{ name }}_typeahead')
+		.typeahead({
+			source: [{% for group, options, index in widget.optgroups %}{% for option in options %}{% if option.value != '' %}
+				{
+					id: '{{ option.value }}',
+					name: unescape("{{ option.label }}"),
+					selected: {{ option.selected|yesno:'true,false,null' }},
+				},{% endif %}{% endfor %}{% endfor %}
+			],
+			items: 10,
+			autoSelect: true,
+			fitToElement: true,
+			afterSelect: function(data) {
+				 $('#id_{{ name }}').val(data.id).trigger('change');
+			}
+		})
+		.val({% for group, options, index in widget.optgroups %}{% for option in options %}{% if option.selected %}'{{ option.label }}'{% endif %}{% endfor %}{% endfor %});
+});
+</script>
+{% endwith %}
