@@ -1,0 +1,99 @@
+/* ----------------------------------------------------------------------------
+// Ezdz [izy-dizy]
+// Licensed under the MIT license.
+// http://github.com/jaysalvat/ezdz/
+// ----------------------------------------------------------------------------
+// Copyright (C) 2014 Jay Salvat
+// http://jaysalvat.com/
+// --------------------------------------------------------------------------*/
+
+.ezdz-dropzone {
+    position: relative;
+    border-radius: 4px;
+    width: 100%;
+    padding: 12px 12px;
+    height: auto;
+    border: 2px dashed #cccccc;
+    overflow: hidden;
+    background-color: transparent;
+    -webkit-transition: background-color .321s, border .321s;
+            transition: background-color .321s, border .321s;
+}
+
+.ezdz-dropzone:focus,
+.ezdz-dropzone:hover {
+    background-color: #ffffff;
+    -webkit-box-shadow: 0 0 2px 1px #ffffff;
+            box-shadow: 0 0 2px 1px #ffffff;
+}
+
+.ezdz-dropzone input[type="file"] {
+    cursor: pointer;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    margin: 0;
+    padding: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+}
+
+.ezdz-dropzone div {
+    /* */
+}
+
+.ezdz-dropzone span {
+    background-color: inherit;
+    color: inherit;
+    width: auto;
+    padding: 3px 6px;
+    vertical-align: middle;
+    display: inline-block;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.ezdz-dropzone .dz-filename {
+    border-radius: 3px;
+}
+
+.ezdz-dropzone span:not(:last-child) {
+    margin-right: 6px;
+}
+
+.ezdz-dropzone img {
+    border-radius: 5px;
+    max-width: 95%;
+    max-height: 95%;
+    margin-top: -3px;
+    vertical-align: middle;
+}
+
+.ezdz-focus {
+    background-color: #ffffff;
+    border-color: #002880;
+}
+
+.ezdz-enter {
+    background-color: #ffffff;
+    border-color: #002880;
+}
+
+.ezdz-accept {
+    margin: 1px;
+    border: 1px solid #ccc;
+}
+
+.ezdz-reject {
+    margin: 1px;
+    border: 1px solid red;
+}
+
+.ezdz-accept .dz-filename {
+    background-color: #14d47f;
+    color: #ffffff;
+}
