@@ -1,0 +1,10 @@
+[{
+	"model": "ihm.ihmsettings",
+	"pk": 1,
+	"fields": {
+		"name": "download-modal-res-list",
+		"contents": "# Avant de t\u00e9l\u00e9charger...\r\n\r\n## Campagne de sondages sur l'utilisation de DATASUD\r\n\r\n![logo_datasud](https:\/\/trouver-rec.datasud.fr\/img\/data-paca-logo.png \"DATASUD\")\r\n\r\n* Vous \u00eates sur le point de t\u00e9l\u00e9charger la ressource. Avant de cliquer sur le bouton T\u00c9L\u00c9CHARGER ci-dessous, prenez cinq minutes pour r\u00e9pondre \u00e0 ce sondage et \u00e0 quelques questions facultatives...\r\n\r\n---\r\n* Vous avez une remarque ? une question ? Vous pouvez laisser un commentaire sur le [jeu de donn\u00e9es]({{URL_DATASET}}) et partager avec la communaut\u00e9 d'utilisateurs de DATASUD (l'inscription pr\u00e9alable \u00e0 l'application DISQUS est n\u00e9cessaire)\r\n\r\n* Entreprise ? Start-up ? Porteur de projet ? Vous utilisez ce jeu de donn\u00e9es et souhaitez valoriser votre r\u00e9utilisation ? Alors d\u00e9clarez votre [r\u00e9utilisation du jeu de donn\u00e9es](https:\/\/trouver-rec.datasud.fr\/showcase\/new) (l'inscription pr\u00e9alable \u00e0 DATASUD est n\u00e9cessaire)",
+		"target": "ckan",
+		"activate": true
+	}
+}]
