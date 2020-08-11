@@ -1,0 +1,73 @@
+{% extends "idgo_admin/base.html" %}
+
+{% load bootstrap3 %}
+
+{% block header %}
+<div class="page-header">
+	<div class="container">
+		<div class="row">
+			<div class="col-md-12">
+				{% block header_content %}
+				{% include "commandes/header.html" %}
+				{% endblock header_content %}
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock header %}
+
+{% block nav_content %}
+
+{% endblock nav_content %}
+
+{% block main_content %}
+{% for hidden_field in form.hidden_fields %}
+{{ hidden_field }}
+{% endfor %}
+{% if form.non_field_errors %}
+<div class="alert alert-danger" role="alert">
+	{% for error in form.non_field_errors %}
+	{{ error }}
+	{% endfor %}
+</div>
+{% endif %}
+<form names="order" action="/commandes/" method="post" enctype="multipart/form-data" class="well">
+	<p>Toute organisation partenaire CRIGE DATA a le droit à une commande
+		de fichiers fonciers <abbr title="Mise À Jour des Informations Cadastrales">MAJIC</abbr> III par an. <br>
+		A chaque demande, Les deux documents suivants doivent être fournis:
+		<ul>
+			<li>Un acte d'engagement <abbr title="Direction Générale des Finances Publiques">DGFIP</abbr> rempli.
+				<a href="http://www.crige-paca.org/index.php?eID=tx_crigedocuments&hash=17314c07&fid=2934" target="_blank">Télécharger l'acte d'engagement à remplir.</a>
+			</li>
+			<li>Un récipissé CNIL du <abbr title="Délégué à la Protection des Données">DPO</abbr> de l'organisation. Le DPO peut être désigné en ligne via <a href="https://www.cnil.fr/fr/designation-dpo" target="_blank">ce lien.</a>
+			</li>
+		</ul>
+		Ces documents peuvent être téléversés via le formulaire ci-dessous. Un mail de confirmation vous sera envoyé et votre demande sera traitée sous 15 jours par l'administrateur du CRIGE-PACA.
+	</p><br>
+	{% csrf_token %}
+	<div class="row">
+		<div class="col-md-8 col-lg-7">
+			{% bootstrap_field form.dpo_cnil %}
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-8 col-lg-7">
+			{% bootstrap_field form.acte_engagement %}
+		</div>
+	</div>
+	<br />
+	<div class="buttons-on-the-right-side">
+		<button type="submit" class="btn btn-primary">Valider votre commande</button>
+	</div>
+	<hr />
+	<div class="row">
+		<div class="col-xs-12">
+			<small>* Les champs marqués d'un astérisque sont obligatoires.</small>
+		</div>
+	</div>
+</form>
+{% endblock main_content %}
+
+{% block footer %}
+{% include "commandes/footer.html" %}
+{% endblock footer %}

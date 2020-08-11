@@ -1,0 +1,30 @@
+{% load static %}
+<link rel="stylesheet" type="text/css" href="{% static "css/commandes.css" %}" />
+{% load bootstrap3 %}
+
+<div class="row">
+	<div class="btn-group login">
+		{% if user.profile.is_admin %}
+		<span class="user-status">admin</span>
+		{% endif %}
+		<button type="button" class="dropdown-toggle" data-toggle="dropdown">
+			{{ user.get_full_name}} <span class="glyphicon glyphicon-user"></span>
+		</button>
+		<ul class="dropdown-menu">
+			<li><a href="{% url "idgo_admin:update_account" %}">Mon profil</a></li>
+			<li><a href="{% url "server_cas:signOut" %}">Me déconnecter</a></li>
+		</ul>
+	</div>
+</div>
+
+<div class="row justify-content-start align-items-center">
+	<div class=col-md-2>
+		<span class="title">
+			<img src="{% static "img/logo_crige_greenforest_court.png" %}" style="height: 57px;" />
+		</span>
+	</div>
+
+	<div class=col-md-10>
+		<span class="title-commandes">Commande de fichiers fonciers</span>
+	</div>
+</div>
