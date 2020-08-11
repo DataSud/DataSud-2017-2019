@@ -1,0 +1,56 @@
+[
+{
+	"code": "2154",
+	"codespace": "EPSG",
+	"value": "RGF93 – Lambert 93 (EPSG:2154)"
+},
+{
+	"code": "3942",
+	"codespace": "EPSG",
+	"value": "RGF93 – Lambert 93 CC42 (EPSG:3942)"
+},
+{
+	"code": "3943",
+	"codespace": "EPSG",
+	"value": "RGF93 – Lambert 93 CC43 (EPSG:3943)"
+},
+{
+	"code": "3944",
+	"codespace": "EPSG",
+	"value": "RGF93 – Lambert 93 CC44 (EPSG:3944)"
+},
+{
+	"code": "3945",
+	"codespace": "EPSG",
+	"value": "RGF93 – Lambert 93 CC45 (EPSG:3945)"
+},
+{
+	"code": "4258",
+	"codespace": "EPSG",
+	"value": "ETRS89 (EPSG:4258)"
+},
+{
+	"code": "27562",
+	"codespace": "EPSG",
+	"value": "NTF Paris –  Lambert Centre France (EPSG:27562)"
+},
+{
+	"code": "27563",
+	"codespace": "EPSG",
+	"value": "NTF Paris –  Lambert Sud France (EPSG:27563)"
+},
+{
+	"code": "27564",
+	"codespace": "EPSG",
+	"value": "NTF Paris –  Lambert Corse (EPSG:27564)"
+},
+{
+	"code": "27572",
+	"codespace": "EPSG",
+	"value": "NTF Paris – Lambert zone II (EPSG:27572)"
+},
+{
+	"code": "4326",
+	"codespace": "EPSG",
+	"value": "WGS84 – 2D (EPSG:4326)"
+}]

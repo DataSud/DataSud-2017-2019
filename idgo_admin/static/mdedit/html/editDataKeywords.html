@@ -1,0 +1,49 @@
+<div class="">
+	<label class="h4 bt-doc control-label" for="~{id}~" uib-tooltip="~{description}~" tooltip-trigger="mouseenter" tooltip-placement="right" ng-click="openModalDoc(help)">~{label}~</label>
+	<table class="table table-condensed">
+		<tr>
+			<th>
+				<span class="bt-doc control-label" uib-tooltip="~{keyword.description}~" tooltip-trigger="mouseenter" tooltip-placement="right" ng-click="openModalDoc(help)">~{keyword.label}~</span>
+			</th>
+			<th>
+				<span class="bt-doc control-label" uib-tooltip="~{keywordType.description}~" tooltip-trigger="mouseenter" tooltip-placement="right" ng-click="openModalDoc(help)">~{keywordType.label}~</span>
+			</th>
+			<th>
+				<span class="bt-doc control-label" uib-tooltip="~{thesaurusName.description}~" tooltip-trigger="mouseenter" tooltip-placement="right" ng-click="openModalDoc(help)">~{thesaurusName.label}~</span>
+			</th>
+			<th>
+				<span class="bt-doc control-label" uib-tooltip="~{thesaurusDatePublication.description}~" tooltip-trigger="mouseenter" tooltip-placement="right" ng-click="openModalDoc(help)">~{thesaurusDatePublication.label}~</span>
+			</th>
+			<th ng-show="multi">
+				<button type="button" class="btn btn-default btn-xs pull-right glyphicon glyphicon-plus" aria-hidden="true" ng-click="addItem()"></button>
+			</th>
+		</tr>
+		<tr ng-repeat="item in vm.data.metadata[field] track by $index">
+			<td>
+				<input type="text" class="form-control input-sm" name="~{keyword.id}~" id="~{keyword.id}~" placeholder="~{keyword.placeholder}~" ng-model="item.keywords" ng-blur="checkKeywords(item.keywords, $index)" />
+			</td>
+			<td>
+				<select class="form-control input-sm selectpicker_" name="~{keywordType.id}~" id="~{keywordType.id}~" ng-options="type.id as type.value for type in MD_KeywordTypeCode" ng-model="item.keywordType">
+					<option value="">Sélectionnez</option>
+				</select>
+			</td>
+			<td>
+				<input type="text" class="form-control input-sm" name="~{thesaurusName.id}~" id="~{thesaurusName.id}~" placeholder="~{thesaurusName.placeholder}~" ng-model="item.thesaurusName" />
+			</td>
+			<td>
+				<div class="input-group date">
+					<input type="text" class="form-control input-sm" uib-datepicker-popup="yyyy-MM-dd" is-open="datePicker['thesaurus_datepublicationOpened_'+$index]" datepicker-options="{startingDay: 1}" close-text="Close" ng-model="item.thesaurusDates[0].date" name="~{thesaurusDatePublication.id}~" id="~{thesaurusDatePublication.id}~" />
+					<span class="input-group-btn">
+						<button type="button" class="btn btn-default btn-sm" ng-click="openDatePicker($event, 'thesaurus_datepublicationOpened_'+$index)">
+							<i class="glyphicon glyphicon-calendar"></i>
+						</button>
+					</span>
+					<input type="hidden" class="form-control input-sm" name="~{thesaurusDates.dateType.id}~" id="~{thesaurusDates.dateType.id}~" ng-model="item.thesaurusDates[0].dateType" ng-value="publication" />
+				</div>
+			</td>
+			<td ng-show="multi">
+				<button type="button" class="btn btn-default btn-xs pull-right glyphicon glyphicon-minus" aria-hidden="true" ng-click="removeItem(item)"></button>
+			</td>
+		</tr>
+	</table>
+</div>

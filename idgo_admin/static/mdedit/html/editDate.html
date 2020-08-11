@@ -1,0 +1,9 @@
+<div class="">
+	<label for="~{id}~" uib-tooltip="~{description}~" tooltip-trigger="mouseenter" tooltip-placement="right" ng-click="openModalDoc(help)">~{label}~</label>
+	<div class="input-group date">
+		<input type="text" class="form-control input-sm" uib-datepicker-popup="yyyy-MM-dd" is-open="datePicker[id]" datepicker-options="{startingDay: 1}" close-text="Close" ng-model="vm.data.metadata[field]" name="~{id}~" id="~{id}~" />
+		<span class="input-group-btn">
+			<button type="button" class="btn btn-default btn-sm" ng-click="openDatePicker($event, id)"><i class="glyphicon glyphicon-calendar"></i></button>
+		</span>
+	</div>
+</div>

@@ -1,0 +1,890 @@
+{
+	"_comments": "Les valeurs précédées d'un undescore '_' ne sont pas directments utilisées dans l'interface. Elles sont conservées pour mémoire ou pour l'ajout de commentaires.",
+	"lang": "fr",
+	"ui":
+	{
+		"bt_help": "Aide",
+		"bt_upload_xml": "Charger un XML",
+		"bt_download_xml": "Télécharger un XML",
+		"bt_view_mode": "Mode visualisation",
+		"bt_edit_mode": "Mode édition",
+		"bt_simple_view": "Vue simple",
+		"bt_complet_view": "Vue complète",
+		"bt_accordion_open": "Ouvrir/fermer les panneaux",
+		"modal_download":
+		{
+			"no_server": "Serveur de téléchargement non configuré ou non disponible: pour créer un fichier XML, copiez (Ctrl+c) le contenu de la zone de texte ci-dessus, collez-le (Ctrl+v) dans un fichier text et enregistrez le avec l'extention '.xml'. Si vous êtes sous FireFox ou Chrome, vous pouvez essayer d'enregistrer le fichier à partir du lien ci-dessous (renommer le fichier avec l'extention '.xml'."
+		}
+	},
+	"md_errors":
+	{
+		"_comment": "Si le message d'erreur est vide, l'erreur est désactivée (elle n'apparaît pas dasn mdEdit)",
+		"mdFileIdentifier": "Info: l'identifiant de la fiche doit être renseigné. Un identifiant a été généré automatiquement.",
+		"mdLanguage": "Info: la langue de description de la fiche doit être renseigné. Par défaut, la langue du navigateur internet est utilisée.",
+		"mdCharacterSet": "Info: l'encodage de la fiche de métadonnées doit être renseigné. Par défaut, cette valeur est fixée à 'UTF-8'.",
+		"mdHierarchyLevel": "Info: le niveau hiérarchique de la fiche de métadonnées doit être renseigné. Par défaut, cette valeur est fixée à 'dataset'.",
+		"mdContacts": "Erreur: au moins un auteur ou contact pour la fiche descriptive des données doit être renseigné.",
+		"mdContactsOrganisation": "Erreur: un organisme doit être renseigné pour chaque contact.",
+		"_name": "",
+		"mdContactsPosition": "",
+		"mdContactsAddress": "",
+		"mdContactscp": "",
+		"md_contact_city": "",
+		"md_contact_tel": "",
+		"md_contact_email": "Erreur: une adresse email doit être renseigné pour chaque contact.",
+		"md_contact_role": "Info: un rôle doit être défini pour chaque contatc. La valeur par défaut est fixée à 'Point de contact'.",
+		"mdDateStamp": "Info: date de création ou mise à jour de la fiche obligatoire. la date d'aujourd'hui est utilisée par défaut.",
+		"mdStandardName": "Info: le nom du standard de métadonnées doit être renseigné. Par défaut, cette valeur est 'ISO 19115/19139'.",
+		"mdStandardVersion": "Info: la version du standard de métadonnées doit être renseigné. Par défaut, cette valeur est 'Cor 1:2006'",
+		"_dataReferenceSystems": "Erreur: le système de projection de la base de données doit être renseigné.",
+		"dataTitle": "Erreur: le titre de la base de données doit être renseigné.",
+		"data_dates": "Erreur: au moins une date pour la base de données doit être renseigné (création, révision ou pblication).",
+		"dataIdentifiers": "Info: au moins un identifiant de la base de données doit être renseigné. Par défaut, cette valeur est fixée à la valeur de l'identifiant de la fiche (mdFileIdentifier).",
+		"dataAbstract": "Erreur: le réumé descriptif de la base de données doit être renseigné.",
+		"dataBrowseGraphics": "Info: au moins une illustration (miniature) de la base de données devrait être renseigné.",
+		"dataMaintenanceFrequencyCode": "",
+		"dataTemporalExtents": "",
+		"dataLanguages": "Info: au moins une langue pour la base de donnéesdoit être renseigné. Par défaut, la langue du navigateur internet est utilisée.",
+		"dataTopicCategories": "Erreur: au moins une catégorie internationale (ISO) doit-être renseignée.",
+		"dataInspireKeywords": "Erreur: au moins un thème européen (Inspire) doit-être renseigné.",
+		"dataKeywordsList": "",
+		"dataKeywords": "Info: pensez à renseigner quelques mots-clés.",
+		"dataContacts": "Erreur: au moins un contact pour la base de données doit être renseigné.",
+		"data_contact_organisation": "Erreur: un organisme doit être renseigné pour chaque contact.",
+		"data_contact_name": "",
+		"data_contact_position": "",
+		"data_contact_address": "",
+		"data_contact_cp": "",
+		"data_contact_city": "",
+		"data_contact_tel": "",
+		"data_contact_email": "Erreur: une adresse email doit être renseigné pour chaque contact.",
+		"data_contact_role": "Info: un rôle doit être défini pour chaque contatc. La valeur par défaut est fixée à 'Point de contact'.",
+		"data_geographicextents": "Erreur: au moins une emprise géographique de la base de données doit-être renseignée (système WGS84).",
+		"dataReferenceSystems": "Erreur: au moins un système de projection pour la base de données doit-être renseigné.",
+		"data_presentationform": "",
+		"data_spatialrepresentationtype": "Info: le type de données (vecteur ou raster) doit être renseigné. Par défaut, cette valeur est fixée à 'vecteur'.",
+		"data_scales": "Erreur: au moins une échelle optimale d'utilisation ou résolution des données doit-être renseignée.",
+		"data_scaledenominator": "",
+		"data_scaledistance": "",
+		"data_dq_level": "Info: le niveau de description pour la qualité des données doit-être renseigné. Par défaut, la valeur utilisée est celle définie pour l'ensemble de la fiche.",
+		"data_li_statement": "Erreur: un texte descriptif de la qualité des données doit être renseigné.",
+		"data_li_processstep": "",
+		"data_li_source": "",
+		"data_characterset": "Info: l'encodage de la base de données doit être renseigné. Par défaut, cette valeur est fixée à 'UTF-8'.",
+		"data_distformats": "Erreur: au moins un format de diffusion doit être renseigné.",
+		"data_uselimitations": "",
+		"data_legal_uselimitations": "",
+		"data_legal_useconstraints": "",
+		"data_legal_accessconstraints": "",
+		"data_legal_accessinspireconstraints": "Info: au moins une contrainte légale Inspire doit être renseignée. La valeur utilisée par défaut est 'Aucune contrainte Inspire ne s'applique'.",
+		"data_legal_accessotherconstraints": "",
+		"data_security_uselimitations": "",
+		"data_security_classification": "Info: un niveau de classification doit être renseigné. La valeur utilisée par défaut est 'Aucune restriction'.",
+		"data_linkages": "Info: pensez à saisir des lien vers des ressources associées, si nécessaire (guide d'utilisation, cartes utilisant les données, téléchargement des données, visuisation des données, etc.) ",
+		"data_dq_conformities": "",
+		"data_dq_inspireconformities": ""
+	},
+	"codelists":
+	{
+		"CI_DateTypeCode": [
+		{
+			"id": "creation",
+			"value": "Création"
+		},
+		{
+			"id": "publication",
+			"value": "Publication"
+		},
+		{
+			"id": "revision",
+			"value": "Révision"
+		}],
+		"MD_TopicCategoryCode": [
+		{
+			"id": "farming",
+			"value": "Agriculture"
+		},
+		{
+			"id": "biota",
+			"value": "Flore et faune"
+		},
+		{
+			"id": "boundaries",
+			"value": "Limites politiques et administratives"
+		},
+		{
+			"id": "climatologyMeteorologyAtmosphere",
+			"value": "Climatologie, météorologie"
+		},
+		{
+			"id": "economy",
+			"value": "Economie"
+		},
+		{
+			"id": "elevation",
+			"value": "Topographie"
+		},
+		{
+			"id": "environment",
+			"value": "Ressources et gestion de l’environnement"
+		},
+		{
+			"id": "geoscientificInformation",
+			"value": "Géosciences"
+		},
+		{
+			"id": "health",
+			"value": "Santé"
+		},
+		{
+			"id": "imageryBaseMapsEarthCover",
+			"value": "Carte de référence de la couverture terrestre"
+		},
+		{
+			"id": "intelligenceMilitary",
+			"value": "Infrastructures militaires"
+		},
+		{
+			"id": "inlandWaters",
+			"value": "Hydrographie"
+		},
+		{
+			"id": "location",
+			"value": "Localisant"
+		},
+		{
+			"id": "oceans",
+			"value": "Océans"
+		},
+		{
+			"id": "planningCadastre",
+			"value": "Planification et aménagement du territoire"
+		},
+		{
+			"id": "society",
+			"value": "Société"
+		},
+		{
+			"id": "structure",
+			"value": "Aménagements urbains"
+		},
+		{
+			"id": "transportation",
+			"value": "Infrastructures de transport"
+		},
+		{
+			"id": "utilitiesCommunication",
+			"value": "Réseaux de télécommunication, d’énergie"
+		}],
+		"MD_CharacterSetCode": [
+		{
+			"id": "ucs2",
+			"value": "ucs2"
+		},
+		{
+			"id": "ucs4",
+			"value": "ucs4"
+		},
+		{
+			"id": "utf7",
+			"value": "utf7"
+		},
+		{
+			"id": "8859part16",
+			"value": "8859part16"
+		},
+		{
+			"id": "8859part15",
+			"value": "8859part15"
+		},
+		{
+			"id": "8859part1",
+			"value": "8859part1"
+		},
+		{
+			"id": "utf16",
+			"value": "utf16"
+		},
+		{
+			"id": "utf8",
+			"value": "utf-8"
+		},
+		{
+			"id": "8859part2",
+			"value": "8859part2"
+		},
+		{
+			"id": "8859part3",
+			"value": "8859part3"
+		},
+		{
+			"id": "8859part4",
+			"value": "8859part4"
+		},
+		{
+			"id": "8859part5",
+			"value": "8859part5"
+		},
+		{
+			"id": "8859part6",
+			"value": "8859part6"
+		},
+		{
+			"id": "8859part7",
+			"value": "8859part7"
+		},
+		{
+			"id": "8859part8",
+			"value": "8859part8"
+		},
+		{
+			"id": "8859part9",
+			"value": "8859part9"
+		},
+		{
+			"id": "8859part10",
+			"value": "8859part10"
+		},
+		{
+			"id": "8859part11",
+			"value": "8859part11"
+		},
+		{
+			"id": "8859part13",
+			"value": "8859part13"
+		},
+		{
+			"id": "8859part14",
+			"value": "8859part14"
+		},
+		{
+			"id": "jis",
+			"value": "jis"
+		},
+		{
+			"id": "shiftJIS",
+			"value": "shiftJIS"
+		},
+		{
+			"id": "eucJP",
+			"value": "eucJP"
+		},
+		{
+			"id": "usAscii",
+			"value": "usAscii"
+		},
+		{
+			"id": "ebcdic",
+			"value": "ebcdic"
+		},
+		{
+			"id": "eucKR",
+			"value": "eucKR"
+		},
+		{
+			"id": "big5",
+			"value": "big5"
+		},
+		{
+			"id": "GB2312",
+			"value": "GB2312"
+		}],
+		"CI_RoleCode": [
+		{
+			"id": "resourceProvider",
+			"value": "Fournisseur"
+		},
+		{
+			"id": "custodian",
+			"value": "Gestionnaire"
+		},
+		{
+			"id": "owner",
+			"value": "Propriétaire"
+		},
+		{
+			"id": "author",
+			"value": "Auteur"
+		},
+		{
+			"id": "pointOfContact",
+			"value": "Point de contact"
+		},
+		{
+			"id": "user",
+			"value": "Utilisateur"
+		},
+		{
+			"id": "distributor",
+			"value": "Distributeur"
+		},
+		{
+			"id": "originator",
+			"value": "Commanditaire"
+		},
+		{
+			"id": "principalInvestigator",
+			"value": "Producteur / Maître d’œuvre principal ou d'ensemble"
+		},
+		{
+			"id": "processor",
+			"value": "Intégrateur / Exécutant secondaire"
+		},
+		{
+			"id": "publisher",
+			"value": "Editeur"
+		}],
+		"MD_ClassificationCode": [
+		{
+			"id": "topSecret",
+			"value": "Top secret"
+		},
+		{
+			"id": "secret",
+			"value": "Secret"
+		},
+		{
+			"id": "confidential",
+			"value": "Confidentiel"
+		},
+		{
+			"id": "restricted",
+			"value": "Restreint"
+		},
+		{
+			"id": "unclassified",
+			"value": "Non classifié"
+		}],
+		"MD_InspireRestrictionCode": [
+		{
+			"id": "L124-4-I-1 du code de l'environnement (Directive 2007/2/CE (INSPIRE), Article 13.1.a)",
+			"value": "La confidentialité des travaux des autorités publiques, lorsque cette confidentialité est prévue par la loi.",
+			"search": "13.1.a"
+		},
+		{
+			"id": "L124-5-II-1 du code de l'environnement (Directive 2007/2/CE (INSPIRE), Article 13.1.b)",
+			"value": "Les relations internationales, la sécurité publique ou la défense nationale.",
+			"search": "13.1.b"
+		},
+		{
+			"id": "L124-5-II-2 du code de l'environnement (Directive 2007/2/CE (INSPIRE), Article 13.1.c)",
+			"value": "La bonne marche de la justice, la possibilité pour toute personne d’être jugée équitablement ou la capacité d’une autorité publique d’effectuer une enquête d’ordre pénal ou disciplinaire.",
+			"search": "13.1.c"
+		},
+		{
+			"id": "L124-4-I-1 du code de l'environnement (Directive 2007/2/CE (INSPIRE), Article 13.1.d)",
+			"value": "La confidentialité des informations commerciales ou industrielles, lorsque cette confidentialité est prévue par la législation nationale ou communautaire afin de protéger un intérêt économique légitime, notamment l’intérêt public lié à la préservation de la confidentialité des statistiques et du secret fiscal.",
+			"search": "13.1.d"
+		},
+		{
+			"id": "L124-5-II-3 du code de l'environnement (Directive 2007/2/CE (INSPIRE), Article 13.1.e)",
+			"value": "Les droits de propriété intellectuelle.",
+			"search": "13.1.e"
+		},
+		{
+			"id": "L124-4-I-1 du code de l'environnement (Directive 2007/2/CE (INSPIRE), Article 13.1.f)",
+			"value": "La confidentialité des données à caractère personnel et/ou des fichiers concernant une personne physique lorsque cette personne n’a pas consenti à la divulgation de ces informations au public, lorsque la confidentialité de ce type d’information est prévue par la législation nationale ou communautaire.",
+			"search": "13.1.f"
+		},
+		{
+			"id": "L124-4-I-3 du code de l'environnement (Directive 2007/2/CE (INSPIRE), Article 13.1.g)",
+			"value": "Les intérêts ou la protection de toute personne qui a fourni les informations demandées sur une base volontaire sans y être contrainte par la loi ou sans que la loi puisse l’y contraindre, à moins que cette personne n’ait consenti à la divulgation de ces données.",
+			"search": "13.1.g"
+		},
+		{
+			"id": "L124-4-I-2 du code de l'environnement (Directive 2007/2/CE (INSPIRE), Article 13.1.h)",
+			"value": "La protection de l’environnement auquel ces informations ont trait, comme par exemple la localisation d’espèces rares.",
+			"search": "13.1.h"
+		},
+		{
+			"id": "Pas de restriction d'accès public selon INSPIRE",
+			"value": "Aucun des articles de la loi ne peut être invoqué pour justifier d’une restriction d’accès public.",
+			"search": "pas de restriction"
+		}],
+		"MD_InspireTopicCategoryCode": [
+		{
+			"id": "Coordinate reference systems",
+			"value": "Référentiels de coordonnées"
+		},
+		{
+			"id": "Geographical grid systems",
+			"value": "Systèmes de maillage géographique"
+		},
+		{
+			"id": "Geographical names",
+			"value": "Dénominations géographiques"
+		},
+		{
+			"id": "Administrative units",
+			"value": "Unités administratives"
+		},
+		{
+			"id": "Adresses",
+			"value": "Adresses"
+		},
+		{
+			"id": "Cadastral parcels",
+			"value": "Parcelles cadastrales"
+		},
+		{
+			"id": "Transport networks",
+			"value": "Réseaux de transport"
+		},
+		{
+			"id": "Hydrography",
+			"value": "Hydrographie"
+		},
+		{
+			"id": "Protected sites",
+			"value": "Sites protégés"
+		},
+		{
+			"id": "Elevation",
+			"value": "Altitude"
+		},
+		{
+			"id": "Land cover",
+			"value": "Occupation des terres"
+		},
+		{
+			"id": "Orthoimagery",
+			"value": "Ortho-imagerie"
+		},
+		{
+			"id": "Geology",
+			"value": "Géologie"
+		},
+		{
+			"id": "Statistical units",
+			"value": "Unités statistiques"
+		},
+		{
+			"id": "Buildings",
+			"value": "Bâtiments"
+		},
+		{
+			"id": "Soil",
+			"value": "Sols"
+		},
+		{
+			"id": "Land use",
+			"value": "Usage des sols"
+		},
+		{
+			"id": "Human health and safety",
+			"value": "Santé et sécurité des personnes"
+		},
+		{
+			"id": "Utility and governmental services",
+			"value": "Services d'utilité publique et services publics"
+		},
+		{
+			"id": "Environmental monitoring facilities",
+			"value": "Installations de suivi environnemental"
+		},
+		{
+			"id": "Production and industrial facilities",
+			"value": "Lieux de production et sites industriels"
+		},
+		{
+			"id": "Agricultural and aquaculture facilities",
+			"value": "Installations agricoles et aquacoles"
+		},
+		{
+			"id": "Population distribution — demography",
+			"value": "Répartition de la population – démographie"
+		},
+		{
+			"id": "Area management/restriction/regulation zones and reporting units",
+			"value": "Zones de gestion, de restriction ou de réglementation et unités de déclaration"
+		},
+		{
+			"id": "Natural risk zones",
+			"value": "Zones à risque naturel"
+		},
+		{
+			"id": "Atmospheric conditions",
+			"value": "Conditions atmosphériques"
+		},
+		{
+			"id": "Meteorological geographical features",
+			"value": "Caractéristiques géographiques météorologiques"
+		},
+		{
+			"id": "Oceanographic geographical features",
+			"value": "Caractéristiques géographiques océanographiques"
+		},
+		{
+			"id": "Sea regions",
+			"value": "Régions maritimes"
+		},
+		{
+			"id": "Bio-geographical regions",
+			"value": "Régions biogéographiques"
+		},
+		{
+			"id": "Habitats and biotopes",
+			"value": "Habitats et biotopes"
+		},
+		{
+			"id": "Species distribution",
+			"value": "Répartition des espèces"
+		},
+		{
+			"id": "Energy resources",
+			"value": "Sources d'énergie"
+		},
+		{
+			"id": "Mineral resources",
+			"value": "Ressources minérales"
+		}],
+		"MD_InspireSpecificationCode": [
+		{
+			"id": "COMMISSION REGULATION (EC) No 1205/2008 of 3 December 2008 implementing Directive 2007/2/EC of the European Parliament and of the Council as regards metadata",
+			"value": "COMMISSION REGULATION (EC) No 1205/2008 of 3 December 2008 implementing Directive 2007/2/EC of the European Parliament and of the Council as regards metadata",
+			"date": "2008-12-03"
+		},
+		{
+			"id": "Corrigendum to INSPIRE Metadata Regulation published in the Official Journal of the European Union, L 328, page 83",
+			"value": "Corrigendum to INSPIRE Metadata Regulation published in the Official Journal of the European Union, L 328, page 83",
+			"date": "2009-12-15"
+		},
+		{
+			"id": "COMMISSION REGULATION (EU) No 1089/2010 of 23 November 2010 implementing Directive 2007/2/EC of the European Parliament and of the Council as regards interoperability of spatial data sets and services",
+			"value": "COMMISSION REGULATION (EU) No 1089/2010 of 23 November 2010 implementing Directive 2007/2/EC of the European Parliament and of the Council as regards interoperability of spatial data sets and services",
+			"date": "2010-12-08"
+		},
+		{
+			"id": "COMMISSION REGULATION (EU) No 1088/2010 of 23 November 2010 amending Regulation (EC) No 976/2009 as regards download services and transformation services",
+			"value": "COMMISSION REGULATION (EU) No 1088/2010 of 23 November 2010 amending Regulation (EC) No 976/2009 as regards download services and transformation services",
+			"date": "2010-12-08"
+		},
+		{
+			"id": "COMMISSION REGULATION (EC) No 976/2009 of 19 October 2009 implementing Directive 2007/2/EC of the European Parliament and of the Council as regards the Network Services",
+			"value": "COMMISSION REGULATION (EC) No 976/2009 of 19 October 2009 implementing Directive 2007/2/EC of the European Parliament and of the Council as regards the Network Services",
+			"date": "2009-10-20"
+		},
+		{
+			"id": "COMMISSION REGULATION (EU) No 268/2010 of 29 March 2010 implementing Directive 2007/2/EC of the European Parliament and of the Council as regards the access to spatial data sets and services of the Member States by Community institutions and bodies under harmonised conditions",
+			"value": "COMMISSION REGULATION (EU) No 268/2010 of 29 March 2010 implementing Directive 2007/2/EC of the European Parliament and of the Council as regards the access to spatial data sets and services of the Member States by Community institutions and bodies under harmonised conditions",
+			"date": "2010-03-30"
+		},
+		{
+			"id": "Commission Decision of 5 June 2009 implementing Directive 2007/2/EC of the European Parliament and of the Council as regards monitoring and reporting (notified under document number C(2009) 4199) (2009/442/EC)",
+			"value": "Commission Decision of 5 June 2009 implementing Directive 2007/2/EC of the European Parliament and of the Council as regards monitoring and reporting (notified under document number C(2009) 4199) (2009/442/EC)",
+			"date": "2009-06-11"
+		}],
+		"MD_KeywordTypeCode": [
+		{
+			"id": "discipline",
+			"value": "Discipline"
+		},
+		{
+			"id": "place",
+			"value": "Localisation"
+		},
+		{
+			"id": "stratum",
+			"value": "Strate"
+		},
+		{
+			"id": "temporal",
+			"value": "Temps"
+		},
+		{
+			"id": "theme",
+			"value": "Thème"
+		}],
+		"MD_LanguageCode": [
+		{
+			"id": "ger",
+			"value": "Allemand"
+		},
+		{
+			"id": "eng",
+			"value": "Anglais"
+		},
+		{
+			"id": "fre",
+			"value": "Français"
+		}],
+		"MD_PassCode": [
+		{
+			"id": "true",
+			"value": "Conforme"
+		},
+		{
+			"id": "false",
+			"value": "Non conforme"
+		},
+		{
+			"id": "empty",
+			"value": "Non évalué"
+		}],
+		"MD_MaintenanceFrequencyCode": [
+		{
+			"id": "continual",
+			"value": "en continu"
+		},
+		{
+			"id": "daily",
+			"value": "quotidienne"
+		},
+		{
+			"id": "weekly",
+			"value": "hebdomadaire"
+		},
+		{
+			"id": "fortnightly",
+			"value": "tous les 15 jours"
+		},
+		{
+			"id": "monthly",
+			"value": "mensuelle"
+		},
+		{
+			"id": "quaterly",
+			"value": "trimestrielle"
+		},
+		{
+			"id": "biannually",
+			"value": "semestrielle"
+		},
+		{
+			"id": "annually",
+			"value": "annuelle"
+		},
+		{
+			"id": "asNeeded",
+			"value": "quand nécessaire"
+		},
+		{
+			"id": "irregular",
+			"value": "irrégulierère"
+		},
+		{
+			"id": "notPlanned",
+			"value": "non plannifiée"
+		},
+		{
+			"id": "unknown",
+			"value": "inconnue"
+		}],
+		"MD_RestrictionCode": [
+		{
+			"id": "copyright",
+			"value": "Droit d’auteur / Droit moral (copyright)"
+		},
+		{
+			"id": "patent",
+			"value": "Brevet"
+		},
+		{
+			"id": "patentPending",
+			"value": "Brevet en instance"
+		},
+		{
+			"id": "trademark",
+			"value": "Marque de commerce"
+		},
+		{
+			"id": "license",
+			"value": "Licence"
+		},
+		{
+			"id": "intellectualPropertyRights",
+			"value": "Droit de propriété intellectuelle / Droit patrimonial"
+		},
+		{
+			"id": "restricted",
+			"value": "Restreint"
+		},
+		{
+			"id": "otherRestrictions",
+			"value": "Autres restrictions"
+		}],
+		"MD_ScopeCode": [
+		{
+			"id": "_attribute",
+			"value": "Attribut"
+		},
+		{
+			"id": "_attributeType",
+			"value": "Type d’attribut"
+		},
+		{
+			"id": "_collectionHardware",
+			"value": "Collection matérielle"
+		},
+		{
+			"id": "_collectionSession",
+			"value": "Collection de session"
+		},
+		{
+			"id": "series",
+			"value": "Collection de données"
+		},
+		{
+			"id": "dataset",
+			"value": "Jeu de données"
+		},
+		{
+			"id": "_nonGeographicDataset",
+			"value": "Jeu de données non géographique"
+		},
+		{
+			"id": "_dimensionGroup",
+			"value": "Dimension d’un groupe"
+		},
+		{
+			"id": "_feature",
+			"value": "Entité"
+		},
+		{
+			"id": "_featureType",
+			"value": "Type d’entité"
+		},
+		{
+			"id": "_propertyType",
+			"value": "Type de propriété"
+		},
+		{
+			"id": "_software",
+			"value": "Logiciel"
+		},
+		{
+			"id": "_fieldSession",
+			"value": "Champ de Session"
+		},
+		{
+			"id": "_service",
+			"value": "Service"
+		},
+		{
+			"id": "_model",
+			"value": "Modèle"
+		},
+		{
+			"id": "_tile",
+			"value": "Sous-ensemble de données"
+		},
+		{
+			"id": "_fieldCampaign",
+			"value": "Campagne de mesures"
+		}],
+		"MD_SpatialRepresentationTypeCode": [
+		{
+			"id": "grid",
+			"value": "Rasteur"
+		},
+		{
+			"id": "vector",
+			"value": "Vecteur"
+		},
+		{
+			"id": "textTable",
+			"value": "Table texte"
+		},
+		{
+			"id": "tin",
+			"value": "Tin"
+		},
+		{
+			"id": "stereoModel",
+			"value": "Vue 3D"
+		},
+		{
+			"id": "video",
+			"value": "Vidéo"
+		},
+		{
+			"id": "undefined",
+			"value": "Non défini"
+		}],
+		"MD_LinkageProtocolCode": [
+		{
+			"id": "OGC:WMS",
+			"value": "WMS"
+		},
+		{
+			"id": "OGC:WFS",
+			"value": "WFS"
+		},
+		{
+			"id": "OGC:WCS",
+			"value": "WCS"
+		},
+		{
+			"id": "OGC:KML",
+			"value": "KML"
+		},
+		{
+			"id": "WWW:DOWNLOAD-1.0-http--download",
+			"value": "Fichier à télécharger"
+		},
+		{
+			"id": "WWW:LINK-1.0-http--link",
+			"value": "Adresse Internet (URL)"
+		},
+		{
+			"id": "DB:POSTGIS",
+			"value": "Base de données / Table PostGIS"
+		}],
+		"MD_ReferenceSystemCode": [
+		{
+			"code": "2154",
+			"codespace": "EPSG",
+			"value": "RGF93 – Lambert 93 (EPSG:2154)"
+		},
+		{
+			"code": "3942",
+			"codespace": "EPSG",
+			"value": "RGF93 – Lambert 93 CC42 (EPSG:3942)"
+		},
+		{
+			"code": "3943",
+			"codespace": "EPSG",
+			"value": "RGF93 – Lambert 93 CC43 (EPSG:3943)"
+		},
+		{
+			"code": "3944",
+			"codespace": "EPSG",
+			"value": "RGF93 – Lambert 93 CC44 (EPSG:3944)"
+		},
+		{
+			"code": "3945",
+			"codespace": "EPSG",
+			"value": "RGF93 – Lambert 93 CC45 (EPSG:3945)"
+		},
+		{
+			"code": "4258",
+			"codespace": "EPSG",
+			"value": "ETRS89 (EPSG:4258)"
+		},
+		{
+			"code": "27562",
+			"codespace": "EPSG",
+			"value": "NTF Paris –  Lambert Centre France (EPSG:27562)"
+		},
+		{
+			"code": "27563",
+			"codespace": "EPSG",
+			"value": "NTF Paris –  Lambert Sud France (EPSG:27563)"
+		},
+		{
+			"code": "27564",
+			"codespace": "EPSG",
+			"value": "NTF Paris –  Lambert Corse (EPSG:27564)"
+		},
+		{
+			"code": "27572",
+			"codespace": "EPSG",
+			"value": "NTF Paris – Lambert zone II (EPSG:27572)"
+		},
+		{
+			"code": "4326",
+			"codespace": "EPSG",
+			"value": "WGS84 – 2D (EPSG:4326)"
+		}]
+	}
+}

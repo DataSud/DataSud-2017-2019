@@ -1,0 +1,376 @@
+<div>
+	<h2 id="dataTitle">~{vm.data.metadata.dataTitle}~</h2>
+</div>
+<div>
+	<div id="page">
+		<div class="panel panel-default">
+			<div id="dataAbstract" class="pre panel-body" ng-bind-html="vm.data.metadata.dataAbstract | nl2br:true"></div>
+		</div>
+		<div class="panel panel-default">
+			<div class="panel-body">
+				<div>
+					<div ng-if="vm.data.metadata.dataDateCreation">
+						<strong>Date de création:</strong>
+						<span class="pre">~{vm.data.metadata.dataDateCreation | date:'dd/MM/yyyy'}~</span>
+						<br />
+					</div>
+					<div ng-if="vm.data.metadata.dataDatePublication">
+						<strong>Date de publication:</strong>
+						<span class="pre">~{vm.data.metadata.dataDatePublication | date:'dd/MM/yyyy'}~</span>
+						<br />
+					</div>
+					<div ng-if="vm.data.metadata.dataDateRevision">
+						<strong>Date de révision:</strong>
+						<span class="pre">~{vm.data.metadata.dataDateRevision | date:'dd/MM/yyyy'}~</span>
+						<br />
+					</div>
+					<div ng-if="vm.data.metadata.dataTemporalExtents">
+						<div ng-repeat="dataTemporalExtent in vm.data.metadata.dataTemporalExtents track by $index">
+							<div ng-if="dataTemporalExtent.dataExtentBegin">
+								<strong>~{dataTemporalExtent.dataExtentName}~:</strong>
+								<span class="pre">~{dataTemporalExtent.dataTemporalExtentBegin | date:'dd/MM/yyyy'}~</span>
+								<span class="pre" ng-if="dataTemporalExtent.dataTemporalExtentEnd"> - ~{dataTemporalExtent.dataTemporalExtentEnd | date:'dd/MM/yyyy'}~</span>
+							</div>
+						</div>
+					</div>
+					<div ng-if="vm.data.metadata.dataMaintenanceFrequency">
+						<p>
+							<strong>Fréquence de mise à jour:</strong>
+							<span class="pre">~{vm.data.metadata.dataMaintenanceFrequency | translateCode:'MD_MaintenanceFrequencyCode'}~</span>
+						</p>
+					</div>
+				</div>
+				<hr />
+				<div>
+					<p><strong>Langue des données:</strong></p>
+					<ul>
+						<div ng-if="vm.data.metadata.dataLanguages">
+							<div ng-repeat="dataLanguage in vm.data.metadata.dataLanguages track by $index">
+								<li class="">~{dataLanguage | translateCode:'MD_LanguageCode'}~</li>
+							</div>
+						</div>
+						<div ng-if="!vm.data.metadata.dataLanguages">
+							<li class="">Non précisé</li>
+						</div>
+					</ul>
+				</div>
+				<hr />
+				<div>
+					<p><strong>Format de diffusion:</strong></p>
+					<ul>
+						<div ng-if="vm.data.metadata.dataDistributionFormats">
+							<div ng-repeat="dataDistributionFormat in vm.data.metadata.dataDistributionFormats track by $index">
+								<li class="">
+									~{dataDistributionFormat.formatName}~
+									<span ng-if="dataDistributionFormat.formatVersion">(~{dataDistributionFormat.formatVersion}~)</span>
+									<span ng-if="dataDistributionFormat.formatSpecification">- ~{dataDistributionFormat.formatSpecification}~</span>
+								</li>
+							</div>
+						</div>
+						<div ng-if="!vm.data.metadata.dataDistributionFormats">
+							<li class="">Non précisé</li>
+						</div>
+					</ul>
+				</div>
+				<hr />
+				<div>
+					<p><strong>Qualité des données:</strong></p>
+					<div class="pre">
+						<div ng-if="vm.data.metadata.dataLiStatement" ng-bind-html="vm.data.metadata.dataLiStatement | nl2br:true"></div>
+						<div ng-if="!vm.data.metadata.dataLiStatement">Non précisé</div>
+					</div>
+				</div>
+				<hr />
+				<div>
+					<p><strong>Limite technique d'usage:</strong></p>
+					<ul>
+						<div ng-if="vm.data.metadata.dataUseLimitations">
+							<div ng-repeat="dataUseLimitation in vm.data.metadata.dataUseLimitations track by $index">
+								<li class="pre">~{dataUseLimitation}~</li>
+							</div>
+						</div>
+						<div ng-if="!vm.data.metadata.dataUseLimitations">
+							<li class="">Aucune limite d'usage définie.</li>
+						</div>
+					</ul>
+				</div>
+				<hr />
+				<div>
+					<p><strong>Droits d'accès et d'usage des données:</strong></p>
+					<div ng-if="vm.data.metadata.dataSecurityClassification">
+						<label>Classification:</label> ~{vm.data.metadata.dataSecurityClassificationValue}~
+						<br />
+					</div>
+					<label>Contraintes d'accès Inspire:</label>
+					<br />
+					<ul>
+						<div ng-if="vm.data.metadata.dataLegalAccessInspireConstraints">
+							<div ng-repeat="dataLegalAccessInspireConstraint in vm.data.metadata.dataLegalAccessInspireConstraints track by $index">
+								<li class="pre">~{dataLegalAccessInspireConstraint | translateCode:'MD_InspireRestrictionCode'}~</li>
+							</div>
+						</div>
+						<div ng-if="!vm.data.metadata.dataLegalAccessInspireConstraints">
+							<li class="pre">Aucune contrainte d'accès Inspire définie.</li>
+						</div>
+					</ul>
+					<label>Autres contraintes d'accès:</label>
+					<br />
+					<ul>
+						<div ng-if="vm.data.metadata.dataLegalAccessConstraints">
+							<div ng-repeat="dataLegalAccessConstraint in vm.data.metadata.dataLegalAccessConstraints track by $index">
+								<li class="pre">~{dataLegalAccessConstraint | translateCode:'MD_RestrictionCode'}~</li>
+							</div>
+						</div>
+						<div ng-if="vm.data.metadata.dataLegalAccessOtherConstraints">
+							<div ng-repeat="dataLegalAccessOtherConstraint in vm.data.metadata.dataLegalAccessOtherConstraints track by $index">
+								<li class="pre" ng-if="dataLegalAccessOtherConstraint">~{dataLegalAccessOtherConstraint}~</li>
+							</div>
+						</div>
+						<div ng-if="!vm.data.metadata.dataLegalAccessConstraints && !vm.data.metadata.dataLegalAccessOtherConstraints">
+							<li class="pre">Aucune contrainte d'accès définie.</li>
+						</div>
+					</ul>
+					<label>Contraintes légales d'usage:</label>
+					<br />
+					<ul>
+						<div ng-if="vm.data.metadata.dataLegalUseConstraints">
+							<div ng-repeat="dataLegalUseConstraint in vm.data.metadata.dataLegalUseConstraints track by $index">
+								<li class="pre">~{dataLegalUseConstraint | translateCode:'MD_RestrictionCode'}~</li>
+							</div>
+						</div>
+						<div ng-if="vm.data.metadata.dataLegalUseLimitations">
+							<div ng-repeat="dataLegalUseLimitation in vm.data.metadata.dataLegalUseLimitations track by $index">
+								<li class="pre">~{dataLegalUseLimitation}~</li>
+							</div>
+						</div>
+						<div ng-if="!vm.data.metadata.dataLegalUseLimitations && !vm.data.metadata.dataLegalUseConstraints">
+							<li class="pre">Aucune limite légale d'usage définie.</li>
+						</div>
+					</ul>
+				</div>
+			</div>
+		</div>
+		<div class="panel panel-default">
+			<div class="panel-body">
+				<div ng-if="vm.data.metadata.dataPointOfContacts">
+					<div ng-repeat="dataPointOfContact in vm.data.metadata.dataPointOfContacts track by $index">
+						<div ng-if="dataPointOfContact.role">
+							<p><strong>~{dataPointOfContact.role | translateCode:'CI_RoleCode'}~ des données:</strong></p>
+						</div>
+						<div ng-if="!dataPointOfContact.role">
+							<p><strong>Contact pour les données:</strong></p>
+						</div>
+						<div class="panel panel-default" style="margin-left: 20px;">
+							<address class="panel-body">
+								<div class="col-md-2">
+									<div ng-if="dataPointOfContact.logoUrl">
+										<img class="logo img-thumbnail" ng-src="~{dataPointOfContact.logoUrl}~" alt="~{data_contact.logoDescription}~" title="~{dataPointOfContact.logoDescription}~" />
+									</div>
+								</div>
+								<div class="col-md-5">
+									<div ng-if="dataPointOfContact.individualName">
+										<div>~{dataPointOfContact.individualName}~</div>
+									</div>
+									<div ng-if="dataPointOfContact.positionName">
+										<div>~{dataPointOfContact.positionName}~</div>
+									</div>
+									<div ng-if="dataPointOfContact.organisationName">
+										<div><strong>~{dataPointOfContact.organisationName}~</strong></div>
+									</div>
+								</div>
+								<div class="col-md-5">
+									<div ng-if="dataPointOfContact.city">
+										<div>
+											<span ng-bind-html="dataPointOfContact.deliveryPoint | nl2br:true"></span>
+											</br>
+											<span>~{dataPointOfContact.postalCode}~ ~{dataPointOfContact.city}~</span>
+										</div>
+									</div>
+									<div ng-if="dataPointOfContact.phoneVoice">
+										<!-- <div>Tél.: ~{dataPointOfContact.phoneVoices}~</div> -->
+										<!-- TODO: spliter les tél. dans une directive -->
+										<div>Tél.: <span ng-bind-html="dataPointOfContact.phoneVoice | nl2br:true"></span></div>
+									</div>
+									<div ng-if="dataPointOfContact.email">
+										<div>
+											<!-- TODO: spliter les emails dans une directive -->
+											<strong>Email: <span>~{dataPointOfContact.email}~</span></strong>
+										</div>
+									</div>
+									<!--
+									<div ng-if="dataPointOfContact.role">
+										<div>Rôle: ~{dataPointOfContact.role}~</div>
+									</div>
+									-->
+								</div>
+							</address>
+						</div>
+					</div>
+				</div>
+				<div ng-if="vm.data.metadata.mdContacts">
+					<div ng-repeat="mdContact in vm.data.metadata.mdContacts track by $index">
+						<div ng-if="mdContact.role">
+							<p><strong>~{mdContact.role | translateCode:'CI_RoleCode'}~ de la fiche de métadonnées:</strong></p>
+						</div>
+						<div ng-if="!mdContact.role">
+							<p><strong>Contact pour de la fiche de métadonnées:</strong></p>
+						</div>
+						<div class="panel panel-default" style="margin-left: 20px;">
+							<address class="panel-body">
+								<div class="col-md-2">
+									<div ng-if="mdContact.logoUrl">
+										<img class="logo img-thumbnail" ng-src="~{mdContact.logoUrl}~" alt="~{mdContact.logoDescription}~" title="~{mdContact.logoDescription}~" />
+									</div>
+								</div>
+								<div class="col-md-5">
+									<div ng-if="mdContact.individualName">
+										<div>~{mdContact.individualName}~</div>
+									</div>
+									<div ng-if="mdContact.positionName">
+										<div>~{mdContact.positionName}~</div>
+									</div>
+									<div ng-if="mdContact.organisationName">
+										<div>
+											<strong>~{mdContact.organisationName}~</strong>
+										</div>
+									</div>
+								</div>
+								<div class="col-md-5">
+									<div ng-if="mdContact.city">
+										<div>
+											<span ng-bind-html="mdContact.deliveryPoint | nl2br:true"></span>
+											</br>
+											<span>~{mdContact.postalCode}~ ~{mdContact.city}~</span>
+										</div>
+									</div>
+									<div ng-if="mdContact.phoneVoice">
+										<!-- <div>Tél.: ~{mdContact.phoneVoices}~</div> -->
+										<!-- TODO: spliter les tél. dans une directive -->
+										<div>Tél.:<span ng-bind-html="mdContact.phoneVoice | nl2br:true"></span></div>
+									</div>
+									<div ng-if="mdContact.email">
+										<div>
+											<!-- TODO: spliter les emails dans une directive -->
+											<strong>Email: <span>~{mdContact.email}~</span></strong>
+										</div>
+									</div>
+									<!--
+									<div ng-if="mdContact.role">
+										<div>Rôle: ~{mdContact.role}~</div>
+									</div>
+									-->
+								</div>
+							</address>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div id="browsegraphic" class="col-md-4">
+		<div ng-if="vm.data.metadata.dataSpatialRepresentationType">
+			<div id="spatial-representation-type-label" class="label label-success pull-right" title="~{vm.data.metadata.dataSpatialRepresentationType | translateCode:'MD_SpatialRepresentationTypeCode'}~">~{vm.data.metadata.dataSpatialRepresentationType | translateCode:'MD_SpatialRepresentationTypeCode'}~</div>
+		</div>
+		<div ng-if="vm.data.metadata.dataBrowseGraphics">
+			<div ng-show="vm.data.metadata.dataBrowseGraphics[0].fileName">
+				<a href="~{vm.data.metadata.dataBrowseGraphics[0].fileName}~" target="_blanck"><img class="img-thumbnail" ng-src="~{vm.data.metadata.dataBrowseGraphics[0].fileName}~" alt="~{vm.data.metadata.dataBrowseGraphics[0].fileDescription}~" title="~{vm.data.metadata.dataBrowseGraphics[0].fileDescription}~"></a>
+			</div>
+		</div>
+	</div>
+	<div id="sidebar">
+		<div class="panel panel-default">
+			<div class="panel-body">
+				<p class="">
+					<span ng-if="vm.data.metadata.dataGeographicExtents">
+						<span ng-repeat="dataGeographicExtent in vm.data.metadata.dataGeographicExtents track by $index">
+							<a class="btn btn-xs btn-info">
+								<i class="glyphicon glyphicon-screenshot" title="Couverture territoriale"></i>
+							</a>
+							<span class="" title="S:~{dataGeographicExtent.dataGeographicExtentSouthBound}~, N:~{dataGeographicExtent.dataGeographicExtentNorthBound}~, W:{~dataGeographicExtent.dataGeographicExtentWestBound}~, E:~{dataGeographicExtent.dataGeographicExtentEastBound}~">
+								<span ng-if="dataGeographicExtent.dataExtentName">~{dataGeographicExtent.dataExtentName}~ (S:~{dataGeographicExtent.dataGeographicExtentSouthBound}~, N:~{dataGeographicExtent.dataGeographicExtentNorthBound}~, W:~{dataGeographicExtent.dataGeographicExtentWestBound}~, E:~{dataGeographicExtent.dataGeographicExtentEastBound}~),</span>
+								<span ng-if="!dataGeographicExtent.dataExtentName">Nom inconnu (S:~{dataGeographicExtent.dataGeographicExtentSouthBound}~, N:~{dataGeographicExtent.dataGeographicExtentNorthBound}~, W:~{dataGeographicExtent.dataGeographicExtentWestBound}~, E:~{dataGeographicExtent.dataGeographicExtentEastBound}~)</span>
+							</span>
+							<br />
+						</span>
+					</span>
+					<span ng-if="!vm.data.metadata.dataGeographicExtents">
+						<a class="btn btn-xs btn-info">
+							<i class="glyphicon glyphicon-screenshot" title="Couverture territoriale"></i>
+						</a>
+						<span class="pre" title="S:0.00, N:0.00, W:0.00, E:0.00">Couverture territoriale non précisée</span>
+						<br />
+					</span>
+				</p>
+				<p class="">
+					<a class="btn btn-xs btn-info">
+						<i class="glyphicon glyphicon-zoom-in" title="Echelle d'utilisation"></i>
+					</a>
+					<span ng-if="vm.data.metadata.dataScaleDenominator">1/~{vm.data.metadata.dataScaleDenominator}~</span>
+					<span ng-if="vm.data.metadata.dataScaleDistance">~{vm.data.metadata.dataScaleDistance}~ mètre(s)</span>
+					<span ng-if="!vm.data.metadata.dataScaleDenominator && !vm.data.metadata.dataScaleDistance">Echelle et résolution non définies.</span>
+				</p>
+				<p class="">
+					<span ng-if="vm.data.metadata.dataReferenceSystems">
+						<span ng-repeat="dataReferenceSystem in vm.data.metadata.dataReferenceSystems track by $index">
+							<a class="btn btn-xs btn-info">
+								<i class="glyphicon glyphicon-globe" title="Système de projection"></i>
+							</a>
+							<span>~{dataReferenceSystem.code}~</span> <!-- <span>~{dataReferenceSystem.code | translateCode:'MD_ReferenceSystemCode'}~</span> -->
+							<span ng-if="dataReferenceSystem.codespace">(~{dataReferenceSystem.codespace}~)</span>
+							<br />
+						</span>
+					</span>
+					<span ng-if="!vm.data.metadata.dataReferenceSystems">
+						<a class="btn btn-xs btn-info">
+							<i class="glyphicon glyphicon-globe" title="Système de projection"></i>
+						</a>
+						<span>Aucun système de projection défini.</span>
+					</span>
+				</p>
+				<hr />
+				<div id="keywords" class="">
+					<span ng-if="vm.data.metadata.dataTopicCategories">
+						<span ng-repeat="dataTopicCategory in vm.data.metadata.dataTopicCategories track by $index">
+							<span title="~{dataTopicCategory}~" class="label label-warning">~{dataTopicCategory | translateCode:'MD_TopicCategoryCode'}~</span>
+						</span>
+					</span>
+					<span ng-if="vm.data.metadata.dataInspireKeywords">
+						<span ng-repeat="dataInspireKeyword in vm.data.metadata.dataInspireKeywords track by $index">
+							<span title="~{dataInspireKeyword}~" class="label label-primary">~{dataInspireKeyword | translateCode:'MD_InspireTopicCategoryCode'}~</span>
+						</span>
+					</span>
+					<span ng-if="vm.data.metadata.dataKeywords">
+						<span ng-repeat="dataKeywords in vm.data.metadata.dataKeywords track by $index">
+							<span ng-repeat="keyword in dataKeywords.keywords | string2array">
+								<span title="~dataKeywords.keywordType}~ - ~{dataKeywords.thesaurusName}~" class="label label-primary">~{keyword}~</span>
+							</span>
+						</span>
+					</span>
+				</div>
+				<hr />
+				<div class="">
+					<strong>Ressources associés:</strong>
+					<ul>
+						<span ng-if="vm.data.metadata.dataLinkages">
+							<span ng-repeat="dataLinkage in vm.data.metadata.dataLinkages track by $index">
+								<li><a href="~{dataLinkage.url}~" target="_blanck" title="~{dataLinkage.url}~">~{dataLinkage.description}~</a></li>
+							</span>
+						</span>
+						<span ng-if="!vm.data.metadata.dataLinkages">
+							<li>Aucune ressource liée disponible.</li>
+						</span>
+					</ul>
+				</div>
+				<!--
+				<hr />
+				<div class="text-center">
+					<span ng-if="vm.data.metadata.csw_url">
+						<a href="~{vm.data.metadata.csw_url}~" target="_blank" class="btn btn-primary btn-sm"><i class="glyphicon glyphicon-download-alt"></i> Télécharger la fiche (XML)</a>
+					</span>
+				</div>
+				-->
+			</div>
+		</div>
+	</div>
+</div>

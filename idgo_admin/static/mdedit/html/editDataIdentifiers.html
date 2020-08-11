@@ -1,0 +1,25 @@
+<div>
+	<label><span class="bt-doc" uib-tooltip="~{description}~" tooltip-trigger="mouseenter" tooltip-placement="right" ng-click="openModalDoc(help)">~{label}~</span></label>
+	<table class="table table-condensed table-striped">
+		<th>
+			<span class="bt-doc control-label" uib-tooltip="~{code.description}~" tooltip-trigger="mouseenter" tooltip-placement="right" ng-click="openModalDoc(help)">~{code.label}~</span>
+		</th>
+		<th>
+			<span class="bt-doc control-label" uib-tooltip="~{codeSpace.description}~" tooltip-trigger="mouseenter" tooltip-placement="right" ng-click="openModalDoc(help)">~{codeSpace.label}~</span>
+		</th>
+		<th ng-show="multi">
+			<button type="button" class="btn btn-default btn-xs pull-right glyphicon glyphicon-plus" aria-hidden="true" ng-click="addItem()"></button>
+		</th>
+		<tr ng-repeat="item in vm.data.metadata.dataIdentifiers track by $index">
+			<td>
+				<input type="text" class="form-control input-sm" name="~{code.id}~" id="~{code.id}~" placeholder="~{code.placeholder}~" ng-model="item.code" />
+			</td>
+			<td>
+				<input type="text" class="form-control input-sm" name="~{codeSpace.id}~" id="~{codeSpace.id}~" placeholder="~{codeSpace.placeholder}~" ng-model="item.codeSpace" />
+			</td>
+			<td ng-show="multi">
+				<button type="button" class="btn btn-default btn-xs pull-right glyphicon glyphicon-minus" aria-hidden="true" ng-click="removeItem(item)"></button>
+			</td>
+		</tr>
+	</table>
+</div>

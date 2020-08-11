@@ -1,0 +1,43 @@
+<div class="">
+	<label class="bt-doc control-label" for="~{id}~" uib-tooltip="~{description}~" tooltip-trigger="mouseenter" tooltip-placement="right" ng-click="openModalDoc(help)">~{label}~</label>
+	<table class="table table-condensed table-striped">
+		<tr>
+			<th>
+				<span class="bt-doc control-label" uib-tooltip="~{dataTemporalExtentBegin.description}~" tooltip-trigger="mouseenter" tooltip-placement="right" ng-click="openModalDoc(help)">~{dataTemporalExtentBegin.label}~</span>
+			</th>
+			<th>
+				<span class="bt-doc control-label" uib-tooltip="~{dataTemporalExtentEnd.description}~" tooltip-trigger="mouseenter" tooltip-placement="right" ng-click="openModalDoc(help)">~{dataTemporalExtentEnd.label}~</span>
+			</th>
+			<th>
+				<span class="bt-doc control-label" uib-tooltip="~{dataExtentName.description}~" tooltip-trigger="mouseenter" tooltip-placement="right" ng-click="openModalDoc(help)">~{dataExtentName.label}~</span>
+			</th>
+			<th>
+				<button type="button" class="btn btn-default btn-xs pull-right glyphicon glyphicon-plus" aria-hidden="true" ng-click="addItem()"></button>
+			</th>
+		</tr>
+		<tr ng-repeat="item in vm.data.metadata[field] track by $index">
+			<td>
+				<div class="input-group date">
+					<input type="text" name="~{dataTemporalExtentBegin.id}~" id="~{dataTemporalExtentBegin.id}~" class="form-control input-sm" uib-datepicker-popup="yyyy-MM-dd" is-open="datePicker['temporalExtentBeginOpened_'+$index]" datepicker-options="{startingDay: 1}" close-text="Close" ng-model="item.dataTemporalExtentBegin" />
+					<span class="input-group-btn">
+						<button type="button" class="btn btn-default btn-sm" ng-click="openDatePicker($event, 'temporalExtentBeginOpened_'+$index)"><i class="glyphicon glyphicon-calendar"></i></button>
+					</span>
+				</div>
+			</td>
+			<td>
+				<div class="input-group date">
+					<input type="text" name="~{dataTemporalExtentEnd.id}~" id="~{dataTemporalExtentEnd.id}~" class="form-control input-sm" uib-datepicker-popup="yyyy-MM-dd" is-open="datePicker['temporalExtentEndOpened_'+$index]" datepicker-options="{startingDay: 1}" close-text="Close" ng-model="item.dataTemporalExtentEnd" />
+					<span class="input-group-btn">
+						<button type="button" class="btn btn-default btn-sm" ng-click="openDatePicker($event, 'temporalExtentEndOpened_'+$index)"><i class="glyphicon glyphicon-calendar"></i></button>
+					</span>
+				</div>
+			</td>
+			<td>
+				<textarea class="form-control input-sm" id="~{dataExtentName.id}~" name="~{dataExtentName.id}~" placeholder="~{dataExtentName.placeholder}~" rows="3" ng-model="item.dataExtentName"></textarea>
+			</td>
+			<td>
+				<button type="button" class="btn btn-default btn-xs pull-right glyphicon glyphicon-minus" aria-hidden="true" ng-click="removeItem(item)"></button>
+			</td>
+		</tr>
+	</table>
+</div>

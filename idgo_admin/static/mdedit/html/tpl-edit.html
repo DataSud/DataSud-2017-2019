@@ -1,0 +1,307 @@
+<div id="content" class="container">
+	<div uib-accordion close-others="false" class="col col-sm-12 panel-group" id="accordion1">
+		<form name="mdForm" novalidate>
+
+			<!-- Panel 1 -->
+			<!-- <div edit-accordion-header showfields="vm.showAllFields" header="Informations sur la fiche de métadonnées" tooltip="Informations sur la fiche de métadonnées" doc="empty"> -->
+			<div uib-accordion-group is-open="true" panel-class="panel-primary" ng-show="vm.showAllFields">
+				<div uib-accordion-heading>
+					<span uib-tooltip="Informations sur la fiche de métadonnées" tooltip-popup-close-delay="100" tooltip-trigger="mouseenter" tooltip-placement="right">Informations sur la fiche de métadonnées</span>
+					<!-- <span class="bt-doc glyphicon glyphicon-info-sign" aria-hidden="true" ng-click="vm.openModalDoc('empty')"></span> -->
+					<span class="glyphicon glyphicon-resize-vertical pull-right"></span>
+				</div>
+				<div>
+					<div class="row">
+						<!-- <div class="col-md-4 form-group">
+							<div edit-input label="FileId:" description="null" placeholder="File id" id="mdFileIdentifier" field="mdFileIdentifier"></div>
+						</div> -->
+						<!-- metadata.mdFileIdentifier -->
+						<div class="col-md-4 form-group">
+							<div edit-input field="mdFileIdentifier" help="mdFileIdentifier"></div>
+						</div>
+						<!-- metadata.mdLanguage -->
+						<div class="col-md-4 form-group">
+							<div edit-select field="mdLanguage" list="MD_LanguageCode" help="mdLanguage"></div>
+						</div>
+						<!-- mdStandardName -->
+						<div class="col-md-4 form-group">
+							<div edit-input field="mdStandardName" help="mdStandardName"></div>
+						</div>
+					</div>
+					<div class="row">
+						<!--mdHierarchyLevel -->
+						<div class="col-md-4 form-group">
+							<div edit-select field="mdHierarchyLevel" list="MD_ScopeCode" help="mdHierarchyLevel"></div>
+						</div>
+						<!-- mdCharacterSet -->
+						<div class="col-md-4 form-group">
+							<div edit-select field="mdCharacterSet" list="MD_CharacterSetCode" disabled="true" help="mdCharacterSet"></div>
+						</div>
+						<!-- mdStandardVersion -->
+						<div class="col-md-4 form-group">
+							<div edit-input field="mdStandardVersion" help="mdStandardVersion"></div>
+						</div>
+					</div>
+					<!-- mdDateStamp -->
+					<div class="row">
+						<div class="col-md-4 form-group">
+							<div edit-date field="mdDateStamp" help="mdDateStamp"></div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Panel 2 -->
+			<!-- <div edit-accordion-header showfields="" header="Auteurs et contacts pour la fiche de métadonnées" tooltip="Informations relatives aux auteurs et contacts pour la fiche de métadonnées" doc="empty"> -->
+			<div uib-accordion-group is-open="true" panel-class="panel-primary">
+				<div uib-accordion-heading>
+					<span uib-tooltip="Informations relatives aux auteurs et contacts pour la fiche de métadonnées" tooltip-popup-close-delay="100" tooltip-trigger="mouseenter" tooltip-placement="right">Auteurs et contacts pour la fiche de métadonnées</span>
+					<span class="bt-doc glyphicon glyphicon-info-sign" aria-hidden="true" ng-click="vm.openModalDoc('mdContacts')"></span>
+					<span class="glyphicon glyphicon-resize-vertical pull-right"></span>
+				</div>
+				<!-- directive editContact: mdContacts -->
+				<div edit-contacts cnt-type="mdContacts"></div>
+			</div>
+
+			<!-- Panel 3 -->
+			<!-- <div edit-accordion-header header="Description des données" tooltip="Informations relatives à la description des données" doc="empty"> -->
+			<div uib-accordion-group is-open="true" panel-class="panel-primary">
+				<div uib-accordion-heading>
+					<span uib-tooltip="Informations relatives à la description des données" tooltip-popup-close-delay="100" tooltip-trigger="mouseenter" tooltip-placement="right">Description des données</span>
+					<!-- <span class="bt-doc glyphicon glyphicon-info-sign" aria-hidden="true" ng-click="vm.openModalDoc('empty')"></span> -->
+					<span class="glyphicon glyphicon-resize-vertical pull-right"></span>
+				</div>
+				<div>
+					<!-- dataTitle -->
+					<div class="row">
+						<div class="col-md-12 form-group">
+							<div edit-input field="dataTitle" help="dataTitle"></div>
+						</div>
+					</div>
+					<!-- dataAbstract -->
+					<div class="row">
+						<div class="col-md-12 form-group">
+							<div edit-textarea field="dataAbstract" help="dataAbstract"></div>
+						</div>
+					</div>
+					<!-- dataIdentifiers -->
+					<div class="row">
+						<hr />
+						<div class="col-md-12 form-group">
+							<div edit-data-identifiers multi="true" help="dataIdentifiers"></div>
+						</div>
+					</div>
+					<!-- dataBrowseGraphics -->
+					<div class="row">
+						<hr />
+						<div class="col-md-12 form-group">
+							<div edit-data-browsegraphics multi="true" help="dataBrowseGraphics"></div>
+						</div>
+					</div>
+					<div class="row">
+						<hr />
+						<!-- dataDateCreation -->
+						<div class="col-md-4 form-group">
+							<div edit-date field="dataDateCreation" help="dataDates"></div>
+						</div>
+						<!-- dataDateRevision -->
+						<div class="col-md-4 form-group">
+							<div edit-date field="dataDateRevision" help="dataDates"></div>
+						</div>
+						<!-- dataDatePublication -->
+						<div class="col-md-4 form-group">
+							<div edit-date field="dataDatePublication" help="dataDates"></div>
+						</div>
+						<!-- dataMaintenanceFrequencyCode -->
+						<div class="col-md-4 form-group">
+							<div edit-select field="dataMaintenanceFrequency" list="MD_MaintenanceFrequencyCode" help="dataMaintenanceFrequency"></div>
+						</div>
+					</div>
+					<div class="row" ng-show="vm.showAllFields">
+						<hr />
+						<!-- dataTemporalExtents -->
+						<div class="col-md-12">
+							<div edit-data-temporal-extents multi="true" help="dataTemporalExtents"></div>
+						</div>
+					</div>
+					<div class="row" ng-show="vm.showAllFields">
+						<hr />
+						<!-- dataLanguages -->
+						<div class="col-md-6 form-group">
+							<div edit-multi-select field="dataLanguages" list="MD_LanguageCode" multi="true"></div>
+						</div>
+					</div>
+					<div class="row">
+						<hr />
+						<!-- dataTopicCategories -->
+						<div class="col-md-6 form-group">
+							<div edit-multi-select field="dataTopicCategories" list="MD_TopicCategoryCode" multi="true" help="dataTopicCategories"></div>
+						</div>
+						<!-- dataInspireKeywords -->
+						<div class="col-md-6 form-group">
+							<div edit-multi-select field="dataInspireKeywords" list="MD_InspireTopicCategoryCode" multi="true" help="dataInspireKeywords"></div>
+						</div>
+					</div>
+					<!-- dataKeywordsList -->
+					<!-- <div class="row">
+						<div class="col-md-12 form-group">
+							<label class="bt-doc control-label" for="{{fields.dataKeywordsList.id}}" uib-tooltip="{{fields.dataKeywordsList.description}}" tooltip-trigger="mouseenter" tooltip-placement="right" ng-click="vm.openModalDoc('empty', $event)">{{fields.dataKeywordsList.label}}</label>
+							<textarea class="form-control input-sm" id="{{fields.dataKeywordsList.id}}" name="{{fields.dataKeywordsList.id}}" placeholder="{{fields.dataKeywordsList.placeholder}}" rows="3" ng-model="metadata.dataKeywordsList"></textarea>
+						</div>
+					</div>
+					-->
+					<!--<div class="row" ng-show="vm.showAllFields">-->
+					<div class="row">
+						<hr />
+						<!-- dataKeywords -->
+						<div class="col-md-12 form-group">
+							<div edit-data-keywords field="dataKeywords" multi="true" help="dataKeywords"></div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Panel 4 -->
+			<!-- <div edit-accordion-header header="Contact(s) des données" tooltip="Informations relatives aux contacts des données" doc="empty"> -->
+			<div uib-accordion-group is-open="true" panel-class="panel-primary">
+				<div uib-accordion-heading>
+					<span uib-tooltip="Informations relatives aux contacts des données" tooltip-popup-close-delay="100" tooltip-trigger="mouseenter" tooltip-placement="right">Contact(s) des données</span>
+					<span class="bt-doc glyphicon glyphicon-info-sign" aria-hidden="true" ng-click="vm.openModalDoc('dataPointsOfContacts')"></span>
+					<span class="glyphicon glyphicon-resize-vertical pull-right"></span>
+				</div>
+				<!-- directive editContact: dataPointOfContacts -->
+				<div>
+					<div edit-contacts cnt-type="dataPointOfContacts"></div>
+				</div>
+			</div>
+
+			<!-- Panel 5 -->
+			<!-- <div edit-accordion-header header="Références géographiques et qualité des données" tooltip="Informations relatives aux références géographiques et à la qualité de la base de données" doc="empty"> -->
+			<div uib-accordion-group is-open="true" panel-class="panel-primary">
+				<div uib-accordion-heading>
+					<span uib-tooltip="Informations relatives aux références géographiques et à la qualité de la base de données" tooltip-popup-close-delay="100" tooltip-trigger="mouseenter" tooltip-placement="right">Références géographiques et qualité des données</span>
+					<!-- <span class="bt-doc glyphicon glyphicon-info-sign" aria-hidden="true" ng-click="vm.openModalDoc('empty')"></span> -->
+					<span class="glyphicon glyphicon-resize-vertical pull-right"></span>
+				</div>
+				<div>
+					<div class="row">
+						<div class="col-md-6 form-group">
+							<div edit-select field="dataSpatialRepresentationType" list="MD_SpatialRepresentationTypeCode" help="dataSpatialRepresentationType"></div>
+						</div>
+					</div>
+					<!-- geographic extents -->
+					<div class="row">
+						<div class="col-md-12">
+							<div edit-data-geographic-extents multi="true" help="dataGeographicExtents"></div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-12 form-group">
+							<div edit-data-reference-systems field="dataReferenceSystems" multi="true" help="dataReferenceSystems"></div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-6 form-group">
+							<div edit-input field="dataScaleDenominator" help="dataScale"></div>
+						</div>
+						<div class="col-md-6 form-group">
+							<div edit-input field="dataScaleDistance" help="dataScale"></div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-12 form-group">
+							<div edit-textarea field="dataLiStatement" help="dataLiStatement"></div>
+						</div>
+					</div>
+					<div class="row" ng-show="vm.showAllFields">
+						<div class="col-md-12 form-group">
+							<div edit-multi-textarea field="dataUseLimitations" multi="true" rows="1" help="dataUseLimitations"></div>
+						</div>
+					</div>
+					<!-- dataCharacterSet -->
+					<div class="row" ng-show="vm.showAllFields">
+						<div class="col-md-12 form-group">
+							<div edit-select field="dataCharacterSet" list="MD_CharacterSetCode" help="dataCharacterSet"></div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-12 form-group">
+							<div edit-data-distribution-formats field="dataDistributionFormats" multi="true" help="dataDistributionFormats"></div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Panel 6 -->
+			<!-- <div edit-accordion-header header="Conditions légales d'accès et d'usage" tooltip="Informations relatives aux conditions légales d'accès et d'usage de la base de données" doc="empty"> -->
+			<div uib-accordion-group is-open="true" panel-class="panel-primary">
+				<div uib-accordion-heading>
+					<span uib-tooltip="Informations relatives aux conditions légales d'accès et d'usage de la base de données" tooltip-popup-close-delay="100" tooltip-trigger="mouseenter" tooltip-placement="right">Conditions légales d'accès et d'usage</span>
+					<!-- <span class="bt-doc glyphicon glyphicon-info-sign" aria-hidden="true" ng-click="vm.openModalDoc('empty')"></span> -->
+					<span class="glyphicon glyphicon-resize-vertical pull-right"></span>
+				</div>
+				<div>
+					<div class="row">
+						<div class="col-md-12 form-group">
+							<div edit-select field="dataSecurityClassification" list="MD_ClassificationCode" help="dataSecurityClassification"></div>
+						</div>
+					</div>
+					<!-- dataLegalAccessInspireConstraints -->
+					<div class="row">
+						<div class="col-md-12">
+							<div edit-multi-select field="dataLegalAccessInspireConstraints" list="MD_InspireRestrictionCode" multi="true" help="dataLegalAccessInspireConstraints"></div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-12">
+							<div edit-multi-select field="dataLegalAccessConstraints" list="MD_RestrictionCode" multi="true" help="dataLegalAccessConstraints"></div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-12">
+							<div edit-multi-select field="dataLegalUseConstraints" list="MD_RestrictionCode" multi="true" help="dataLegalUseConstraints"></div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-12">
+							<div edit-multi-textarea field="dataLegalUseLimitations" multi="true" rows="2" help="dataLegalUseLimitations"></div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Panel 7 -->
+			<!-- <div edit-accordion-header header="Ressources associées" tooltip="Ressources associées à la base de données" doc="empty"> -->
+			<div uib-accordion-group is-open="true" panel-class="panel-primary">
+				<div uib-accordion-heading>
+					<span uib-tooltip="Ressources associées à la base de données" tooltip-popup-close-delay="100" tooltip-trigger="mouseenter" tooltip-placement="right">Ressources associées</span>
+					<!-- <span class="bt-doc glyphicon glyphicon-info-sign" aria-hidden="true" ng-click="vm.openModalDoc('empty')"></span> -->
+					<span class="glyphicon glyphicon-resize-vertical pull-right"></span>
+				</div>
+				<div>
+					<div class="row">
+						<div class="col-md-12">
+							<div edit-data-linkages field="dataLinkages" multi="true" help="dataLinkages"></div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Panel 8 -->
+			<!-- <div edit-accordion-header header="Conformités" tooltip="Conformité de la base de données" doc="empty"> -->
+			<div uib-accordion-group is-open="false" panel-class="panel-primary">
+				<div uib-accordion-heading>
+					<span uib-tooltip="Conformité de la base de données" tooltip-popup-close-delay="100" tooltip-trigger="mouseenter" tooltip-placement="right">Conformités</span>
+					<!-- <span class="bt-doc glyphicon glyphicon-info-sign" aria-hidden="true" ng-click="vm.openModalDoc('empty')"></span> -->
+					<span class="glyphicon glyphicon-resize-vertical pull-right"></span>
+				</div>
+			</div>
+			<div>
+				<div class="row">
+					<div class="col-md-12">
+					</div>
+				</div>
+			</div>
+		</form>
+	</div>
+</div>

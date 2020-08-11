@@ -1,0 +1,45 @@
+<div>
+	<label class="bt-doc control-label" for="~{id}~" uib-tooltip="~{description}~" tooltip-trigger="mouseenter" tooltip-placement="right" ng-click="openModalDoc(help)">~{label}~</label>
+	<table class="table table-condensed table-transparent">
+		<tr>
+			<th>
+				<span class="bt-doc control-label" uib-tooltip="~{dataExtentName.description}~" tooltip-trigger="mouseenter" tooltip-placement="right" ng-click="openModalDoc(help)">~{dataExtentName.label}~</span>
+			</th>
+			<th>
+				<span class="bt-doc control-label" uib-tooltip="~{dataGeographicExtentWestBound.description}~" tooltip-trigger="mouseenter" tooltip-placement="right" ng-click="openModalDoc(help)">~{dataGeographicExtentWestBound.label}~</span>
+			</th>
+			<th>
+				<span class="bt-doc control-label" uib-tooltip="~{dataGeographicExtentEastBound.description}~" tooltip-trigger="mouseenter" tooltip-placement="right" ng-click="openModalDoc(help)">~{dataGeographicExtentEastBound.label}~</span>
+			</th>
+			<th>
+				<span class="bt-doc control-label" uib-tooltip="~{dataGeographicExtentSouthBound.description}~" tooltip-trigger="mouseenter" tooltip-placement="right" ng-click="openModalDoc(help)">~{dataGeographicExtentSouthBound.label}~</span>
+			</th>
+			<th>
+				<span class="bt-doc control-label" uib-tooltip="~{dataGeographicExtentNorthBound.description}~" tooltip-trigger="mouseenter" tooltip-placement="right" ng-click="openModalDoc(help)">~{dataGeographicExtentNorthBound.label}~</span>
+			</th>
+			<th ng-show="multi">
+				<button type="button" class="btn btn-default btn-xs pull-right glyphicon glyphicon-plus" aria-hidden="true" ng-click="addItem()"></button>
+			</th>
+		</tr>
+		<tr ng-repeat="item in vm.data.metadata.dataGeographicExtents track by $index">
+			<td>
+				<input type="text" class="form-control input-sm" autocomplete="off" name="~{dataExtentName.id}~" id="~{dataExtentName.id}~" placeholder="~{dataExtentName.placeholder}~" ng-model="item.dataExtentName" uib-typeahead="geographicextent as geographicextent.dataExtentName+' ('+geographicextent.dataExtentDescription+')' for geographicextent in geographicExtents | filter:$viewValue | limitTo:8" typeahead-on-select="onSelectGeographixExtent($item, $model, $label, $index)" />
+			</td>
+			<td>
+				<input type="text" class="form-control input-sm" name="~{dataGeographicExtentWestBound.id}~" id="~{dataGeographicExtentWestBound.id}~" placeholder="~{dataGeographicExtentWestBound.placeholder}~" ng-model="item.dataGeographicExtentWestBound" />
+			</td>
+			<td>
+				<input type="text" class="form-control input-sm" name="~{dataGeographicExtentEastBound.id}~" id="~{dataGeographicExtentEastBound.id}~" placeholder="~{dataGeographicExtentEastBound.placeholder}~" ng-model="item.dataGeographicExtentEastBound" />
+			</td>
+			<td>
+				<input type="text" class="form-control input-sm" name="~{dataGeographicExtentSouthBound.id}~" id="~{dataGeographicExtentSouthBound.id}~" placeholder="~{dataGeographicExtentSouthBound.placeholder}~" ng-model="item.dataGeographicExtentSouthBound" />
+			</td>
+			<td>
+				<input type="text" class="form-control input-sm" name="~{dataGeographicExtentNorthBound.id}~" id="~{dataGeographicExtentNorthBound.id}~" placeholder="~{dataGeographicExtentNorthBound.placeholder}~" ng-model="item.dataGeographicExtentNorthBound" />
+			</td>
+			<td ng-show="multi">
+				<button type="button" class="btn btn-default btn-xs pull-right glyphicon glyphicon-minus" aria-hidden="true" ng-click="removeItem(item)"></button>
+			</td>
+		</tr>
+	</table>
+</div>

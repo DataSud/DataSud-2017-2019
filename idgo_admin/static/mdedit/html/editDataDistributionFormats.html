@@ -1,0 +1,33 @@
+<div class="">
+	<label class="bt-doc control-label" for="~{id}~" uib-tooltip="~{description}~" tooltip-trigger="mouseenter" tooltip-placement="right" ng-click="openModalDoc(help)">~{label}~</label>
+	<table class="table table-condensed">
+		<tr>
+			<th>
+				<span class="bt-doc control-label" uib-tooltip="~{formatName.description}~" tooltip-trigger="mouseenter" tooltip-placement="right" ng-click="openModalDoc(help)">~{formatName.label}~</span>
+			</th>
+			<th>
+				<span class="bt-doc control-label" uib-tooltip="~{formatVersion.description}~" tooltip-trigger="mouseenter" tooltip-placement="right" ng-click="openModalDoc(help)">~{formatVersion.label}~</span>
+			</th>
+			<th>
+				<span class="bt-doc control-label" uib-tooltip="~{formatSpecification.description}~" tooltip-trigger="mouseenter" tooltip-placement="right" ng-click="openModalDoc(help)">~{formatSpecification.label}~</span>
+			</th>
+			<th ng-show="multi">
+				<button type="button" class="btn btn-default btn-xs pull-right glyphicon glyphicon-plus" aria-hidden="true" ng-click="addItem()"></button>
+			</th>
+		</tr>
+		<tr ng-repeat="item in vm.data.metadata[field] track by $index">
+			<td>
+				<input type="text" class="form-control input-sm" name="~{formatName.id}~" id="~{formatName.id}~" placeholder="~{formatName.placeholder}~" ng-model="item.formatName" />
+			</td>
+			<td>
+				<input type="text" class="form-control input-sm" name="~{formatVersion.id}~" id="~{formatVersion.id}~" placeholder="~{formatVersion.placeholder}~" ng-model="item.formatVersion" />
+			</td>
+			<td>
+				<input type="text" class="form-control input-sm" name="~{formatSpecification.id}~" id="~{formatSpecification.id}~" placeholder="~{formatSpecification.placeholder}~" ng-model="item.formatSpecification" />
+			</td>
+			<td ng-show="multi">
+				<button type="button" class="btn btn-default btn-xs pull-right glyphicon glyphicon-minus" aria-hidden="true" ng-click="removeItem(item)"></button>
+			</td>
+		</tr>
+	</table>
+</div>

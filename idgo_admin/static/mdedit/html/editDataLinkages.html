@@ -1,0 +1,36 @@
+<div>
+	<div ng-repeat="item in vm.data.metadata[field] track by $index" class="well">
+		<div class="buttons-on-the-right-side">
+			<button type="button" class="btn btn-xs glyphicon glyphicon-remove" aria-hidden="true" ng-click="removeItem(item)"></button>
+		</div>
+		<div class="row">
+			<div class="col-md-12 form-group">
+				<label class="bt-doc control-label" for="~{name.id}~_~{$index}~" uib-tooltip="~{name.description}~" tooltip-trigger="mouseenter" tooltip-placement="right" ng-click="openModalDoc(help)">~{name.label}~</label>
+				<input type="text" class="form-control input-sm" name="~{name.id}~" id="~{name.id}~_~{$index}~" placeholder="~{name.placeholder}~" ng-model="item.name" />
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-12 form-group">
+				<label class="bt-doc control-label" for="~{description.id}~_~{$index}~" uib-tooltip="~{description.description}~" tooltip-trigger="mouseenter" tooltip-placement="right" ng-click="openModalDoc(help)">~{description.label}~</label>
+				<textarea class="form-control input-sm" id="~{description.id}~_~{$index}~" name="~{description.id}~" placeholder="~{description.placeholder}~" rows="3" ng-model="item.description"></textarea>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-12 form-group">
+				<label class="bt-doc control-label" for="~{url.id}~_~{$index}~" uib-tooltip="~{url.description}~" tooltip-trigger="mouseenter" tooltip-placement="right" ng-click="openModalDoc(help)">~{url.label}~</label>
+				<input type="text" class="form-control input-sm" name="~{url.id}~" id="~{url.id}~_~{$index}~" placeholder="~{url.placeholder}~" ng-model="item.url" />
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-4 form-group">
+				<label class="bt-doc control-label" for="~{id}~_~{$index}~" uib-tooltip="~{protocol.description}~" tooltip-trigger="mouseenter" tooltip-placement="right" ng-click="openModalDoc(help)">~{protocol.label}~</label>
+				<select class="form-control input-sm selectpicker_" name="~{id}~" id="~{id}~_~{$index}~" ng-options="linkage.id as linkage.value for linkage in MD_LinkageProtocolCode" ng-model="item.protocol" ng-disabled="disabled">
+					<option value="">~{protocol.placeholder}~</option>
+				</select>
+			</div>
+		</div>
+	</div>
+	<div class="buttons-on-the-right-side">
+		<button type="button" class="btn btn-link btn-xs" aria-hidden="true" ng-click="addItem()">Ajouter une ressource</button>
+	</div>
+</div>

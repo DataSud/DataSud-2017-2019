@@ -1,0 +1,41 @@
+<div class="">
+	<label>
+		<span class="bt-doc" uib-tooltip="~{description}~" tooltip-trigger="mouseenter" tooltip-placement="right" ng-click="openModalDoc(help)">~{label}~</span>
+	</label>
+	<table class="table table-condensed">
+		<tr>
+			<th>
+				<span class="bt-doc control-label" uib-tooltip="~{fileName.description}~" tooltip-trigger="mouseenter" tooltip-placement="right" ng-click="openModalDoc(help)">~{fileName.label}~</span>
+			</th>
+			<th>
+				<span class="bt-doc control-label" uib-tooltip="~{fileDescription.description}~" tooltip-trigger="mouseenter" tooltip-placement="right" ng-click="openModalDoc(help)">~{fileDescription.label}~</span>
+			</th>
+			<th>
+				<span class="bt-doc control-label" uib-tooltip="~{fileType.description}~" tooltip-trigger="mouseenter" tooltip-placement="right" ng-click="openModalDoc(help)">~{fileType.label}~</span>
+			</th>
+			<th>
+				<span class="bt-doc control-label" uib-tooltip="~{image.description}~" tooltip-trigger="mouseenter" tooltip-placement="right" ng-click="openModalDoc(help)">~{image.label}~</span>
+			</th>
+			<th ng-show="multi">
+				<button type="button" class="btn btn-default btn-xs pull-right glyphicon glyphicon-plus" aria-hidden="true" ng-click="addItem()"></button>
+			</th>
+		</tr>
+		<tr ng-repeat="item in vm.data.metadata[field] track by $index">
+			<td>
+				<input type="text" class="form-control input-sm" name="~{fileName.id}~" id="~{fileName.id}~" placeholder="~{fileName.placeholder}~" ng-model="item.fileName" />
+			</td>
+			<td>
+				<input type="text" class="form-control input-sm" name="~{fileDescription.id}~" id="~{fileDescription.id}~" placeholder="~{fileDescription.placeholder}~" ng-model="item.fileDescription" />
+			</td>
+			<td>
+				<input type="text" class="form-control input-sm" name="~{fileType.id}~" id="~{fileType.id}~" placeholder="~{fileType.placeholder}~" ng-model="item.fileType" value="getExt(item.fileName)" />
+			</td>
+			<td style="max-width: 150px;">
+				<img class="img-thumbnail" ng-if="item.fileName != ''" ng-src="~{item.fileName}~" alt="~{item.fileDescription}~" />
+			</td>
+			<td ng-show="multi">
+				<button type="button" class="btn btn-default btn-xs pull-right glyphicon glyphicon-minus" aria-hidden="true" ng-click="removeItem(item)"></button>
+			</td>
+		</tr>
+	</table>
+</div>
