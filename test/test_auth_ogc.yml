@@ -1,0 +1,154 @@
+---
+- config:
+  - testset: "Basic tests for ocs auth"
+  - timeout: 100  # Increase timeout from the default 10 seconds
+
+- test:
+  - group: "Authentification"
+  - name: "Without Authorization header access to open data"
+  - url: "/maps/neogeo-technologies?service=WMS&request=GetCapabilities"
+    #  - expected_status: [401]
+
+- test:
+  - group: "Authentification"
+  - name: "Anonymous access to open data"
+  - url: "/maps/neogeo-technologies?service=WMS&request=GetCapabilities"
+
+- test:
+  - group: "Authentification"
+  - name: "Authorized access to open data"
+  - url: "/maps/neogeo-technologies?service=WMS&request=GetCapabilities"
+  - auth_username: "neogeo"
+  - auth_password: "neogeo2017$"
+
+- test:
+  - group: "Authentification"
+  - name: "do not allow wrong passwords"
+  - url: "/maps/neogeo-technologies?service=WMS&request=GetCapabilities"
+  - auth_username: "neogeo"
+  - auth_password: ""
+  - expected_status: [401]
+
+
+- test:
+  - name: "Ressource access by anonymous"
+  - group: "Auth Access to resource available to anonymous"
+  - url: '/maps/neogeo-technologies?request=getFeature&service=wfs&version=1.1.0&typenames=ogrgeojson_908428b&'
+
+- test:
+  - name: "Ressource access by neogeo (authentified)"
+  - group: "Auth Access to resource available to anonymous"
+  - auth_username: "neogeo"
+  - auth_password: "neogeo2017$"
+  - url: '/maps/neogeo-technologies?request=getFeature&service=wfs&version=1.1.0&typenames=nouvelles_regions_fe2eccb&'
+
+- test:
+  - name: "Ressource access by mael (owner)"
+  - group: "Auth Access to resource available to anonymous"
+  - auth_username: "mmeliani"
+  - auth_password: "passpass"
+  - url: '/maps/neogeo-technologies?request=getFeature&service=wfs&version=1.1.0&typenames=nouvelles_regions_fe2eccb&'
+
+
+
+- test:
+  - name: "Ressource access by anonymous fail"
+  - group: "Auth Access to resource available to auth"
+  - url: '/maps/neogeo-technologies?request=getFeature&service=wfs&version=1.1.0&typenames=p2a_equipco_201705_ad41f9b'
+  - expected_status: [401]
+
+- test:
+  - name: "Ressource access by neogeo (authentified)"
+  - group: "Auth Access to resource available to auth"
+  - auth_username: "neogeo"
+  - auth_password: "neogeo2017$"
+  - url: '/maps/neogeo-technologies?request=getFeature&service=wfs&version=1.1.0&typenames=p2a_equipco_201705_ad41f9b'
+
+- test:
+  - name: "Ressource access by mael (owner)"
+  - group: "Auth Access to resource available to auth"
+  - auth_username: "mmeliani"
+  - auth_password: "passpass"
+  - url: '/maps/neogeo-technologies?request=getFeature&service=wfs&version=1.1.0&typenames=p2a_equipco_201705_ad41f9b'
+
+
+
+
+- test:
+  - name: "Ressource access by anonymous fail"
+  - group: "Auth Access to resource available to mael"
+  - url: '/maps/neogeo-technologies?request=getFeature&service=wfs&version=1.1.0&typenames=ogrgeojson_7acfe3e'
+  - expected_status: [401]
+
+- test:
+  - name: "Ressource access by neogeo (authentified)"
+  - group: "Auth Access to resource available to mael"
+  - auth_username: "neogeo"
+  - auth_password: "neogeo2017$"
+  - url: '/maps/neogeo-technologies?request=getFeature&service=wfs&version=1.1.0&typenames=ogrgeojson_7acfe3e'
+  - expected_status: [401]
+
+- test:
+  - name: "Ressource access by mael (owner)"
+  - group: "Auth Access to resource available to mael"
+  - auth_username: "mmeliani"
+  - auth_password: "passpass"
+  - url: '/maps/neogeo-technologies?request=getFeature&service=wfs&version=1.1.0&typenames=ogrgeojson_7acfe3e'
+
+
+
+- test: 
+  - group: 'Path tests'
+  - name: "Anonymous don't authorize preview access"
+  - url: '/preview/?request=getFeature&service=wfs&version=1.1.0&typenames=nouvelles_regions_fe2eccb&'
+  - expected_status: [401]
+
+- test: 
+  - group: 'Path tests'
+  - name: "Auth access don't authorize preview access"
+  - url: '/preview/?request=getFeature&service=wfs&version=1.1.0&typenames=nouvelles_regions_fe2eccb&'
+  - auth_username: "neogeo"
+  - auth_password: "neogeo2017$"
+  - expected_status: [401]
+
+
+
+- test: 
+  - group: 'multiressource tests'
+  - name: "access to multiple ressources in anonymous mode"
+  - url: '/maps/?request=getFeature&service=wfs&version=1.1.0&typenames=nouvelles_regions_fe2eccb,ogrgeojson_908428b'
+
+- test: 
+  - group: 'multiressource tests'
+  - name: "access to multiple ressources in neogeo if at least one requires auth"
+  - url: '/maps/?request=getFeature&service=wfs&version=1.1.0&typenames=nouvelles_regions_fe2eccb,p2a_equipco_201705_ad41f9b'
+  - auth_username: "neogeo"
+  - auth_password: "neogeo2017$"
+
+- test: 
+  - group: 'multiressource tests'
+  - name: "access to multiple ressources in mael if at least one requires auth"
+  - url: '/maps/?request=getFeature&service=wfs&version=1.1.0&typenames=nouvelles_regions_fe2eccb,p2a_equipco_201705_ad41f9b'
+  - auth_username: "mmeliani"
+  - auth_password: "passpass"
+
+- test: 
+  - group: 'multiressource tests'
+  - name: "access to multiple ressources in anonymous mode fail if at least one requires being orga"
+  - url: '/maps/?request=getFeature&service=wfs&version=1.1.0&typenames=nouvelles_regions_fe2eccb,ogrgeojson_7acfe3e'
+  - expected_status: [401]
+
+- test: 
+  - group: 'multiressource tests'
+  - name: "access to multiple ressources in neogeo fail if at least one requires being orga"
+  - url: '/maps/?request=getFeature&service=wfs&version=1.1.0&typenames=nouvelles_regions_fe2eccb,ogrgeojson_7acfe3e'
+  - auth_username: "neogeo"
+  - auth_password: "neogeo2017$"
+  - expected_status: [401]
+
+- test: 
+  - group: 'multiressource tests'
+  - name: "access to multiple ressources in mael if at least one requires being orga"
+  - url: '/maps/?request=getFeature&service=wfs&version=1.1.0&typenames=nouvelles_regions_fe2eccb,ogrgeojson_7acfe3e'
+  - auth_username: "mmeliani"
+  - auth_password: "passpass"
